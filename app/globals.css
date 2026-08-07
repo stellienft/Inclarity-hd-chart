@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+/*
+  Inclarity Space design tokens.
+  Plum, dusty pink, dark grey, brown and off grey, on warm neutral grounds.
+*/
+@theme {
+  --color-plum: #7a5f60;
+  --color-dusty: #b18f90;
+  --color-ink: #443e3d;
+  --color-brown: #a27e6b;
+  --color-offgrey: #eae7e1;
+  --color-warmwhite: #fbfaf8;
+  --color-parchment: #f4f1ec;
+  --color-design: #9c4a4a;
+
+  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-warmwhite);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Visible, high-contrast focus for keyboard users everywhere. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-plum);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Screen-reader-only text that becomes visible when focused. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   PRINT — an A4 chart sheet
+   ==========================================================================
+   The BodyGraph is SVG, so it prints at the printer's own resolution rather
+   than being rasterised. Nothing here converts it to an image.
+*/
+@page {
+  size: A4 portrait;
+  margin: 14mm 14mm 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000;
+    font-size: 10.5pt;
+  }
+
+  /* Anything purely interactive has no place on paper. */
+  .no-print,
+  nav button,
+  form,
+  [data-print="hide"] {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Keep the chart and its planetary columns on one sheet. */
+  .print-sheet {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Force the brand tones to render rather than being dropped as "background". */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+
+  /*
+    On paper the three columns must read Design | BodyGraph | Personality.
+    The screen layout stacks them for mobile using `order`, which would
+    otherwise carry into print and drop the BodyGraph into the narrow first
+    column while pushing the Personality table off the sheet. Placement is
+    therefore stated explicitly rather than inherited.
+  */
+  .print-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 1fr) !important;
+    gap: 5mm !important;
+    align-items: start !important;
+    width: 100% !important;
+  }
+
+  .print-grid > [data-col="design"] {
+    order: 1 !important;
+    grid-column: 1 !important;
+  }
+
+  .print-grid > [data-col="graph"] {
+    order: 2 !important;
+    grid-column: 2 !important;
+  }
+
+  .print-grid > [data-col="personality"] {
+    order: 3 !important;
+    grid-column: 3 !important;
+  }
+
+  /* Let the chart use the full middle column on paper. */
+  .print-grid > [data-col="graph"] > div {
+    max-width: none !important;
+  }
+
+  /* Planetary tables are narrow on paper; keep them from clipping. */
+  .print-grid table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  /* Space between the major blocks is generous on screen, wasteful on paper. */
+  .space-y-14 > * + * {
+    margin-top: 7mm !important;
+  }
+
+  .print-compact {
+    font-size: 8.5pt !important;
+    line-height: 1.35 !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
