@@ -14,8 +14,12 @@
   --color-parchment: #f4f1ec;
   --color-design: #9c4a4a;
 
-  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Self-hosted via next/font; the literal names are the fallback if the
+     variables are ever absent (e.g. a bare component render in a test). */
+  --font-display: var(--font-display-loaded), "Bricolage Grotesque", "Inter",
+    ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans-loaded), "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
 }
 
 :root {

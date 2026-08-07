@@ -125,7 +125,8 @@ and the Type/Authority/Profile derivations. Development-only unless
 
 ## Testing
 
-177 unit/integration tests and 20 end-to-end tests across desktop and mobile.
+177 unit/integration tests, and 20 end-to-end tests run across both a desktop
+and a mobile device profile (40 runs).
 
 The suite deliberately includes cases that catch the classic errors: a hanging
 gate must not define its centre; a Throat defined only from the Ajna must not

@@ -1,8 +1,32 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque, Inter } from "next/font/google";
 
 import { siteConfig } from "@/lib/config/site";
 
 import "./globals.css";
+
+/**
+ * Fonts are self-hosted via `next/font`, which downloads and serves them from
+ * our own origin at build time. That removes the third-party request to Google
+ * Fonts entirely — better for privacy, and it avoids the flash of unstyled text
+ * a blocking <link> would cause. Both declare a system fallback stack, so the
+ * page stays fully legible if a font fails to load.
+ */
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display-loaded",
+  display: "swap",
+  fallback: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+});
+
+const body = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-sans-loaded",
+  display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   title: `${siteConfig.brand} ${siteConfig.product}`,
@@ -14,20 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        {/*
-          Fonts are loaded from Google Fonts with a system fallback stack
-          declared in globals.css, so the page remains fully legible if the
-          request is blocked or slow.
-        */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <a
           href="#main"

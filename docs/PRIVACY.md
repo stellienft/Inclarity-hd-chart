@@ -63,16 +63,17 @@ Prefer a privacy-respecting, cookieless analytics provider.
 | Recipient | What it receives | When |
 | --- | --- | --- |
 | Open-Meteo geocoding | The **place-name text typed into the search box** | While the visitor types a birth place |
-| Google Fonts | The visitor's IP and user agent | On page load, for webfonts |
+
+That is the complete list. The visitor's browser makes **no third-party
+requests at all**.
 
 The geocoder receives a place-name query only. It never receives the birth date
 or birth time, and it is called **server-side** from `/api/locations`, so the
 visitor's browser never contacts it directly and their IP is not exposed to it.
 
-> **Consideration for launch:** Google Fonts is loaded from a third-party origin.
-> Self-hosting the two fonts would remove that request entirely and is
-> recommended for a stricter privacy posture in the EU/UK. The font stack already
-> degrades gracefully, so this change is low risk.
+Fonts are **self-hosted**. `next/font` downloads Bricolage Grotesque and Inter
+at build time and serves them from our own origin, so there is no request to
+Google Fonts and no third-party origin sees the visitor's IP or user agent.
 
 ## In the interface
 

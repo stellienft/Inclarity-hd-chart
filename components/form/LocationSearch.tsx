@@ -41,29 +41,34 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
   // text when an option is chosen.
   const skipNextSearch = useRef(false);
 
+  const trimmed = query.trim();
+  const tooShort = trimmed.length < 2;
+
+  /*
+    No state is set synchronously in this effect body — doing so triggers
+    cascading renders. A too-short query simply schedules no work, and the
+    listbox is gated on `tooShort` at render time, so any stale results are
+    never shown. Every setState below runs inside the debounced callback.
+  */
   useEffect(() => {
     if (skipNextSearch.current) {
       skipNextSearch.current = false;
       return;
     }
-    if (query.trim().length < 2) {
-      setResults([]);
-      setSearched(false);
-      setLoading(false);
-      return;
-    }
+    if (tooShort) return;
 
-    setLoading(true);
+    const controller = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = controller;
+
     const timer = setTimeout(async () => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
+      setLoading(true);
       try {
-        const response = await fetch(`/api/locations?q=${encodeURIComponent(query.trim())}`, {
+        const response = await fetch(`/api/locations?q=${encodeURIComponent(trimmed)}`, {
           signal: controller.signal,
         });
         const payload = (await response.json()) as { results?: LocationResult[] };
+        if (controller.signal.aborted) return;
         setResults(payload.results ?? []);
         setOpen(true);
         setActiveIndex(-1);
@@ -74,12 +79,16 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
           setSearched(true);
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, DEBOUNCE_MS);
 
-    return () => clearTimeout(timer);
-  }, [query]);
+    return () => {
+      clearTimeout(timer);
+      // Supersede any in-flight request for a query the visitor has moved on from.
+      controller.abort();
+    };
+  }, [trimmed, tooShort]);
 
   useEffect(() => {
     function onDocumentPointerDown(event: MouseEvent) {
@@ -135,7 +144,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
         type="text"
         role="combobox"
         autoComplete="off"
-        aria-expanded={open}
+        aria-expanded={open && !tooShort && results.length > 0}
         aria-controls={listId}
         aria-autocomplete="list"
         aria-describedby={describedBy || undefined}
@@ -157,11 +166,11 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
       />
 
       <p id={statusId} className="mt-1.5 text-xs text-plum/70" aria-live="polite">
-        {loading
+        {loading && !tooShort
           ? "Searching…"
           : value
             ? `Selected: ${value.displayName} · timezone ${value.timezone}`
-            : searched && results.length === 0
+            : !tooShort && searched && results.length === 0
               ? "No matching places found. Try a larger nearby city."
               : "Start typing a town or city, then choose from the list."}
       </p>
@@ -172,7 +181,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
         </p>
       ) : null}
 
-      {open && results.length > 0 ? (
+      {open && !tooShort && results.length > 0 ? (
         <ul
           id={listId}
           role="listbox"
