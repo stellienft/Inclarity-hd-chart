@@ -12,7 +12,7 @@
   --color-offgrey: #eae7e1;
   --color-warmwhite: #fbfaf8;
   --color-parchment: #f4f1ec;
-  --color-design: #9c4a4a;
+  --color-design: #a2622f;
 
   /* Self-hosted via next/font; the literal names are the fallback if the
      variables are ever absent (e.g. a bare component render in a test). */
@@ -159,7 +159,7 @@ h3,
   */
   .print-grid {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 2.4fr) minmax(0, 0.85fr) !important;
     gap: 5mm !important;
     align-items: start !important;
     width: 100% !important;

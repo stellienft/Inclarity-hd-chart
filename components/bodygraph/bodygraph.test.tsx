@@ -8,7 +8,7 @@ import type { LocationResult } from "@/lib/location/types";
 
 import { BodyGraph } from "./BodyGraph";
 import { CENTERS, GATE_POINTS, VIEWBOX, gateLabelPoint } from "./geometry";
-import { DESIGN_COLOR, PERSONALITY_COLOR } from "./styles";
+import { DESIGN_COLOR, GATE_MARKER_RADIUS, PERSONALITY_COLOR } from "./styles";
 
 const BRISBANE: LocationResult = {
   displayName: "Brisbane, Queensland, Australia",
@@ -63,6 +63,45 @@ describe("BodyGraph geometry", () => {
   it("has nine centres", () => {
     expect(CENTERS).toHaveLength(9);
     expect(new Set(CENTERS.map((c) => c.id)).size).toBe(9);
+  });
+
+  it("never lets two gate markers in the same centre overlap", () => {
+    // Markers are GATE_MARKER_RADIUS (9.5) circles, so two of them need at
+    // least 19 units between centres. This has caught real collisions twice:
+    // once from pushing labels outward, once from a uniform inward nudge that
+    // dragged opposite edges of the small triangles together.
+    const MIN_SEPARATION = 2 * GATE_MARKER_RADIUS;
+
+    const byCentre = new Map<string, Array<{ gate: number; point: { x: number; y: number } }>>();
+    for (const { gate, center } of GATE_DEFINITIONS) {
+      const list = byCentre.get(center) ?? [];
+      list.push({ gate, point: gateLabelPoint(gate, center) });
+      byCentre.set(center, list);
+    }
+
+    for (const [centre, gates] of byCentre) {
+      for (let i = 0; i < gates.length; i += 1) {
+        for (let j = i + 1; j < gates.length; j += 1) {
+          const a = gates[i]!;
+          const b = gates[j]!;
+          const separation = Math.hypot(a.point.x - b.point.x, a.point.y - b.point.y);
+          expect(
+            separation,
+            `gates ${a.gate} and ${b.gate} in ${centre} are ${separation.toFixed(1)} apart`,
+          ).toBeGreaterThanOrEqual(MIN_SEPARATION);
+        }
+      }
+    }
+  });
+
+  it("keeps every gate marker inside the viewBox", () => {
+    for (const { gate, center } of GATE_DEFINITIONS) {
+      const p = gateLabelPoint(gate, center);
+      expect(p.x).toBeGreaterThanOrEqual(GATE_MARKER_RADIUS);
+      expect(p.x).toBeLessThanOrEqual(VIEWBOX.width - GATE_MARKER_RADIUS);
+      expect(p.y).toBeGreaterThanOrEqual(GATE_MARKER_RADIUS);
+      expect(p.y).toBeLessThanOrEqual(VIEWBOX.height - GATE_MARKER_RADIUS);
+    }
   });
 
   it("pushes gate labels away from their anchor", () => {

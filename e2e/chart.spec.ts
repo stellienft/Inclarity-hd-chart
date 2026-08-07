@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { VIEWBOX } from "../components/bodygraph/geometry";
+
 /**
  * End-to-end coverage of the visitor journey, plus the public API contract.
  *
@@ -152,7 +154,9 @@ test.describe("layout", () => {
   test("the BodyGraph scales rather than using a fixed size", async ({ page }) => {
     await generateChart(page);
     const svg = page.locator("svg[role='img']");
-    await expect(svg).toHaveAttribute("viewBox", "0 0 540 920");
+    // Read from the geometry module so a deliberate redesign does not need a
+    // hand-edited magic string here.
+    await expect(svg).toHaveAttribute("viewBox", `0 0 ${VIEWBOX.width} ${VIEWBOX.height}`);
     expect(await svg.getAttribute("width")).toBeNull();
   });
 

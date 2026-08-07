@@ -28,7 +28,9 @@ npm run build          # production build
 - Maps thirteen bodies onto the Rave Mandala for both imprints.
 - Derives channels, centres, Definition, Type, Strategy, Authority, Profile and
   the Incarnation Cross activations, using graph logic rather than special cases.
-- Renders an original SVG BodyGraph that prints at full vector quality.
+- Renders an original SVG BodyGraph — warm terracotta on cream, rounded
+  centres, circular gate markers and curved channel routing — that prints at
+  full vector quality.
 
 ## Architecture
 

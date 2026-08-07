@@ -64,7 +64,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           Your BodyGraph with Design and Personality activations
         </h2>
 
-        <div className="print-grid grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)_minmax(0,1fr)] lg:gap-10">
+        <div className="print-grid grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2.7fr)_minmax(0,0.8fr)] lg:gap-8">
           {/* Design column — left on desktop, below the chart on mobile. */}
           <div data-col="design" className="order-2 lg:order-1">
             <PlanetColumn activations={chart.design} side="design" />
@@ -72,7 +72,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
 
           <div data-col="graph" className="order-1 lg:order-2">
             {/* The BodyGraph is the hero: it takes the full column width. */}
-            <div className="mx-auto w-full max-w-[34rem]">
+            <div className="mx-auto w-full max-w-[44rem]">
               <BodyGraph
                 chart={chart}
                 className="h-auto w-full"
@@ -90,20 +90,20 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
 
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-plum/80">
           <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-0.5 w-6 bg-ink" />
+            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-ink" />
             Personality (conscious)
           </span>
           <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-0.5 w-6 bg-design" />
+            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-design" />
             Design (unconscious)
           </span>
           <span className="inline-flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="inline-block h-0.5 w-6 bg-design"
+              className="inline-block h-1 w-6 rounded-full bg-design"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(90deg,#443E3D 0 4px,transparent 4px 8px)",
+                  "repeating-linear-gradient(90deg,#221E1D 0 4px,transparent 4px 8px)",
               }}
             />
             Both

@@ -3,15 +3,31 @@ import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
 import type { HumanDesignChart } from "@/lib/human-design/types/chart";
 import { CENTER_LABELS, type CenterId } from "@/lib/human-design/types/center";
 
-import { CENTERS, VIEWBOX, getGatePoint, gateLabelPoint, shapeToPath } from "./geometry";
 import {
+  BODY_SILHOUETTE_PATH,
+  CENTERS,
+  VIEWBOX,
+  channelHalfPath,
+  channelMidpoint,
+  channelPath,
+  gateLabelPoint,
+  getGatePoint,
+  shapeToPath,
+} from "./geometry";
+import {
+  BODY_SILHOUETTE_FILL,
   CENTER_DEFINED_FILL,
-  CENTER_DEFINED_TEXT,
+  CENTER_DEFINED_STROKE,
   CENTER_STROKE,
   CENTER_UNDEFINED_FILL,
   CHANNEL_INACTIVE,
   DESIGN_COLOR,
-  PALETTE,
+  GATE_MARKER_RADIUS,
+  GATE_MARKER_RING,
+  GATE_MARKER_RING_WIDTH,
+  GATE_MARKER_TEXT,
+  ON_DEFINED_TEXT,
+  ON_UNDEFINED_TEXT,
   PERSONALITY_COLOR,
   STROKE_WIDTH,
   describeActivation,
@@ -30,6 +46,27 @@ function styleFor(personality: boolean, design: boolean): ActivationStyle {
   if (personality) return "personality";
   if (design) return "design";
   return "none";
+}
+
+/** A circle split down the middle, for a gate carrying both imprints. */
+function SplitGateMarker({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  return (
+    <>
+      <path
+        d={`M ${cx} ${cy - r} A ${r} ${r} 0 0 0 ${cx} ${cy + r} Z`}
+        fill={PERSONALITY_COLOR}
+      />
+      <path d={`M ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} Z`} fill={DESIGN_COLOR} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke={GATE_MARKER_RING}
+        strokeWidth={GATE_MARKER_RING_WIDTH}
+      />
+    </>
+  );
 }
 
 /**
@@ -72,8 +109,11 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       <title id="bodygraph-title">{accessibleTitle}</title>
       <desc id="bodygraph-desc">{description}</desc>
 
-      {/* ---- Channels, drawn beneath the centres ---- */}
-      <g strokeLinecap="round">
+      {/* ---- Decorative body silhouette ---- */}
+      <path d={BODY_SILHOUETTE_PATH} fill={BODY_SILHOUETTE_FILL} aria-hidden="true" />
+
+      {/* ---- Channels, beneath the centres ---- */}
+      <g strokeLinecap="round" fill="none">
         {CHANNEL_DEFINITIONS.map((definition) => {
           const [gateA, gateB] = definition.gates;
           const a = getGatePoint(gateA);
@@ -82,12 +122,9 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
 
           if (!active) {
             return (
-              <line
+              <path
                 key={definition.id}
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
+                d={channelPath(a, b)}
                 stroke={CHANNEL_INACTIVE}
                 strokeWidth={STROKE_WIDTH.channelInactive}
                 data-channel={definition.id}
@@ -100,39 +137,26 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const sidesB = active.activation[gateB] ?? { personality: false, design: false };
           const styleA = styleFor(sidesA.personality, sidesA.design);
           const styleB = styleFor(sidesB.personality, sidesB.design);
-
-          const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          const mid = channelMidpoint(a, b);
 
           /**
-           * Each half of the channel is painted for the gate that owns it, so
-           * a channel activated from both imprints is visibly split rather
-           * than flattened to one colour. A gate carrying both Personality and
+           * Each half is painted for the gate that owns it, so a channel
+           * activated from both imprints is visibly split rather than
+           * flattened to one colour. A gate carrying both Personality and
            * Design is drawn as a design-coloured stroke with a dashed
-           * personality overlay, keeping both readable in print and greyscale.
+           * personality overlay, so the distinction survives greyscale
+           * printing.
            */
-          const half = (
-            from: { x: number; y: number },
-            to: { x: number; y: number },
-            style: ActivationStyle,
-            gate: number,
-          ) => {
+          const half = (from: typeof a, style: ActivationStyle, gate: number) => {
+            const d = channelHalfPath(from, from === a ? b : a, mid);
             const key = `${definition.id}-${gate}`;
+
             if (style === "both") {
               return (
                 <g key={key}>
-                  <line
-                    x1={from.x}
-                    y1={from.y}
-                    x2={to.x}
-                    y2={to.y}
-                    stroke={DESIGN_COLOR}
-                    strokeWidth={STROKE_WIDTH.channelActive}
-                  />
-                  <line
-                    x1={from.x}
-                    y1={from.y}
-                    x2={to.x}
-                    y2={to.y}
+                  <path d={d} stroke={DESIGN_COLOR} strokeWidth={STROKE_WIDTH.channelActive} />
+                  <path
+                    d={d}
                     stroke={PERSONALITY_COLOR}
                     strokeWidth={STROKE_WIDTH.channelActive}
                     strokeDasharray="7 7"
@@ -141,12 +165,9 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
               );
             }
             return (
-              <line
+              <path
                 key={key}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
+                d={d}
                 stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
                 strokeWidth={STROKE_WIDTH.channelActive}
               />
@@ -160,8 +181,8 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                 {`Gate ${gateA}: ${describeActivation(styleA)}. `}
                 {`Gate ${gateB}: ${describeActivation(styleB)}.`}
               </title>
-              {half(a, mid, styleA, gateA)}
-              {half(b, mid, styleB, gateB)}
+              {half(a, styleA, gateA)}
+              {half(b, styleB, gateB)}
             </g>
           );
         })}
@@ -175,10 +196,9 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
             <path
               key={centre.id}
               d={shapeToPath(centre.shape)}
-              fill={defined ? CENTER_DEFINED_FILL[centre.id] : CENTER_UNDEFINED_FILL}
-              stroke={CENTER_STROKE}
+              fill={defined ? CENTER_DEFINED_FILL : CENTER_UNDEFINED_FILL}
+              stroke={defined ? CENTER_DEFINED_STROKE : CENTER_STROKE}
               strokeWidth={STROKE_WIDTH.centre}
-              strokeLinejoin="round"
               data-center={centre.id}
               data-defined={defined ? "true" : "false"}
             >
@@ -190,24 +210,14 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
         })}
       </g>
 
-      {/* ---- Gate numbers ---- */}
-      <g fontSize={11} fontWeight={600} textAnchor="middle" dominantBaseline="middle">
+      {/* ---- Gates ---- */}
+      <g fontSize={10.5} fontWeight={600} textAnchor="middle" dominantBaseline="central">
         {GATE_DEFINITIONS.map(({ gate, center, name }) => {
           const state = gateState.get(gate);
           const style = styleFor(state?.personality ?? false, state?.design ?? false);
-          const point = gateLabelPoint(gate, center);
-          const anchor = getGatePoint(gate);
+          const at = gateLabelPoint(gate, center);
           const defined = definedCenters.has(center);
           const active = style !== "none";
-          // Centres whose fill is dark enough to need light text on top.
-          const onDarkFill = defined && CENTER_DEFINED_TEXT[center] === "#FFFFFF";
-
-          const dotFill =
-            style === "design"
-              ? DESIGN_COLOR
-              : style === "none"
-                ? "#FFFFFF"
-                : PERSONALITY_COLOR;
 
           return (
             <g key={gate} data-gate={gate} data-activation={style}>
@@ -215,41 +225,37 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                 {`Gate ${gate} — ${name}, ${CENTER_LABELS[center]} centre, ${describeActivation(style)}`}
               </title>
 
-              {/* Activation dot on the centre boundary. */}
-              <circle
-                cx={anchor.x}
-                cy={anchor.y}
-                r={active ? 4.5 : 3}
-                fill={dotFill}
-                stroke={style === "both" ? DESIGN_COLOR : CENTER_STROKE}
-                strokeWidth={style === "both" ? 3 : STROKE_WIDTH.gateDot}
-              />
-
               {/*
-                Gate numbers sit inside the centre, so their colour is chosen
-                for CONTRAST against that centre's fill first. The Personality
-                and Design distinction is carried by the boundary dot and by
-                the <title> text, never by the number's colour alone.
+                An activated gate becomes a filled marker with a white numeral;
+                an inactive one is a plain numeral. Shape, not just colour,
+                distinguishes them.
               */}
+              {active ? (
+                style === "both" ? (
+                  <SplitGateMarker cx={at.x} cy={at.y} r={GATE_MARKER_RADIUS} />
+                ) : (
+                  <circle
+                    cx={at.x}
+                    cy={at.y}
+                    r={GATE_MARKER_RADIUS}
+                    fill={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
+                    stroke={GATE_MARKER_RING}
+                    strokeWidth={GATE_MARKER_RING_WIDTH}
+                  />
+                )
+              ) : null}
+
               <text
-                x={point.x}
-                y={point.y}
-                fill={onDarkFill
-                  ? style === "design"
-                    ? "#F4CFCF"
-                    : "#FFFFFF"
-                  : style === "design"
-                    ? DESIGN_COLOR
-                    : active || defined
-                      ? PALETTE.ink
-                      : "#9A928C"}
+                x={at.x}
+                y={at.y}
+                fill={
+                  active
+                    ? GATE_MARKER_TEXT
+                    : defined
+                      ? ON_DEFINED_TEXT
+                      : ON_UNDEFINED_TEXT
+                }
                 fontWeight={active ? 700 : 500}
-                /*
-                  An inactive number on a DEFINED centre still has to clear its
-                  fill, so it uses the centre's ink at reduced opacity rather
-                  than the pale grey used against the warm-white background.
-                */
-                fillOpacity={active ? 1 : defined ? 0.62 : 1}
                 aria-hidden="true"
               >
                 {gate}
@@ -262,10 +268,10 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       {/*
         Centre names are deliberately NOT drawn inside the shapes. Conventional
         BodyGraphs do not label them, and at this scale the names collide with
-        the gate numbers in the four triangular centres. The naming is carried
+        the gate markers in the four triangular centres. The naming is carried
         instead by each centre's <title>, by the SVG description, and by the
-        labelled centre list rendered beside the chart — all of which are
-        available to screen readers and to sighted readers alike.
+        labelled centre list rendered beside the chart — all available to
+        screen readers and sighted readers alike.
       */}
     </svg>
   );

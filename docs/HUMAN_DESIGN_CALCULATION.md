@@ -465,3 +465,22 @@ second independent implementation. This gap should be closed before launch.
   true lunar node (ch. 47), Pluto (ch. 37).
 - `astronomy-engine` and `astronomia` documentation and source.
 - Reference chart sources are cited individually in [VALIDATION.md](./VALIDATION.md).
+
+---
+
+## Appendix: what the BodyGraph does and does not show
+
+The renderer is presentation only — it reads a finished chart and never
+computes anything. Two omissions are deliberate and worth stating, because both
+are visible on charts from other tools:
+
+- **No Variable arrows.** The four arrows some charts print at the top corners
+  encode Digestion, Environment, Awareness and Perspective, which are read off
+  **Colour and Tone**. Those are not calculated here (§8), so the arrows are not
+  drawn. Showing them would mean inventing values.
+- **No cross names.** See §15.
+
+Everything the drawing conveys is also available as text: each centre, gate and
+channel carries a `<title>` stating its state in words, the SVG has a
+title/description pair naming Type, Authority, Profile and Definition, and the
+results page renders the full centre and channel list as prose beside the chart.

@@ -113,6 +113,14 @@ This is the area with the most risk, and it was handled conservatively.
 - **No proprietary chart graphics.** The BodyGraph is original SVG geometry
   drawn from coordinates defined in `components/bodygraph/geometry.ts`. Nothing
   was traced, screenshotted, or copied from another provider's artwork.
+
+  A third-party chart was used as a *visual style reference* — for proportions,
+  the warm terracotta-on-cream palette, rounded centre shapes, circular gate
+  markers and curved channel routing. Those are unprotectable ideas and visual
+  conventions, not copied expression: every coordinate, path, colour value and
+  curve rule in this repository was derived and written here. The nine-centre
+  arrangement itself is the standard diagram of the system and is drawn the same
+  way by every implementation.
 - **No Incarnation Cross name table.** We do not hold one that is both verified
   and lawfully usable, so cross **names are not shipped** — only the four gate
   activations and the structurally derived angle. This is a deliberate omission,

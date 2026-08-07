@@ -1,20 +1,18 @@
-import type { CenterId } from "@/lib/human-design/types/center";
-
 /**
  * BodyGraph palette.
  *
- * Built from the Inclarity system (plum #7A5F60, dusty pink #B18F90, dark grey
- * #443E3D, brown #A27E6B, off grey #EAE7E1) while keeping the two conventions
- * a trained Human Design reader relies on:
+ * Warm terracotta for defined centres against a pale cream ground, with near
+ * black and terracotta carrying the Personality/Design distinction.
  *
- *   - Personality (conscious) activations read as dark grey/black.
- *   - Design (unconscious) activations read as red — here a muted plum-red
- *     rather than a primary red, so it sits inside the brand.
+ * This deliberately does NOT use the canonical Human Design colour scheme
+ * (yellow Head, green Ajna, red Sacral and so on). The reference style we are
+ * matching does not either, which is fortunate: terracotta and cream sit
+ * naturally beside the Inclarity brown (#A27E6B) and off grey (#EAE7E1), so the
+ * chart reads as part of the brand rather than as an imported asset.
  *
- * Defined centres are filled with restrained, distinguishable brand tones;
- * undefined centres stay warm white. Colour is never the only signal: every
- * centre and channel also carries a text label via <title>, and the chart is
- * fully described in the accompanying text summary.
+ * Colour is never the only signal. Every centre, gate and channel carries a
+ * <title> stating its state in words, and `ChartTextSummary` repeats all of it
+ * as prose.
  */
 
 export const PALETTE = {
@@ -24,53 +22,45 @@ export const PALETTE = {
   brown: "#A27E6B",
   offGrey: "#EAE7E1",
   warmWhite: "#FBFAF8",
-  ink: "#2E2A29",
+  ink: "#1F1B1A",
 } as const;
 
 /** Personality / conscious. */
-export const PERSONALITY_COLOR = PALETTE.darkGrey;
+export const PERSONALITY_COLOR = "#221E1D";
 /** Design / unconscious. */
-export const DESIGN_COLOR = "#9C4A4A";
-
-export const CHANNEL_INACTIVE = "#DFDAD2";
-export const CENTER_UNDEFINED_FILL = PALETTE.warmWhite;
-export const CENTER_STROKE = "#8C837E";
-
 /**
- * Fill for each defined centre. Adjacent centres are given enough separation
- * to stay legible when several are defined at once.
+ * Design markers sit ON terracotta centres, so this is darkened until white
+ * numerals clear 4.5:1 against it (measured ~5.0:1). A lighter, prettier tan
+ * failed that test by blending into CENTER_DEFINED_FILL.
  */
-export const CENTER_DEFINED_FILL: Record<CenterId, string> = {
-  head: "#C9BCB0",
-  ajna: "#B9A79C",
-  throat: "#A27E6B",
-  g: "#B18F90",
-  heart: "#8E5F5E",
-  sacral: "#C08E7E",
-  spleen: "#9E9A8C",
-  solarPlexus: "#7A5F60",
-  root: "#6F6360",
-};
+export const DESIGN_COLOR = "#A2622F";
 
-/** Text colour that stays readable on each defined centre fill. */
-export const CENTER_DEFINED_TEXT: Record<CenterId, string> = {
-  head: PALETTE.ink,
-  ajna: PALETTE.ink,
-  throat: "#FFFFFF",
-  g: PALETTE.ink,
-  heart: "#FFFFFF",
-  sacral: PALETTE.ink,
-  spleen: PALETTE.ink,
-  solarPlexus: "#FFFFFF",
-  root: "#FFFFFF",
-};
+/** Every defined centre shares one warm fill, as in the reference. */
+export const CENTER_DEFINED_FILL = "#E2AE85";
+export const CENTER_UNDEFINED_FILL = "#FCF6F2";
+export const CENTER_STROKE = "#E3D9D1";
+export const CENTER_DEFINED_STROKE = "#CE955F";
+
+export const CHANNEL_INACTIVE = "#E0D7CF";
+export const BODY_SILHOUETTE_FILL = "#F1F1EB";
+
+/** Text that sits on top of a defined (terracotta) centre. */
+export const ON_DEFINED_TEXT = "#2B2320";
+/** Text on the pale ground of an undefined centre. */
+export const ON_UNDEFINED_TEXT = "#6E625C";
+/** Numerals inside an activated gate marker. */
+export const GATE_MARKER_TEXT = "#FFFFFF";
 
 export const STROKE_WIDTH = {
-  centre: 1.5,
-  channelInactive: 3,
-  channelActive: 7,
-  gateDot: 1,
+  centre: 1.25,
+  channelInactive: 2.5,
+  channelActive: 6,
 } as const;
+
+export const GATE_MARKER_RADIUS = 9.5;
+/** A white ring separates a marker from whatever centre fill sits behind it. */
+export const GATE_MARKER_RING = "#FFFFFF";
+export const GATE_MARKER_RING_WIDTH = 1.5;
 
 export type ActivationStyle = "none" | "personality" | "design" | "both";
 
@@ -81,7 +71,7 @@ export function activationColor(style: ActivationStyle): string {
     case "design":
       return DESIGN_COLOR;
     case "both":
-      // Rendered as two half-strokes; this is the fallback single colour.
+      // Rendered as two halves; this is the single-colour fallback.
       return PERSONALITY_COLOR;
     default:
       return CHANNEL_INACTIVE;
