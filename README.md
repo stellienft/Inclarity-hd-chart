@@ -83,6 +83,18 @@ Full reasoning in the docs below.
 | [LICENSING.md](docs/LICENSING.md) | Dependency licences, geocoding terms, Human Design IP position |
 | [PRIVACY.md](docs/PRIVACY.md) | What is stored, logged, cached and shared (short answer: almost nothing) |
 
+## Shared standalone build
+
+`npm run build:standalone` bundles the whole generator — engine, BodyGraph,
+styles and fonts — into one self-contained HTML file at
+`dist/inclarity-chart.html`, with no external requests. Useful for sharing a
+testable build where a server isn't available.
+
+It imports the same modules the app does, so the calculation is identical. Two
+things necessarily differ: the chart is computed in the browser rather than in
+`/api/chart`, and birth-place search falls back to the offline gazetteer
+(~70 cities) because there is no server to proxy the geocoder through.
+
 ## Configuration
 
 | Variable | Default | Purpose |

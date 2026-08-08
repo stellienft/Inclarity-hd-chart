@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:standalone": "node demo/build.mjs"
   },
   "dependencies": {
     "astronomy-engine": "^2.1.19",
@@ -26,12 +27,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/luxon": "^3.7.3",
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.0",
     "postcss": "^8.5.26",
