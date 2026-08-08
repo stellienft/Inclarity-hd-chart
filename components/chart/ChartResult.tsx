@@ -63,13 +63,19 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           Your BodyGraph with Design and Personality activations
         </h2>
 
-        <div className="print-grid grid gap-8 lg:grid-cols-[minmax(0,0.62fr)_minmax(0,3.1fr)_minmax(0,0.62fr)] lg:gap-6">
-          {/* Design column — left on desktop, below the chart on mobile. */}
-          <div data-col="design" className="order-2 lg:order-1">
+        {/*
+          Design | BodyGraph | Personality at EVERY width. The columns flank
+          the chart on a phone just as they do on a desktop and on paper —
+          stacking them below would break the arrangement a Human Design reader
+          expects. The side columns size to their content so the chart keeps
+          whatever is left.
+        */}
+        <div className="print-grid grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-1.5 sm:gap-4 lg:grid-cols-[minmax(0,0.62fr)_minmax(0,3.1fr)_minmax(0,0.62fr)] lg:gap-6">
+          <div data-col="design">
             <PlanetColumn activations={chart.design} side="design" />
           </div>
 
-          <div data-col="graph" className="order-1 lg:order-2">
+          <div data-col="graph">
             {/* The BodyGraph is the hero: it takes the full column width. */}
             <div className="mx-auto w-full max-w-[46rem]">
               <BodyGraph
@@ -82,7 +88,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
             </div>
           </div>
 
-          <div data-col="personality" className="order-3">
+          <div data-col="personality">
             <PlanetColumn activations={chart.personality} side="personality" />
           </div>
         </div>

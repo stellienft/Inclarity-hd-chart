@@ -65,6 +65,9 @@ const fonts = [
 ].join("\n");
 
 const html = [
+  // Without this a phone browser lays the page out at ~980px and scales it
+  // down, so the chart and its columns render far too small to read.
+  '<meta name="viewport" content="width=device-width, initial-scale=1">',
   "<title>Inclarity Space — Human Design Chart Generator</title>",
   `<style>${fonts}${readFileSync(join(out, "demo.css"), "utf8")}</style>`,
   '<div id="root"></div>',

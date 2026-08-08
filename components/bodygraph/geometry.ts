@@ -388,17 +388,36 @@ export function channelHalfPath(from: Point, to: Point, mid: Point): string {
  * aria-hidden. It gives the centres something to sit within, which is what
  * stops the figure reading as a floating circuit diagram.
  */
+/**
+ * A soft human figure behind the graph: crown, neck, sloping shoulders, torso
+ * and hips.
+ *
+ * Purely decorative — it carries no chart information and is marked
+ * aria-hidden. It gives the centres a body to sit within, which is what stops
+ * the figure reading as a floating circuit diagram.
+ *
+ * The Spleen and Solar Plexus deliberately extend past the torso, as they do
+ * in the brand artwork; the Heart sits just inside it.
+ */
 export const BODY_SILHOUETTE_PATH = [
-  "M 310 14",
-  "C 264 14, 244 48, 246 92",
-  "C 247 120, 252 148, 256 172",
-  "C 210 190, 172 236, 158 320",
-  "C 142 420, 138 560, 166 672",
-  "C 184 752, 236 800, 310 802",
-  "C 384 800, 436 752, 454 672",
-  "C 482 560, 478 420, 462 320",
-  "C 448 236, 410 190, 364 172",
-  "C 368 148, 373 120, 374 92",
-  "C 376 48, 356 14, 310 14",
+  // Crown, then down the left of the head.
+  "M 310 8",
+  "C 258 8, 232 46, 232 96",
+  "C 232 140, 252 174, 274 188",
+  // Neck.
+  "C 276 206, 276 218, 272 230",
+  // Shoulder falling away to the left, then the torso.
+  "C 226 244, 176 282, 152 340",
+  "C 128 400, 122 486, 130 570",
+  "C 138 654, 156 736, 190 786",
+  // Hips and the rounded base.
+  "C 216 822, 404 822, 430 786",
+  "C 464 736, 482 654, 490 570",
+  "C 498 486, 492 400, 468 340",
+  "C 444 282, 394 244, 348 230",
+  // Back up the neck and the right of the head.
+  "C 344 218, 344 206, 346 188",
+  "C 368 174, 388 140, 388 96",
+  "C 388 46, 362 8, 310 8",
   "Z",
 ].join(" ");

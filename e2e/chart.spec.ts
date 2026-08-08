@@ -156,6 +156,30 @@ test.describe("layout", () => {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 
+  test("keeps Design and Personality either side of the chart, at every width", async ({
+    page,
+  }) => {
+    // The mobile project runs this at 412px. Stacking the columns below the
+    // chart would break the arrangement a Human Design reader expects, so the
+    // three-across layout is asserted rather than left to a breakpoint.
+    await generateChart(page);
+    // Webfonts change metrics as they swap in, which moves the columns. Wait
+    // for them before measuring, or this races on a cold load.
+    await page.evaluate(() => document.fonts.ready);
+
+    const chart = await page.locator("svg[role='img']").boundingBox();
+    const design = await page.getByTestId("design-column").boundingBox();
+    const personality = await page.getByTestId("personality-column").boundingBox();
+    if (!chart || !design || !personality) throw new Error("missing layout boxes");
+
+    expect(design.x + design.width).toBeLessThanOrEqual(chart.x + 1);
+    expect(personality.x).toBeGreaterThanOrEqual(chart.x + chart.width - 1);
+
+    // And they sit alongside it, not above or below.
+    expect(design.y).toBeLessThan(chart.y + chart.height);
+    expect(personality.y).toBeLessThan(chart.y + chart.height);
+  });
+
   test("the BodyGraph scales rather than using a fixed size", async ({ page }) => {
     await generateChart(page);
     const svg = page.locator("svg[role='img']");

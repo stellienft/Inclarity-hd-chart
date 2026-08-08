@@ -36,14 +36,14 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
     >
       <h3
         id={`${side}-column-heading`}
-        className={`mb-3 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-plum ${
+        className={`mb-2 font-display text-[9px] font-semibold uppercase tracking-[0.12em] text-plum sm:mb-3 sm:text-[11px] sm:tracking-[0.18em] ${
           isDesign ? "text-left" : "text-right"
         }`}
       >
         {isDesign ? "Design" : "Personality"}
       </h3>
 
-      <table className="w-full border-separate border-spacing-y-1 text-sm">
+      <table className="w-full border-separate border-spacing-y-1 text-[10px] sm:text-sm">
         <caption className="sr-only">
           {isDesign
             ? "Design (unconscious) planetary activations, gate and line"
@@ -62,7 +62,7 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
             const glyph = (
               <span
                 aria-hidden="true"
-                className="inline-block w-4 text-center text-[13px] leading-none"
+                className="inline-block w-3 text-center text-[10px] leading-none sm:w-4 sm:text-[13px]"
               >
                 {PLANET_GLYPHS[planet]}
               </span>
@@ -73,7 +73,7 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
                 {formatGateLine(activation)}
                 {activation.retrograde ? (
                   <>
-                    <span aria-hidden="true" className="ml-0.5 text-[10px] opacity-80">
+                    <span aria-hidden="true" className="ml-0.5 text-[8px] opacity-80 sm:text-[10px]">
                       ℞
                     </span>
                     <span className="sr-only"> retrograde</span>
@@ -88,12 +88,12 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
                   <>
                     <th
                       scope="row"
-                      className={`w-9 rounded-l-md ${chip} py-1.5 pl-2.5 text-left font-normal text-white`}
+                      className={`w-5 rounded-l-md ${chip} py-1 pl-1.5 text-left font-normal text-white sm:w-9 sm:py-1.5 sm:pl-2.5`}
                     >
                       {glyph}
                     </th>
                     <td
-                      className={`rounded-r-md ${chip} py-1.5 pr-2.5 text-right font-semibold tabular-nums text-white`}
+                      className={`rounded-r-md ${chip} py-1 pr-1.5 text-right font-semibold tabular-nums text-white sm:py-1.5 sm:pr-2.5`}
                     >
                       {value}
                     </td>
@@ -101,13 +101,13 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
                 ) : (
                   <>
                     <td
-                      className={`rounded-l-md ${chip} py-1.5 pl-2.5 text-left font-semibold tabular-nums text-white`}
+                      className={`rounded-l-md ${chip} py-1 pl-1.5 text-left font-semibold tabular-nums text-white sm:py-1.5 sm:pl-2.5`}
                     >
                       {value}
                     </td>
                     <th
                       scope="row"
-                      className={`w-9 rounded-r-md ${chip} py-1.5 pr-2.5 text-right font-normal text-white`}
+                      className={`w-5 rounded-r-md ${chip} py-1 pr-1.5 text-right font-normal text-white sm:w-9 sm:py-1.5 sm:pr-2.5`}
                     >
                       {glyph}
                     </th>

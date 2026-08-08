@@ -153,11 +153,8 @@ h3,
   }
 
   /*
-    On paper the three columns must read Design | BodyGraph | Personality.
-    The screen layout stacks them for mobile using `order`, which would
-    otherwise carry into print and drop the BodyGraph into the narrow first
-    column while pushing the Personality table off the sheet. Placement is
-    therefore stated explicitly rather than inherited.
+    Design | BodyGraph | Personality, stated explicitly so the proportions are
+    right for A4 rather than inherited from whichever breakpoint was active.
   */
   .print-grid {
     display: grid !important;
@@ -168,17 +165,14 @@ h3,
   }
 
   .print-grid > [data-col="design"] {
-    order: 1 !important;
     grid-column: 1 !important;
   }
 
   .print-grid > [data-col="graph"] {
-    order: 2 !important;
     grid-column: 2 !important;
   }
 
   .print-grid > [data-col="personality"] {
-    order: 3 !important;
     grid-column: 3 !important;
   }
 
