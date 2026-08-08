@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/config/site";
 import type { HumanDesignChart } from "@/lib/human-design/types/chart";
 
 import { ChartTextSummary } from "./ChartTextSummary";
-import { CorePanel } from "./CorePanel";
+import { FoundationChart } from "./FoundationChart";
 import { Orientation } from "./Orientation";
 import { PlanetColumn } from "./PlanetColumn";
 
@@ -34,9 +34,6 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           {name ? name : "Your Human Design"}
         </h1>
         <p className="mt-2 text-sm text-plum">{formatBirthLine(chart)}</p>
-        <p className="mt-0.5 text-xs text-plum/60">
-          Timezone {chart.subject.timezone} · Design {chart.subject.designUtc.slice(0, 16)}Z
-        </p>
       </header>
 
       {/* ---- Anything the engine wants the reader to know ---- */}
@@ -56,7 +53,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
         </div>
       ) : null}
 
-      <CorePanel chart={chart} />
+      <FoundationChart chart={chart} />
 
       {/* ---- The BodyGraph is the hero ---- */}
       <section aria-labelledby="bodygraph-heading" className="print-sheet">
@@ -64,7 +61,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           Your BodyGraph with Design and Personality activations
         </h2>
 
-        <div className="print-grid grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,2.7fr)_minmax(0,0.8fr)] lg:gap-8">
+        <div className="print-grid grid gap-8 lg:grid-cols-[minmax(0,0.62fr)_minmax(0,3.1fr)_minmax(0,0.62fr)] lg:gap-6">
           {/* Design column — left on desktop, below the chart on mobile. */}
           <div data-col="design" className="order-2 lg:order-1">
             <PlanetColumn activations={chart.design} side="design" />
@@ -72,7 +69,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
 
           <div data-col="graph" className="order-1 lg:order-2">
             {/* The BodyGraph is the hero: it takes the full column width. */}
-            <div className="mx-auto w-full max-w-[44rem]">
+            <div className="mx-auto w-full max-w-[46rem]">
               <BodyGraph
                 chart={chart}
                 className="h-auto w-full"
@@ -103,7 +100,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
               className="inline-block h-1 w-6 rounded-full bg-design"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(90deg,#221E1D 0 4px,transparent 4px 8px)",
+                  "repeating-linear-gradient(90deg,#4A403A 0 4px,transparent 4px 8px)",
               }}
             />
             Both

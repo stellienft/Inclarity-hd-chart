@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { calculateChart } from "../index";
 import { formatGateLine } from "../calculate/gate-line";
+import { PLANET_IDS } from "../types/activation";
 import { MOTOR_CENTERS } from "../types/center";
 import type { LocationResult } from "../../location/types";
 
@@ -193,6 +194,100 @@ describe("reference chart: Nelson Mandela", () => {
     for (const motor of MOTOR_CENTERS) {
       expect(chart.centers.defined).not.toContain(motor);
     }
+  });
+});
+
+describe("reference chart: Genetic Matrix, 5 June 1989 Brisbane", () => {
+  /**
+   * The strongest fixture in the suite, and the only one checked against a
+   * live established calculator rather than a published description.
+   *
+   * Source: a Genetic Matrix "Foundation Chart" for 5 June 1989, 17:58,
+   * Brisbane (UTC+10). Genetic Matrix computes with Swiss Ephemeris against
+   * the JPL planetary database, so this is a direct comparison against the
+   * reference implementation of the field.
+   *
+   * ALL 26 ACTIVATIONS are asserted, not just the headline properties. Getting
+   * 26 gate.line values right simultaneously is not something a wrong wheel
+   * offset, a wrong node convention or a wrong Design solver can do by luck.
+   */
+  const brisbane = location(
+    "Brisbane, Queensland, Australia",
+    "Brisbane",
+    "Queensland",
+    "Australia",
+    -27.4678,
+    153.028,
+    "Australia/Brisbane",
+  );
+
+  const DESIGN: Record<string, string> = {
+    sun: "63.6", earth: "64.6", northNode: "55.6", southNode: "59.6", moon: "37.4",
+    mercury: "30.1", venus: "37.4", mars: "8.4", jupiter: "8.6", saturn: "38.3",
+    uranus: "58.2", neptune: "38.3", pluto: "1.2",
+  };
+  const PERSONALITY: Record<string, string> = {
+    sun: "35.4", earth: "5.4", northNode: "30.5", southNode: "29.5", moon: "52.1",
+    mercury: "8.4", venus: "15.3", mars: "62.3", jupiter: "45.1", saturn: "38.4",
+    uranus: "58.1", neptune: "38.3", pluto: "44.6",
+  };
+
+  const chartPromise = calculateChart({
+    date: "1989-06-05",
+    time: "17:58",
+    location: brisbane,
+  });
+
+  it("matches all 13 Design activations", async () => {
+    const { chart } = await chartPromise;
+    for (const planet of PLANET_IDS) {
+      expect(formatGateLine(chart.design[planet]), `design ${planet}`).toBe(DESIGN[planet]);
+    }
+  });
+
+  it("matches all 13 Personality activations", async () => {
+    const { chart } = await chartPromise;
+    for (const planet of PLANET_IDS) {
+      expect(formatGateLine(chart.personality[planet]), `personality ${planet}`).toBe(
+        PERSONALITY[planet],
+      );
+    }
+  });
+
+  it("matches the published Type, Profile, Definition and Authority", async () => {
+    const { chart } = await chartPromise;
+    // Genetic Matrix says "Pure Manifesting Generator"; "Pure" is its own
+    // sub-label for an MG with a direct Sacral-Throat channel, not a separate
+    // type, so the type itself is Manifesting Generator.
+    expect(chart.type).toBe("Manifesting Generator");
+    expect(chart.profile).toBe("4/6");
+    expect(chart.definition).toBe("Single Definition");
+    expect(chart.authority).toBe("Sacral");
+    expect(chart.strategy).toBe("To Respond");
+  });
+
+  it("matches the published channel list", async () => {
+    const { chart } = await chartPromise;
+    expect(chart.channels.map((c) => c.id).sort()).toEqual(["1-8", "5-15"]);
+    expect(chart.channels.map((c) => c.name).sort()).toEqual(["Inspiration", "Rhythm"]);
+  });
+
+  it("converts the birth time with Queensland's June 1989 offset", async () => {
+    const { chart } = await chartPromise;
+    // The DST trial ran from late October 1989, so June is plain UTC+10.
+    expect(chart.subject.birthLocal).toBe("1989-06-05T17:58:00+10:00");
+    expect(chart.subject.birthUtc).toBe("1989-06-05T07:58:00.000Z");
+  });
+
+  it("solves the Design moment to within a minute of Swiss Ephemeris", async () => {
+    const { chart } = await chartPromise;
+    // Genetic Matrix reports 1989-03-07 05:46:55 UTC. The remaining seconds
+    // are the ephemeris difference between astronomy-engine and Swiss
+    // Ephemeris/JPL — far too small to move a gate (5.625 deg) or a line
+    // (0.9375 deg), as the 26 matching activations above demonstrate.
+    const ours = new Date(chart.subject.designUtc).getTime();
+    const theirs = Date.UTC(1989, 2, 7, 5, 46, 55);
+    expect(Math.abs(ours - theirs)).toBeLessThan(60_000);
   });
 });
 

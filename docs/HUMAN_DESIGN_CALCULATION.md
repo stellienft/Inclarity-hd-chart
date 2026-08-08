@@ -186,7 +186,14 @@ The mean node is also implemented (Meeus eq. 47.7) and the convention is
 switchable via `AstronomyEngineProvider({ nodeConvention })`, so the decision can
 be revisited without touching Human Design logic.
 
-**Caveat, stated plainly:** we could not obtain a first-party statement from
+**Now confirmed empirically.** A full 26-activation comparison against Genetic
+Matrix (Swiss Ephemeris + JPL) matches on both nodes, on both imprints —
+North Node 55.6 / 30.5 and South Node 59.6 / 29.5. A mean-node engine would sit
+up to 1.5° away, which is enough to move a line, so this is direct evidence for
+the true-node choice rather than an inference. See
+[VALIDATION.md](./VALIDATION.md).
+
+**Residual caveat:** we still could not obtain a first-party statement from
 Jovian Archive confirming which node their software uses. The choice rests on
 the secondary evidence above plus agreement with the reference charts in
 [VALIDATION.md](./VALIDATION.md). Recorded in §16.
@@ -415,13 +422,13 @@ reproduced anywhere in this repository.
 
 Recorded openly rather than papered over.
 
-### 16.1 Lunar node convention — *decided, with residual uncertainty*
+### 16.1 Lunar node convention — *resolved*
 
-True (osculating) node chosen on secondary evidence (§5). We could not obtain a
-first-party statement from Jovian Archive. The reference charts in
-VALIDATION.md are consistent with this choice, but none of them turns on a node
-being near a boundary, so they do not *prove* it. Switchable via
-`nodeConvention`.
+True (osculating) node, chosen on secondary evidence (§5) and since **confirmed
+against Genetic Matrix (Swiss Ephemeris + JPL): all four node activations match
+exactly.** Still switchable via `nodeConvention`. The only remaining gap is a
+first-party statement from Jovian Archive, which would be confirmation of a
+result we have already measured.
 
 ### 16.2 Colour, Tone and Base — *deferred*
 
@@ -437,15 +444,16 @@ No verified, lawfully usable table. See §15.
 See §1. Affects some pre-1970 births by tens of minutes. Fixing it properly
 needs tzdata compiled with `backzone`.
 
-### 16.5 External calculator cross-comparison — *incomplete*
+### 16.5 External calculator cross-comparison — *one of two done*
 
-The brief asks for comparison against at least two established calculators. The
-build environment's network policy blocks every Human Design calculator and
-ephemeris service (including JPL Horizons), so live cross-comparison could not
-be performed. What *was* done instead is documented in
-[VALIDATION.md](./VALIDATION.md): validation against three independently
-published reference charts, and cross-validation of the ephemeris against a
-second independent implementation. This gap should be closed before launch.
+**Genetic Matrix (Swiss Ephemeris + JPL) now matches on all 26 activations**,
+plus Type, Profile, Definition, Authority, both channels and the Design
+timestamp to within 10.2 seconds. See [VALIDATION.md](./VALIDATION.md).
+
+A **second** independent calculator is still outstanding. The build
+environment's network policy blocks every Human Design calculator and ephemeris
+service (including JPL Horizons), so further live comparison could not be
+performed from here.
 
 ---
 

@@ -12,7 +12,9 @@
   --color-offgrey: #eae7e1;
   --color-warmwhite: #fbfaf8;
   --color-parchment: #f4f1ec;
-  --color-design: #a2622f;
+  --color-design: #8f6a4e;
+  --color-sage: #c9ddd7;
+  --color-sagedeep: #55736c;
 
   /* Self-hosted via next/font; the literal names are the fallback if the
      variables are ever absent (e.g. a bare component render in a test). */

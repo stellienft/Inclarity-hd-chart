@@ -31,7 +31,9 @@ export const SIGNATURE_BY_TYPE: Record<HdType, string> = {
 export const NOT_SELF_THEME_BY_TYPE: Record<HdType, string> = {
   Manifestor: "Anger",
   Generator: "Frustration",
-  "Manifesting Generator": "Frustration",
+  // A Manifesting Generator carries the Manifestor's anger alongside the
+  // Generator's frustration; established calculators print both.
+  "Manifesting Generator": "Frustration (Anger)",
   Projector: "Bitterness",
   Reflector: "Disappointment",
 };

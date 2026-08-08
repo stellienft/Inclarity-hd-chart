@@ -20,7 +20,8 @@ import {
   CENTER_DEFINED_STROKE,
   CENTER_STROKE,
   CENTER_UNDEFINED_FILL,
-  CHANNEL_INACTIVE,
+  CHANNEL_TRACK_EDGE,
+  CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
   GATE_MARKER_RADIUS,
   GATE_MARKER_RING,
@@ -121,15 +122,14 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const active = activeChannelById.get(definition.id);
 
           if (!active) {
+            // Two strokes: a faint wider edge, then white on top. That reads as
+            // an empty "track" both over the pale silhouette and over the page.
+            const d = channelPath(a, b);
             return (
-              <path
-                key={definition.id}
-                d={channelPath(a, b)}
-                stroke={CHANNEL_INACTIVE}
-                strokeWidth={STROKE_WIDTH.channelInactive}
-                data-channel={definition.id}
-                data-active="false"
-              />
+              <g key={definition.id} data-channel={definition.id} data-active="false">
+                <path d={d} stroke={CHANNEL_TRACK_EDGE} strokeWidth={STROKE_WIDTH.channelTrackEdge} />
+                <path d={d} stroke={CHANNEL_TRACK_FILL} strokeWidth={STROKE_WIDTH.channelTrack} />
+              </g>
             );
           }
 

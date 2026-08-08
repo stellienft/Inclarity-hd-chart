@@ -14,9 +14,11 @@ export interface PlanetColumnProps {
 /**
  * One of the two planetary activation columns that flank the BodyGraph.
  *
- * Design sits on the left, Personality on the right — the arrangement a
- * trained reader expects. Each row is a pale chip carrying the body's glyph
- * and its gate.line.
+ * Each row is a filled chip carrying the body's glyph and its gate.line, in
+ * the brand's two browns: the lighter taupe for Design, the darker for
+ * Personality. The two columns mirror each other — Design reads glyph-then-
+ * value on the left, Personality value-then-glyph on the right — so the pair
+ * frames the chart rather than repeating the same shape twice.
  *
  * Values are always the calculated activations; there are no placeholder rows
  * anywhere in this component. The markup stays a real table so the columns are
@@ -24,6 +26,7 @@ export interface PlanetColumnProps {
  */
 export function PlanetColumn({ activations, side }: PlanetColumnProps) {
   const isDesign = side === "design";
+  const chip = isDesign ? "bg-design" : "bg-ink";
 
   return (
     <section
@@ -31,21 +34,16 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
       className="print-compact w-full"
       data-testid={`${side}-column`}
     >
-      <header className="mb-3">
-        <h3
-          id={`${side}-column-heading`}
-          className={`font-display text-[11px] font-semibold uppercase tracking-[0.16em] ${
-            isDesign ? "text-design" : "text-ink"
-          }`}
-        >
-          {isDesign ? "Design" : "Personality"}
-        </h3>
-        <p className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-plum/60">
-          {isDesign ? "Unconscious" : "Conscious"}
-        </p>
-      </header>
+      <h3
+        id={`${side}-column-heading`}
+        className={`mb-3 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-plum ${
+          isDesign ? "text-left" : "text-right"
+        }`}
+      >
+        {isDesign ? "Design" : "Personality"}
+      </h3>
 
-      <table className="w-full border-separate border-spacing-y-1.5 text-sm">
+      <table className="w-full border-separate border-spacing-y-1 text-sm">
         <caption className="sr-only">
           {isDesign
             ? "Design (unconscious) planetary activations, gate and line"
@@ -60,37 +58,61 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
         <tbody>
           {PLANET_IDS.map((planet) => {
             const activation = activations[planet];
+
+            const glyph = (
+              <span
+                aria-hidden="true"
+                className="inline-block w-4 text-center text-[13px] leading-none"
+              >
+                {PLANET_GLYPHS[planet]}
+              </span>
+            );
+            const value = (
+              <>
+                <span className="sr-only">{PLANET_LABELS[planet]}: </span>
+                {formatGateLine(activation)}
+                {activation.retrograde ? (
+                  <>
+                    <span aria-hidden="true" className="ml-0.5 text-[10px] opacity-80">
+                      ℞
+                    </span>
+                    <span className="sr-only"> retrograde</span>
+                  </>
+                ) : null}
+              </>
+            );
+
             return (
               <tr key={planet}>
-                <th
-                  scope="row"
-                  className="rounded-l-md bg-parchment/70 py-1.5 pl-2.5 text-left font-normal"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`mr-1.5 inline-block w-4 text-center text-[13px] leading-none ${
-                      isDesign ? "text-design" : "text-ink"
-                    }`}
-                  >
-                    {PLANET_GLYPHS[planet]}
-                  </span>
-                  <span className="text-[12px] text-plum">{PLANET_LABELS[planet]}</span>
-                </th>
-                <td
-                  className={`rounded-r-md bg-parchment/70 py-1.5 pr-2.5 text-right font-semibold tabular-nums ${
-                    isDesign ? "text-design" : "text-ink"
-                  }`}
-                >
-                  {formatGateLine(activation)}
-                  {activation.retrograde ? (
-                    <>
-                      <span aria-hidden="true" className="ml-1 text-[10px] opacity-70">
-                        ℞
-                      </span>
-                      <span className="sr-only"> retrograde</span>
-                    </>
-                  ) : null}
-                </td>
+                {isDesign ? (
+                  <>
+                    <th
+                      scope="row"
+                      className={`w-9 rounded-l-md ${chip} py-1.5 pl-2.5 text-left font-normal text-white`}
+                    >
+                      {glyph}
+                    </th>
+                    <td
+                      className={`rounded-r-md ${chip} py-1.5 pr-2.5 text-right font-semibold tabular-nums text-white`}
+                    >
+                      {value}
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td
+                      className={`rounded-l-md ${chip} py-1.5 pl-2.5 text-left font-semibold tabular-nums text-white`}
+                    >
+                      {value}
+                    </td>
+                    <th
+                      scope="row"
+                      className={`w-9 rounded-r-md ${chip} py-1.5 pr-2.5 text-right font-normal text-white`}
+                    >
+                      {glyph}
+                    </th>
+                  </>
+                )}
               </tr>
             );
           })}

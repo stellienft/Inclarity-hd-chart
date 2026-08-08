@@ -1,18 +1,20 @@
 /**
- * BodyGraph palette.
+ * BodyGraph palette — Inclarity brand.
  *
- * Warm terracotta for defined centres against a pale cream ground, with near
- * black and terracotta carrying the Personality/Design distinction.
+ * Taken from the Inclarity-branded chart artwork: pale sage for defined
+ * centres against warm off-white, warm browns for the activations, and a
+ * near-black marker for gates.
  *
  * This deliberately does NOT use the canonical Human Design colour scheme
- * (yellow Head, green Ajna, red Sacral and so on). The reference style we are
- * matching does not either, which is fortunate: terracotta and cream sit
- * naturally beside the Inclarity brown (#A27E6B) and off grey (#EAE7E1), so the
- * chart reads as part of the brand rather than as an imported asset.
+ * (yellow Head, green Ajna, red Sacral and so on).
  *
- * Colour is never the only signal. Every centre, gate and channel carries a
- * <title> stating its state in words, and `ChartTextSummary` repeats all of it
- * as prose.
+ * PERSONALITY / DESIGN: the brand artwork distinguishes the two imprints with
+ * two weights of the same warm brown rather than the traditional black/red.
+ * That distinction is required (a trained reader relies on it), so the two
+ * tones are used consistently for channels, gate markers and the planetary
+ * columns alike. Colour is never the only signal: every centre, gate and
+ * channel carries a <title> stating its state in words, and
+ * `ChartTextSummary` repeats all of it as prose.
  */
 
 export const PALETTE = {
@@ -22,39 +24,48 @@ export const PALETTE = {
   brown: "#A27E6B",
   offGrey: "#EAE7E1",
   warmWhite: "#FBFAF8",
-  ink: "#1F1B1A",
+  sage: "#C9DDD7",
+  ink: "#2B2724",
 } as const;
 
-/** Personality / conscious. */
-export const PERSONALITY_COLOR = "#221E1D";
-/** Design / unconscious. */
+/** Personality / conscious — the darker of the two brand browns. */
+export const PERSONALITY_COLOR = "#4A403A";
 /**
- * Design markers sit ON terracotta centres, so this is darkened until white
- * numerals clear 4.5:1 against it (measured ~5.0:1). A lighter, prettier tan
- * failed that test by blending into CENTER_DEFINED_FILL.
+ * Design / unconscious — the lighter of the two brand browns.
+ *
+ * Darkened from the artwork's tan until white numerals clear 4.5:1 against it
+ * (measured ~4.8:1). The lighter tone reached only 3.85:1, which fails on the
+ * filled column chips where the text sits directly on it.
  */
-export const DESIGN_COLOR = "#A2622F";
+export const DESIGN_COLOR = "#8F6A4E";
 
-/** Every defined centre shares one warm fill, as in the reference. */
-export const CENTER_DEFINED_FILL = "#E2AE85";
-export const CENTER_UNDEFINED_FILL = "#FCF6F2";
-export const CENTER_STROKE = "#E3D9D1";
-export const CENTER_DEFINED_STROKE = "#CE955F";
+/** Defined centres share one pale sage fill, as in the brand artwork. */
+export const CENTER_DEFINED_FILL = "#C9DDD7";
+export const CENTER_DEFINED_STROKE = "#A6C7BF";
+export const CENTER_UNDEFINED_FILL = "#F7F5F2";
+export const CENTER_STROKE = "#DCD7D0";
 
-export const CHANNEL_INACTIVE = "#E0D7CF";
-export const BODY_SILHOUETTE_FILL = "#F1F1EB";
+/**
+ * Inactive channels are drawn as white "tracks" with a faint edge, so they
+ * read both against the pale silhouette and against the page behind it.
+ */
+export const CHANNEL_TRACK_FILL = "#FFFFFF";
+export const CHANNEL_TRACK_EDGE = "#E4DFD8";
 
-/** Text that sits on top of a defined (terracotta) centre. */
-export const ON_DEFINED_TEXT = "#2B2320";
-/** Text on the pale ground of an undefined centre. */
-export const ON_UNDEFINED_TEXT = "#6E625C";
+export const BODY_SILHOUETTE_FILL = "#EEEBE6";
+
+/** Gate numerals on a defined (sage) centre. */
+export const ON_DEFINED_TEXT = "#2B3A36";
+/** Gate numerals on the pale ground of an undefined centre. */
+export const ON_UNDEFINED_TEXT = "#6B615B";
 /** Numerals inside an activated gate marker. */
 export const GATE_MARKER_TEXT = "#FFFFFF";
 
 export const STROKE_WIDTH = {
   centre: 1.25,
-  channelInactive: 2.5,
-  channelActive: 6,
+  channelTrack: 7,
+  channelTrackEdge: 9,
+  channelActive: 7,
 } as const;
 
 export const GATE_MARKER_RADIUS = 9.5;
@@ -74,7 +85,7 @@ export function activationColor(style: ActivationStyle): string {
       // Rendered as two halves; this is the single-colour fallback.
       return PERSONALITY_COLOR;
     default:
-      return CHANNEL_INACTIVE;
+      return CHANNEL_TRACK_FILL;
   }
 }
 

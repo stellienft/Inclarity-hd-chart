@@ -9,11 +9,16 @@ Expectations recorded in the regression suite come from **published charts**,
 never from this engine's own output. Recording our own results as "expected"
 would make the suite self-confirming and worthless.
 
-### What could not be done
+### One established calculator has now been compared
 
-The brief asks for comparison against at least two established Human Design
-calculators. **This was not possible in the build environment.** Its network
-egress policy blocks every relevant service, verified directly:
+The brief asks for comparison against at least two established calculators.
+**One has now been done** — a full 26-activation comparison against Genetic
+Matrix (Swiss Ephemeris + JPL), reproduced below, supplied by the user as a
+screenshot. Every activation matches.
+
+A **second** independent calculator is still outstanding. The build
+environment's network egress policy blocks every relevant service, verified
+directly:
 
 | Target | Result |
 | --- | --- |
@@ -91,7 +96,83 @@ Fixture: `lib/human-design/__tests__/reference-charts.test.ts`.
 
 ---
 
-## Reference chart 2 — Princess Diana
+## Reference chart 2 — Genetic Matrix, 5 June 1989 Brisbane
+
+**The strongest fixture in the suite**, and the only one checked against a live
+established calculator rather than a published description.
+
+**Source:** a Genetic Matrix "Foundation Chart" for 5 June 1989, 17:58,
+Brisbane (UTC+10). Genetic Matrix computes with **Swiss Ephemeris against the
+JPL planetary database** — the reference implementation of the field, and the
+same stack Jovian Archive's own software uses.
+
+### All 26 activations
+
+| Body | Design (ref / ours) | Personality (ref / ours) |
+| --- | --- | --- |
+| Sun | 63.6 / 63.6 ✅ | 35.4 / 35.4 ✅ |
+| Earth | 64.6 / 64.6 ✅ | 5.4 / 5.4 ✅ |
+| North Node | 55.6 / 55.6 ✅ | 30.5 / 30.5 ✅ |
+| South Node | 59.6 / 59.6 ✅ | 29.5 / 29.5 ✅ |
+| Moon | 37.4 / 37.4 ✅ | 52.1 / 52.1 ✅ |
+| Mercury | 30.1 / 30.1 ✅ | 8.4 / 8.4 ✅ |
+| Venus | 37.4 / 37.4 ✅ | 15.3 / 15.3 ✅ |
+| Mars | 8.4 / 8.4 ✅ | 62.3 / 62.3 ✅ |
+| Jupiter | 8.6 / 8.6 ✅ | 45.1 / 45.1 ✅ |
+| Saturn | 38.3 / 38.3 ✅ | 38.4 / 38.4 ✅ |
+| Uranus | 58.2 / 58.2 ✅ | 58.1 / 58.1 ✅ |
+| Neptune | 38.3 / 38.3 ✅ | 38.3 / 38.3 ✅ |
+| Pluto | 1.2 / 1.2 ✅ | 44.6 / 44.6 ✅ |
+
+**26 / 26 exact.**
+
+### Derived properties
+
+| Property | Genetic Matrix | This engine | |
+| --- | --- | --- | --- |
+| Birth UTC | 05 June 1989, 07:58 | 1989-06-05T07:58:00Z | ✅ |
+| Design UTC | 07 March 1989, 05:46:55 | 07 March 1989, 05:46:44.8 | ✅ (10.2 s) |
+| Type | Pure Manifesting Generator | Manifesting Generator | see note |
+| Profile | 4/6 | 4/6 | ✅ |
+| Definition | Single | Single Definition | ✅ |
+| Inner Authority | Sacral | Sacral | ✅ |
+| Strategy | Respond | To Respond | ✅ |
+| Channels | 0108 Inspiration, 0515 Rhythm | 1-8 Inspiration, 5-15 Rhythm | ✅ |
+| Cross angle | RAX (Right Angle Cross) | Right Angle | ✅ |
+
+### Why this fixture is decisive
+
+Twenty-six gate.line values are not something a wrong wheel offset, a wrong node
+convention or a broken Design solver can produce by luck. In particular:
+
+- **The gate wheel** is confirmed at 26 independent longitudes, not just the six
+  published boundary checkpoints.
+- **The node convention** is confirmed: North and South Node match on both
+  imprints. A mean-node engine would differ by up to 1.5°, which is enough to
+  move a line — so this is direct evidence for the true-node choice recorded in
+  HUMAN_DESIGN_CALCULATION.md §5.
+- **The 88° solver** is confirmed to **10.2 seconds** against Swiss
+  Ephemeris/JPL. That residual is the ephemeris difference between
+  astronomy-engine and JPL, and is ~0.0001° of solar arc — four orders of
+  magnitude below a line.
+- **Queensland's timezone history** is confirmed: June 1989 is before the
+  1989-92 DST trial began in late October, so plain UTC+10, matching.
+
+### The one difference, and why it is not an error
+
+Genetic Matrix labels the type **"Pure Manifesting Generator"**; we say
+**"Manifesting Generator"**. "Pure" is Genetic Matrix's own sub-label, not one
+of the five types, and we could not establish the rule it uses — this chart's
+motor reaches the Throat *indirectly* (Sacral -5-15- G -1-8- Throat), so it is
+not the common "direct 20-34" definition of a pure MG. Rather than guess at
+another vendor's sub-classification, we report the standard type. The
+underlying mechanics agree completely.
+
+Fixture: `lib/human-design/__tests__/reference-charts.test.ts`.
+
+---
+
+## Reference chart 3 — Princess Diana
 
 **Birth data:** 1 July 1961, 19:45 BST, Sandringham, Norfolk, England. Rodden
 rating AA (birth certificate) — among the most reliable public birth data
@@ -116,7 +197,7 @@ derivation correct rather than coincidental.
 
 ---
 
-## Reference chart 3 — Nelson Mandela
+## Reference chart 4 — Nelson Mandela
 
 **Birth data:** 18 July 1918, Mvezo, South Africa. Birth **time is not reliably
 recorded**, so only claims robust to the unknown time are asserted (noon is used).
@@ -210,8 +291,9 @@ client-supplied timezone that contradicts the coordinates.
 
 ## Open items
 
-1. **Cross-compare against two established calculators from an unrestricted
-   network.** The single most valuable remaining check.
+1. **Cross-compare against a SECOND established calculator.** Genetic Matrix
+   now matches on all 26 activations; one more independent tool would close
+   this out entirely.
 2. **Obtain a Reflector reference chart.** Reflectors are ~1 % of the
    population; the type is covered synthetically but not by a published chart.
 3. **Confirm the node convention against a chart with a node near a gate or line

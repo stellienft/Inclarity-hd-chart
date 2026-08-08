@@ -60,6 +60,15 @@ const CHANNEL_SEEDS: readonly ChannelSeed[] = [
   { gates: [47, 64], name: "Abstraction", circuit: "collective", circuitGroup: "sensing" },
 ] as const;
 
+/**
+ * Zero-padded four-digit channel code, e.g. gates 1 and 8 -> "0108".
+ * The notation established Human Design software prints alongside the name.
+ */
+export function channelCode(a: number, b: number): string {
+  const [low, high] = a < b ? [a, b] : [b, a];
+  return `${String(low).padStart(2, "0")}${String(high).padStart(2, "0")}`;
+}
+
 export function channelId(a: number, b: number): string {
   const [low, high] = a < b ? [a, b] : [b, a];
   return `${low}-${high}`;

@@ -37,15 +37,20 @@ test.describe("chart generation", () => {
     await expect(core.getByText("Generator", { exact: true })).toBeVisible();
     await expect(core.getByText("To Respond", { exact: true })).toBeVisible();
     await expect(core.getByText("Emotional", { exact: true })).toBeVisible();
-    await expect(core.getByText("5/1", { exact: true })).toBeVisible();
+    await expect(core.getByText(/^5\/1 — /)).toBeVisible();
     await expect(core.getByText("Split Definition", { exact: true })).toBeVisible();
   });
 
   test("applies the birth place's historical timezone, not the browser's", async ({ page }) => {
     await generateChart(page);
-    // Queensland was observing daylight saving on this date: UTC+11.
-    await expect(page.getByText(/1990-03-01 at 14:32/)).toBeVisible();
-    await expect(page.getByText(/Timezone Australia\/Brisbane/)).toBeVisible();
+    const core = page.getByTestId("core-panel");
+
+    // Queensland was observing daylight saving on this date, so the offset is
+    // +11:00 and the UTC time is 03:32 — not the +10:00 an offset table would give.
+    await expect(core.getByText("05 March 1990", { exact: false })).toHaveCount(0);
+    await expect(core.getByText(/01 March 1990, 14:32 \(UTC\+11:00\)/)).toBeVisible();
+    await expect(core.getByText(/01 March 1990, 03:32/)).toBeVisible();
+    await expect(core.getByText("Brisbane, Queensland, Australia")).toBeVisible();
   });
 
   test("renders the BodyGraph with all nine centres, 64 gates and 36 channels", async ({ page }) => {

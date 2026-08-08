@@ -65,7 +65,7 @@ interface LocationProvider  { search(query: string): Promise<LocationResult[]>; 
 | --- | --- | --- |
 | Ephemeris | `astronomy-engine` (MIT) | Swiss Ephemeris is AGPL-or-commercial; `astronomia`'s bundled data returns 0° longitude for Uranus and Neptune |
 | Frame | Apparent geocentric, true ecliptic of date | Matches the Swiss Ephemeris default, i.e. the Human Design convention |
-| Lunar node | True (osculating) | Matches mainstream Human Design calculators; differs from mean by up to 1.5° |
+| Lunar node | True (osculating) | Confirmed against Genetic Matrix — all four node activations match; mean node would differ by up to 1.5° |
 | Wheel origin | Gate 41 at **302.0°**, ascending | Verified against six published gate/degree checkpoints |
 | Boundaries | Half-open `[start, end)` | Deterministic; all 64 gate and 384 line boundaries tested |
 | Cross names | **Not shipped** | No verified, lawfully usable table — gates and angle only |
@@ -150,10 +150,14 @@ at 88 days.
 
 ## Status
 
-The engine is validated against three published reference charts (see
-VALIDATION.md). The main outstanding item before launch is a live cross-check
-against two established Human Design calculators, which the build environment's
-network policy prevented.
+The engine reproduces **all 26 activations** of a Genetic Matrix chart (Swiss
+Ephemeris + JPL) exactly, along with Type, Profile, Definition, Authority and
+both channels, and solves the Design moment to within 10.2 seconds of it. It
+also matches three further published reference charts. See
+[VALIDATION.md](docs/VALIDATION.md).
+
+Outstanding before launch: a comparison against a *second* established
+calculator, and confirmation of the Open-Meteo commercial tier.
 
 ---
 
