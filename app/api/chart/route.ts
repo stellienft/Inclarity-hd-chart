@@ -9,7 +9,17 @@ export const runtime = "nodejs";
 /** Personal birth data must never be cached at the edge or in a CDN. */
 export const dynamic = "force-dynamic";
 
-const RATE_LIMIT = 30;
+/**
+ * Charts allowed per client per window.
+ *
+ * 30/minute is the shipped default. CHART_RATE_LIMIT exists because the e2e
+ * suite drives more than that from a single loopback address in under a
+ * minute, and a throttled test run reports as a broken chart rather than as
+ * the limiter doing its job. The limiter's own behaviour is covered by
+ * lib/api/__tests__/rate-limit.test.ts, which does not read this variable, so
+ * raising it for a test run cannot quietly disable the protection.
+ */
+const RATE_LIMIT = Number(process.env.CHART_RATE_LIMIT ?? 30);
 const RATE_WINDOW_MS = 60_000;
 const MAX_BODY_BYTES = 4096;
 

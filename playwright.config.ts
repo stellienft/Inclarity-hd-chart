@@ -33,6 +33,11 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
-    env: { LOCATION_PROVIDER: "static" },
+    /**
+     * The suite generates well over the shipped 30 charts/minute from a single
+     * loopback address, so without this the last tests to run get a 429 and
+     * report as a broken chart. The limiter itself is unit-tested separately.
+     */
+    env: { LOCATION_PROVIDER: "static", CHART_RATE_LIMIT: "1000" },
   },
 });

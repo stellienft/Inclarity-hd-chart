@@ -7,7 +7,15 @@ import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
 import type { LocationResult } from "@/lib/location/types";
 
 import { BodyGraph } from "./BodyGraph";
-import { CENTERS, GATE_POINTS, VIEWBOX, gateLabelPoint } from "./geometry";
+import {
+  AXIS_X,
+  BODY_SILHOUETTE_PATH,
+  CENTERS,
+  GATE_POINTS,
+  VIEWBOX,
+  gateLabelPoint,
+  type Point,
+} from "./geometry";
 import { DESIGN_COLOR, GATE_MARKER_RADIUS, PERSONALITY_COLOR } from "./styles";
 
 const BRISBANE: LocationResult = {
@@ -111,6 +119,115 @@ describe("BodyGraph geometry", () => {
       const label = gateLabelPoint(gate, center);
       expect(Math.hypot(label.x - anchor.x, label.y - anchor.y)).toBeGreaterThan(5);
     }
+  });
+});
+
+/**
+ * The silhouette is decoration, but it has one job: to sit BEHIND the whole
+ * graph. A figure narrower than the Spleen or the Solar Plexus leaves centres
+ * hanging outside the body, which is what made earlier drafts read wrongly.
+ *
+ * Rather than pin the path string — which would fight every redesign — these
+ * tests flatten it to a polygon and ask the question that actually matters:
+ * is each gate marker inside the figure?
+ */
+describe("body silhouette", () => {
+  /** Flatten the cubic path to a polygon, sampling each segment evenly. */
+  function silhouettePolygon(steps = 24): Point[] {
+    const numbers = (text: string) =>
+      (text.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+
+    const commands = BODY_SILHOUETTE_PATH.match(/[MCZ][^MCZ]*/g) ?? [];
+    const points: Point[] = [];
+    let cursor: Point = { x: 0, y: 0 };
+
+    for (const command of commands) {
+      const values = numbers(command.slice(1));
+      if (command.startsWith("M")) {
+        const [x, y] = values;
+        if (x === undefined || y === undefined) throw new Error(`bad move: ${command}`);
+        cursor = { x, y };
+        points.push(cursor);
+        continue;
+      }
+      if (command.startsWith("Z")) continue;
+
+      const [x1, y1, x2, y2, x, y] = values;
+      if (
+        x1 === undefined || y1 === undefined || x2 === undefined ||
+        y2 === undefined || x === undefined || y === undefined
+      ) {
+        throw new Error(`bad curve: ${command}`);
+      }
+
+      const from = cursor;
+      for (let step = 1; step <= steps; step += 1) {
+        const t = step / steps;
+        const u = 1 - t;
+        points.push({
+          x: u ** 3 * from.x + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t ** 3 * x,
+          y: u ** 3 * from.y + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t ** 3 * y,
+        });
+      }
+      cursor = { x, y };
+    }
+
+    return points;
+  }
+
+  /** Standard ray-casting containment test. */
+  function contains(polygon: Point[], point: Point): boolean {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+      const a = polygon[i];
+      const b = polygon[j];
+      if (!a || !b) continue;
+      const straddles = a.y > point.y !== b.y > point.y;
+      if (!straddles) continue;
+      const crossingX = ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+      if (point.x < crossingX) inside = !inside;
+    }
+    return inside;
+  }
+
+  const polygon = silhouettePolygon();
+
+  it("is a closed shape that stays within the viewBox", () => {
+    expect(BODY_SILHOUETTE_PATH.trimEnd().endsWith("Z")).toBe(true);
+    for (const point of polygon) {
+      expect(point.x).toBeGreaterThanOrEqual(0);
+      expect(point.x).toBeLessThanOrEqual(VIEWBOX.width);
+      expect(point.y).toBeGreaterThanOrEqual(0);
+      expect(point.y).toBeLessThanOrEqual(VIEWBOX.height);
+    }
+  });
+
+  it("encloses every gate marker, edge of the marker included", () => {
+    for (const { gate, center } of GATE_DEFINITIONS) {
+      const marker = gateLabelPoint(gate, center);
+      // Check the marker's extremes, not just its middle, so a gate cannot sit
+      // half outside the figure and still pass.
+      for (const [dx, dy] of [
+        [0, 0],
+        [-GATE_MARKER_RADIUS, 0],
+        [GATE_MARKER_RADIUS, 0],
+        [0, -GATE_MARKER_RADIUS],
+        [0, GATE_MARKER_RADIUS],
+      ]) {
+        const probe = { x: marker.x + (dx ?? 0), y: marker.y + (dy ?? 0) };
+        expect(contains(polygon, probe), `gate ${gate} at ${probe.x},${probe.y}`).toBe(true);
+      }
+    }
+  });
+
+  it("reads as a profile: the face juts left of the back of the head", () => {
+    const head = polygon.filter((p) => p.y < 220);
+    const faceX = Math.min(...head.map((p) => p.x));
+    const backX = Math.max(...head.map((p) => p.x));
+    // A featureless oval would be near-symmetric about the axis. The nose and
+    // chin push the left edge well past halfway.
+    expect(AXIS_X - faceX).toBeGreaterThan(60);
+    expect(backX - AXIS_X).toBeGreaterThan(60);
   });
 });
 

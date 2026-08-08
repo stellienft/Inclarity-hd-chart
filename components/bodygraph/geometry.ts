@@ -382,42 +382,58 @@ export function channelHalfPath(from: Point, to: Point, mid: Point): string {
 }
 
 /**
- * A soft human silhouette behind the graph.
+ * The figure behind the graph: a head in LEFT-FACING PROFILE — forehead, brow,
+ * nose, mouth, chin — on a body wide enough to enclose the whole BodyGraph,
+ * Spleen and Solar Plexus included.
  *
- * Purely decorative — it carries no chart information and is marked
- * aria-hidden. It gives the centres something to sit within, which is what
- * stops the figure reading as a floating circuit diagram.
- */
-/**
- * A soft human figure behind the graph: crown, neck, sloping shoulders, torso
- * and hips.
+ * Purely decorative; carries no chart information and is marked aria-hidden.
+ * It gives the centres something to sit within, which is what stops the graph
+ * reading as a floating circuit diagram.
  *
- * Purely decorative — it carries no chart information and is marked
- * aria-hidden. It gives the centres a body to sit within, which is what stops
- * the figure reading as a floating circuit diagram.
- *
- * The Spleen and Solar Plexus deliberately extend past the torso, as they do
- * in the brand artwork; the Heart sits just inside it.
+ * Three properties matter and are easy to lose:
+ *   1. The profile must read as a face. A plain oval reads as a mummy case.
+ *      The nose tip at x=224 is the single feature doing most of that work.
+ *   2. The torso must be WIDER than the widest centres. The Spleen reaches
+ *      x=42 and the Solar Plexus x=578, so the body spans roughly 14 to 606
+ *      and contains them rather than letting them float outside it.
+ *   3. The shoulders have to crest HIGH — just under the neck, level with the
+ *      Throat — and the sides then run close to vertical. Pushing the widest
+ *      point down to the Sacral instead turns the body into an egg.
  */
 export const BODY_SILHOUETTE_PATH = [
-  // Crown, then down the left of the head.
-  "M 310 8",
-  "C 258 8, 232 46, 232 96",
-  "C 232 140, 252 174, 274 188",
-  // Neck.
-  "C 276 206, 276 218, 272 230",
-  // Shoulder falling away to the left, then the torso.
-  "C 226 244, 176 282, 152 340",
-  "C 128 400, 122 486, 130 570",
-  "C 138 654, 156 736, 190 786",
-  // Hips and the rounded base.
-  "C 216 822, 404 822, 430 786",
-  "C 464 736, 482 654, 490 570",
-  "C 498 486, 492 400, 468 340",
-  "C 444 282, 394 244, 348 230",
-  // Back up the neck and the right of the head.
-  "C 344 218, 344 206, 346 188",
-  "C 368 174, 388 140, 388 96",
-  "C 388 46, 362 8, 310 8",
+  // Crown, then down the back of the head on the right.
+  "M 310 6",
+  "C 352 6, 384 32, 390 72",
+  "C 394 104, 392 134, 384 158",
+  // Nape into the right of the neck.
+  "C 378 176, 370 194, 366 212",
+  "C 364 220, 363 226, 362 230",
+  // Right shoulder, cresting level with the Throat, then a near-vertical side.
+  "C 402 234, 456 254, 498 300",
+  "C 546 352, 582 424, 596 502",
+  "C 604 560, 606 622, 600 674",
+  // Hip into the base.
+  "C 592 738, 556 790, 500 812",
+  "C 448 830, 380 834, 310 834",
+  "C 240 834, 172 830, 120 812",
+  // Left side of the body, then the left shoulder rising to the neck.
+  "C 64 790, 28 738, 20 674",
+  "C 14 622, 16 560, 24 502",
+  "C 38 424, 74 352, 122 300",
+  "C 164 254, 218 234, 258 230",
+  "C 257 226, 256 220, 254 212",
+  // Up the throat to the chin.
+  "C 252 198, 250 186, 248 178",
+  // Chin, jaw, mouth.
+  "C 240 174, 233 168, 236 161",
+  "C 240 156, 246 154, 246 149",
+  // Under the nose, out to the tip, back to the bridge.
+  "C 245 144, 240 142, 238 139",
+  "C 230 136, 221 131, 224 126",
+  "C 227 121, 236 119, 240 114",
+  // Brow, forehead, back to the crown.
+  "C 242 108, 240 102, 238 96",
+  "C 234 74, 244 38, 268 18",
+  "C 280 10, 295 6, 310 6",
   "Z",
 ].join(" ");
