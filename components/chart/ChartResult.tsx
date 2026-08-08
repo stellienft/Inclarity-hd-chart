@@ -53,9 +53,11 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
         </div>
       ) : null}
 
-      <FoundationChart chart={chart} />
-
-      {/* ---- The BodyGraph is the hero ---- */}
+      {/*
+        The BodyGraph leads. It is the thing a reader recognises and the reason
+        they came; the Foundation Chart below it is the reference detail they
+        consult second.
+      */}
       <section aria-labelledby="bodygraph-heading" className="print-sheet">
         <h2 id="bodygraph-heading" className="sr-only">
           Your BodyGraph with Design and Personality activations
@@ -107,6 +109,8 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           </span>
         </p>
       </section>
+
+      <FoundationChart chart={chart} />
 
       <ChartTextSummary chart={chart} />
 
