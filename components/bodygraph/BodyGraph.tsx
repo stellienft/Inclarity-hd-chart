@@ -3,9 +3,12 @@ import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
 import type { HumanDesignChart } from "@/lib/human-design/types/chart";
 import { CENTER_LABELS, type CenterId } from "@/lib/human-design/types/center";
 
+import { VARIABLE_POSITIONS, type VariableArrow } from "@/lib/human-design/derive/variable";
+
 import {
   BODY_SILHOUETTE_PATH,
   CENTERS,
+  VARIABLE_SLOTS,
   VIEWBOX,
   channelHalfPath,
   channelMidpoint,
@@ -13,6 +16,7 @@ import {
   gateLabelPoint,
   getGatePoint,
   shapeToPath,
+  variableArrowPath,
 } from "./geometry";
 import {
   BODY_SILHOUETTE_FILL,
@@ -70,6 +74,67 @@ function SplitGateMarker({ cx, cy, r }: { cx: number; cy: number; r: number }) {
   );
 }
 
+const DIRECTION_MEANING = {
+  left: "active, focused",
+  right: "passive, receptive",
+} as const;
+
+/**
+ * One Variable arrow: the glyph, its Colour, and its Tone as a subscript.
+ *
+ * The number is Colour — what the variable is. The subscript is Tone — why the
+ * arrow points where it does. Direction is carried by the glyph's shape, not
+ * by which side of the head it sits on, so an arrow can point back toward the
+ * chart; that is a real result, not a drawing error.
+ *
+ * An arrow whose Tone is within a whisker of its boundary is drawn with a
+ * DASHED shaft. That is a second, non-colour signal that the direction is
+ * provisional, and the <title> says so in words.
+ */
+function VariableArrowGlyph({ arrow, color }: { arrow: VariableArrow; color: string }) {
+  const slot = VARIABLE_SLOTS[arrow.position];
+  const source = arrow.side === "design" ? "Design" : "Personality";
+
+  return (
+    <g data-variable={arrow.position} data-direction={arrow.direction}>
+      <title>
+        {`${arrow.label} (${source}): Colour ${arrow.color}, Tone ${arrow.tone}. `}
+        {`Arrow points ${arrow.direction} — ${DIRECTION_MEANING[arrow.direction]}.`}
+        {arrow.nearToneBoundary
+          ? " This Tone sits on the edge of its band, so the direction is provisional."
+          : ""}
+      </title>
+
+      <path
+        d={variableArrowPath(slot.arrow, arrow.direction)}
+        fill="none"
+        stroke={color}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...(arrow.nearToneBoundary ? { strokeDasharray: "5 4" } : {})}
+        aria-hidden="true"
+      />
+
+      <text
+        x={slot.value.x}
+        y={slot.value.y}
+        textAnchor={slot.textAnchor}
+        dominantBaseline="central"
+        fill={color}
+        aria-hidden="true"
+      >
+        <tspan fontSize={22} fontWeight={700}>
+          {arrow.color}
+        </tspan>
+        <tspan fontSize={14} fontWeight={600} dy={7}>
+          {arrow.tone}
+        </tspan>
+      </text>
+    </g>
+  );
+}
+
 /**
  * The BodyGraph.
  *
@@ -97,7 +162,12 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
     `${chart.type}, ${chart.authority} authority, profile ${chart.profile}, ` +
     `${chart.definition}. Defined centres: ` +
     `${chart.centers.defined.map((c) => CENTER_LABELS[c]).join(", ") || "none"}. ` +
-    `Defined channels: ${chart.channels.map((c) => c.id).join(", ") || "none"}.`;
+    `Defined channels: ${chart.channels.map((c) => c.id).join(", ") || "none"}. ` +
+    `Variable arrows: ` +
+    `${VARIABLE_POSITIONS.map((position) => {
+      const arrow = chart.variable.arrows[position];
+      return `${arrow.label} colour ${arrow.color} tone ${arrow.tone}, pointing ${arrow.direction}`;
+    }).join("; ")}.`;
 
   return (
     <svg
@@ -112,6 +182,20 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
 
       {/* ---- Decorative body silhouette ---- */}
       <path d={BODY_SILHOUETTE_PATH} fill={BODY_SILHOUETTE_FILL} aria-hidden="true" />
+
+      {/* ---- Variable: the four arrows either side of the head ---- */}
+      <g data-testid="variable-arrows">
+        {VARIABLE_POSITIONS.map((position) => {
+          const arrow = chart.variable.arrows[position];
+          return (
+            <VariableArrowGlyph
+              key={position}
+              arrow={arrow}
+              color={arrow.side === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
+            />
+          );
+        })}
+      </g>
 
       {/* ---- Channels, beneath the centres ---- */}
       <g strokeLinecap="round" fill="none">

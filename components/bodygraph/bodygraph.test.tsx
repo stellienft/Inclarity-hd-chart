@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { calculateChart } from "@/lib/human-design";
 import { CHANNEL_DEFINITIONS } from "@/lib/human-design/constants/channels";
 import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
+import type { CenterId } from "@/lib/human-design/types/center";
 import type { LocationResult } from "@/lib/location/types";
 
 import { BodyGraph } from "./BodyGraph";
@@ -123,13 +124,15 @@ describe("BodyGraph geometry", () => {
 });
 
 /**
- * The silhouette is decoration, but it has one job: to sit BEHIND the whole
- * graph. A figure narrower than the Spleen or the Solar Plexus leaves centres
- * hanging outside the body, which is what made earlier drafts read wrongly.
+ * The silhouette is decoration, but its proportions are not arbitrary: it is a
+ * TORSO holding the spine of the graph, with the Spleen and Solar Plexus
+ * reaching out past its sides and the Root sitting below its hem. Drawn any
+ * wider it stops reading as a body and becomes an outline round everything.
  *
  * Rather than pin the path string — which would fight every redesign — these
- * tests flatten it to a polygon and ask the question that actually matters:
- * is each gate marker inside the figure?
+ * tests flatten it to a polygon and ask the questions that actually matter:
+ * does it hold the centres it should, and does it stay off the ones it
+ * shouldn't?
  */
 describe("body silhouette", () => {
   /** Flatten the cubic path to a polygon, sampling each segment evenly. */
@@ -202,8 +205,12 @@ describe("body silhouette", () => {
     }
   });
 
-  it("encloses every gate marker, edge of the marker included", () => {
+  /** The centres running down the middle of the figure, which it must hold. */
+  const SPINE: CenterId[] = ["head", "ajna", "throat", "g", "heart", "sacral"];
+
+  it("holds every gate of the centres on its spine, marker edges included", () => {
     for (const { gate, center } of GATE_DEFINITIONS) {
+      if (!SPINE.includes(center)) continue;
       const marker = gateLabelPoint(gate, center);
       // Check the marker's extremes, not just its middle, so a gate cannot sit
       // half outside the figure and still pass.
@@ -218,6 +225,36 @@ describe("body silhouette", () => {
         expect(contains(polygon, probe), `gate ${gate} at ${probe.x},${probe.y}`).toBe(true);
       }
     }
+  });
+
+  /**
+   * The wings and the Root reaching past the figure is the look being matched,
+   * not an oversight — so it is asserted, and a future widening that swallows
+   * them fails here rather than quietly landing back at a blob.
+   */
+  it("lets the Spleen and Solar Plexus reach out past its sides", () => {
+    for (const center of ["spleen", "solarPlexus"] as CenterId[]) {
+      const outermost = GATE_DEFINITIONS.filter((g) => g.center === center)
+        .map((g) => gateLabelPoint(g.gate, center))
+        .sort((a, b) => Math.abs(b.x - AXIS_X) - Math.abs(a.x - AXIS_X))[0];
+      if (!outermost) throw new Error(`no gates for ${center}`);
+      expect(contains(polygon, outermost), `${center} outermost gate`).toBe(false);
+    }
+  });
+
+  it("stops above the Root rather than wrapping it", () => {
+    const rootGates = GATE_DEFINITIONS.filter((g) => g.center === "root");
+    for (const { gate } of rootGates) {
+      expect(contains(polygon, gateLabelPoint(gate, "root")), `gate ${gate}`).toBe(false);
+    }
+  });
+
+  it("keeps its shoulders close to the graph rather than filling the frame", () => {
+    const widest = polygon.reduce((max, p) => Math.max(max, Math.abs(p.x - AXIS_X)), 0);
+    // Wide enough to clear the Throat and the Heart, narrow enough that the
+    // wings still show. The Heart's far corner is the widest thing it holds.
+    expect(widest).toBeGreaterThan(170);
+    expect(widest).toBeLessThan(VIEWBOX.width / 2 - 60);
   });
 
   it("reads as a profile: the face juts left of the back of the head", () => {

@@ -275,6 +275,40 @@ Plus negative cases that catch the classic mistakes:
 - Sacral authority outranks Splenic; Splenic outranks Ego.
 - A motor cannot connect through an undefined centre.
 
+### Substructure — Colour, Tone and Base
+
+- The subdivision arithmetic: 6 colours × 6 tones × 5 bases, and
+  `GATE_WIDTH / BASE_WIDTH = 1080` exactly.
+- A **full walk of one gate's 1080 positions**, asserting they appear in order
+  with no gaps and no repeats, and that the gate opens at 1.1.1.1 and closes at
+  6.6.6.5.
+- Boundary behaviour at colour and tone edges, matching the gate/line
+  convention.
+- Range checks (`colour 1-6`, `tone 1-6`, `base 1-5`, `tonePhase [0,1)`) swept
+  across the whole circle.
+- The **180° pair invariant**: a body and its opposite share line, colour, tone
+  and base, checked at ~1000 positions round the wheel. This is why the
+  literature can quote "Sun and Earth" as one value.
+
+### Variable arrows
+
+- Position and side of all four arrows.
+- Each arrow reads its own source: Determination from the Design Sun,
+  Environment from the Design Nodes, Motivation from the Personality Sun,
+  Perspective from the Personality Nodes.
+- Every direction is derived from its own Tone; tones 1-3 left, 4-6 right.
+- Reading the Earth or the South Node instead would give identical arrows —
+  asserted, not assumed.
+- The near-boundary warning fires on an edge case and stays silent mid-band,
+  and reaches `calculationMeta.warnings` rather than staying internal.
+
+**Corroboration.** The project owner's reference chart prints all four arrows
+with their Colour and Tone: 1₃ and 4₃ on the Design side, both pointing left;
+6₄ and 3₆ on the Personality side, both pointing right. All four agree with the
+tones-1-3-left rule. That validates the *rule*; it does not validate our Colour
+and Tone *values*, because the chart does not print its birth data. See
+[HUMAN_DESIGN_CALCULATION.md §16.2](./HUMAN_DESIGN_CALCULATION.md#162-colour-tone-and-base--calculated-arrow-rule-corroborated-numbers-not-independently-verified).
+
 ### Timezone
 
 Queensland's 1989–92 DST trial (the spec's own Brisbane example is UTC+11, not
@@ -286,8 +320,8 @@ client-supplied timezone that contradicts the coordinates.
 
 ## Current totals
 
-- **177** unit/integration tests (`npm test`)
-- **20** end-to-end tests × 2 device profiles (`npm run test:e2e`)
+- **216** unit/integration tests (`npm test`)
+- **21** end-to-end tests × 2 device profiles (`npm run test:e2e`)
 
 ## Open items
 
@@ -299,3 +333,8 @@ client-supplied timezone that contradicts the coordinates.
 3. **Confirm the node convention against a chart with a node near a gate or line
    boundary** — the case where true vs mean actually diverges in output.
 4. **Verify pre-1970 births** in zones affected by the tzdata merge.
+5. **Verify Colour and Tone values against an external calculator.** Needs one
+   published chart that prints *both* its birth data and its arrows. The
+   reference we have prints arrows without birth data; the Genetic Matrix
+   fixture we validated 26 activations against was captured without its arrows.
+   Re-capturing that same chart with the arrows visible would close this.

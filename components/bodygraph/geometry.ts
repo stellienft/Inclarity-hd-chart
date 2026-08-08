@@ -1,3 +1,4 @@
+import type { VariablePosition } from "@/lib/human-design/derive/variable";
 import type { CenterId } from "@/lib/human-design/types/center";
 
 /**
@@ -393,37 +394,87 @@ export function channelHalfPath(from: Point, to: Point, mid: Point): string {
  * Three properties matter and are easy to lose:
  *   1. The profile must read as a face. A plain oval reads as a mummy case.
  *      The nose tip at x=224 is the single feature doing most of that work.
- *   2. The torso must be WIDER than the widest centres. The Spleen reaches
- *      x=42 and the Solar Plexus x=578, so the body spans roughly 14 to 606
- *      and contains them rather than letting them float outside it.
- *   3. The shoulders have to crest HIGH — just under the neck, level with the
- *      Throat — and the sides then run close to vertical. Pushing the widest
- *      point down to the Sacral instead turns the body into an egg.
+ *   2. The figure is a TORSO, not an outline drawn around everything. It holds
+ *      the spine of the graph — Head, Ajna, Throat, G, Heart, Sacral — while
+ *      the Spleen and the Solar Plexus reach out past its sides and the Root
+ *      sits just below its hem. Widening it until it swallows those turns it
+ *      back into a blob; the reference chart keeps the body close to the
+ *      gates, which is what makes it read as a body at all.
+ *   3. The shoulders crest HIGH, level with the top of the Throat, and the
+ *      sides then run close to vertical before drawing in at the hips.
  */
+/* -------------------------------------------------------------------------- */
+/*  Variable arrows                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Where the four Variable arrows sit: two either side of the head, in the
+ * space the silhouette's shoulders leave empty.
+ *
+ * The POSITION of each arrow is fixed — Determination is always top-left,
+ * whichever way it happens to point. Only the glyph's direction varies. The
+ * arrow is drawn outboard of its numbers, so the pair reads outward from the
+ * head exactly as it does on a conventional chart.
+ */
+export const VARIABLE_SLOTS: Record<
+  VariablePosition,
+  { arrow: Point; value: Point; textAnchor: "start" | "end" }
+> = {
+  determination: { arrow: { x: 96, y: 62 }, value: { x: 140, y: 62 }, textAnchor: "start" },
+  environment: { arrow: { x: 96, y: 132 }, value: { x: 140, y: 132 }, textAnchor: "start" },
+  motivation: { arrow: { x: 524, y: 62 }, value: { x: 480, y: 62 }, textAnchor: "end" },
+  perspective: { arrow: { x: 524, y: 132 }, value: { x: 480, y: 132 }, textAnchor: "end" },
+};
+
+/** Half the shaft length of an arrow glyph. */
+const ARROW_REACH = 25;
+const ARROW_HEAD = 13;
+const ARROW_WING = 9;
+
+/**
+ * An arrow glyph centred on a point: one shaft and two head strokes.
+ *
+ * Returned as a single stroked path with no fill so it keeps its weight when
+ * the chart is scaled down on a phone.
+ */
+export function variableArrowPath(at: Point, direction: "left" | "right"): string {
+  const sign = direction === "left" ? -1 : 1;
+  const tip = at.x + sign * ARROW_REACH;
+  const tail = at.x - sign * ARROW_REACH;
+  const back = tip - sign * ARROW_HEAD;
+
+  return [
+    `M ${tail} ${at.y} L ${tip} ${at.y}`,
+    `M ${tip} ${at.y} L ${back} ${at.y - ARROW_WING}`,
+    `M ${tip} ${at.y} L ${back} ${at.y + ARROW_WING}`,
+  ].join(" ");
+}
+
 export const BODY_SILHOUETTE_PATH = [
   // Crown, then down the back of the head on the right.
   "M 310 6",
   "C 352 6, 384 32, 390 72",
   "C 394 104, 392 134, 384 158",
   // Nape into the right of the neck.
-  "C 378 176, 370 194, 366 212",
-  "C 364 220, 363 226, 362 230",
-  // Right shoulder, cresting level with the Throat, then a near-vertical side.
-  "C 402 234, 456 254, 498 300",
-  "C 546 352, 582 424, 596 502",
-  "C 604 560, 606 622, 600 674",
-  // Hip into the base.
-  "C 592 738, 556 790, 500 812",
-  "C 448 830, 380 834, 310 834",
-  "C 240 834, 172 830, 120 812",
+  "C 377 178, 366 198, 360 216",
+  "C 358 226, 357 236, 356 244",
+  // Right shoulder, cresting level with the top of the Throat.
+  "C 396 250, 452 268, 486 306",
+  // Upper torso out to the widest point, level with the G.
+  "C 516 342, 532 396, 536 452",
+  "C 540 508, 538 566, 530 614",
+  // Hip, drawing in to a hem that clears the Sacral and stops above the Root.
+  "C 522 640, 500 664, 468 678",
+  "C 422 690, 366 692, 310 692",
+  "C 254 692, 198 690, 152 678",
   // Left side of the body, then the left shoulder rising to the neck.
-  "C 64 790, 28 738, 20 674",
-  "C 14 622, 16 560, 24 502",
-  "C 38 424, 74 352, 122 300",
-  "C 164 254, 218 234, 258 230",
-  "C 257 226, 256 220, 254 212",
+  "C 120 664, 98 640, 90 614",
+  "C 82 566, 80 508, 84 452",
+  "C 88 396, 104 342, 134 306",
+  "C 168 268, 224 250, 264 244",
+  "C 263 236, 262 226, 260 216",
   // Up the throat to the chin.
-  "C 252 198, 250 186, 248 178",
+  "C 256 200, 251 187, 248 178",
   // Chin, jaw, mouth.
   "C 240 174, 233 168, 236 161",
   "C 240 156, 246 154, 246 149",

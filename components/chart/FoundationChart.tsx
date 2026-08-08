@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 
 import { channelCode } from "@/lib/human-design/constants/channels";
+import { VARIABLE_POSITIONS } from "@/lib/human-design/derive/variable";
 import type { HumanDesignChart } from "@/lib/human-design/types/chart";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -94,6 +95,36 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
         <Row label="Elapsed">{chart.calculationMeta.designElapsedDays.toFixed(3)} days</Row>
       </dl>
 
+      <SectionHeading>Variable</SectionHeading>
+      <dl className="mt-2 divide-y divide-offgrey/70">
+        {VARIABLE_POSITIONS.map((position) => {
+          const arrow = chart.variable.arrows[position];
+          return (
+            <Row key={position} label={arrow.label}>
+              <span className="tabular-nums">
+                Colour {arrow.color}, Tone {arrow.tone}
+              </span>
+              {" — "}
+              <span aria-hidden="true">{arrow.direction === "left" ? "←" : "→"}</span>{" "}
+              {arrow.direction === "left" ? "Left" : "Right"}
+              <span className="block text-xs text-plum/60">
+                {arrow.side === "design" ? "Design" : "Personality"}{" "}
+                {position === "determination" || position === "motivation" ? "Sun" : "Nodes"}
+                {arrow.nearToneBoundary
+                  ? " · on the edge of its Tone, so the direction is provisional"
+                  : ""}
+              </span>
+            </Row>
+          );
+        })}
+        <Row label="Notation">
+          <span className="tabular-nums">{chart.variable.notation}</span>
+          <span className="block text-xs text-plum/60">
+            Design pair, then Personality pair. Tone sets the direction: 1–3 left, 4–6 right.
+          </span>
+        </Row>
+      </dl>
+
       <SectionHeading>Channels</SectionHeading>
       <dl className="mt-2 divide-y divide-offgrey/70">
         <Row label={`Channels (${chart.channels.length})`}>
@@ -120,11 +151,17 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
       </dl>
 
       <p className="mt-6 border-t border-offgrey pt-4 text-xs leading-relaxed text-plum/70">
-        <span className="font-semibold text-plum">Not shown:</span> the Variable fields — Brain,
-        Determination, Cognition, Environment, Motivation, Sense, Trajectory and View — along with
-        the four Variable arrows. All of them are read off Colour and Tone, a further subdivision of
-        each line that this engine does not yet calculate to a standard we can stand behind. They
-        are omitted rather than estimated.
+        <span className="font-semibold text-plum">Not shown:</span> the named Variable fields —
+        Brain, Cognition, Sense, Trajectory and the rest — which read the Colour and Tone above
+        off tables published in the Human Design literature. The arrows and their numbers are
+        calculated here; the names those numbers map to are not, so they are omitted rather than
+        guessed. Also absent are Fixing marks (exaltation and detriment), for the same reason.
+      </p>
+
+      <p className="mt-3 text-xs leading-relaxed text-plum/70">
+        A Tone is roughly 38 minutes of the Sun&rsquo;s motion, so the arrows depend on the birth
+        time far more sharply than the rest of the chart does. Where one sits close to a boundary,
+        the chart says so instead of presenting it as settled.
       </p>
     </section>
   );

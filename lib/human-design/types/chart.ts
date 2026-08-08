@@ -5,6 +5,7 @@ import type { CenterId } from "./center";
 import type { ActiveChannel, ActiveGate } from "./channel";
 import type { IncarnationCross } from "../derive/incarnation-cross";
 import type { AmbiguityKind } from "../../birth/timezone";
+import type { Variable } from "../derive/variable";
 
 export interface ChartSubject {
   name?: string;
@@ -54,5 +55,7 @@ export interface HumanDesignChart {
   profileName: string;
   definition: DefinitionType;
   incarnationCross: IncarnationCross;
+  /** The four arrows either side of the head. */
+  variable: Variable;
   calculationMeta: CalculationMeta;
 }

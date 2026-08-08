@@ -1,26 +1,44 @@
 import {
+  BASES_PER_TONE,
+  COLOR_WIDTH_DEG,
+  COLORS_PER_LINE,
   GATE_WHEEL_ORIGIN_DEG,
   GATE_WHEEL_SEQUENCE,
   GATE_WIDTH_DEG,
   GATES_IN_WHEEL,
   LINE_WIDTH_DEG,
   LINES_PER_GATE,
+  TONE_WIDTH_DEG,
+  TONES_PER_COLOR,
 } from "../constants/gates";
 import type { Activation } from "../types/activation";
 import { normalise360 } from "./angles";
 
 /**
+ * Subdivide a span into `count` equal parts and return the 1-based index.
+ *
+ * The clamp is not defensive noise: `withinSpan / width` can land exactly on
+ * `count` through floating-point error when a longitude sits a hair under the
+ * top of its parent, and an off-the-end index would surface as a Tone 7.
+ */
+function subdivision(withinSpan: number, width: number, count: number): number {
+  const index = Math.floor(withinSpan / width);
+  return (index >= count ? count - 1 : index < 0 ? 0 : index) + 1;
+}
+
+/**
  * Map an ecliptic longitude onto the Rave Mandala.
  *
  * BOUNDARY CONVENTION: half-open [start, end). A longitude falling exactly on
- * a gate or line boundary belongs to the gate/line that BEGINS there. This is
- * enforced by using floor() on a non-negative normalised offset, so it holds
- * across the 360 -> 0 wrap as well.
+ * a gate, line, colour, tone or base boundary belongs to the one that BEGINS
+ * there. This is enforced by using floor() on a non-negative normalised
+ * offset, so it holds across the 360 -> 0 wrap as well.
  *
- * Colour, Tone and Base are deliberately NOT returned. They are a further
- * 6 x 6 x 5 subdivision of each line and are extremely sensitive to ephemeris
- * error; they will only be added once independently verified. See
- * docs/HUMAN_DESIGN_CALCULATION.md §10.
+ * Colour, Tone and Base are the substructure beneath the line. They are far
+ * more sensitive to birth-time precision than the gate and line are — a Tone
+ * is about 38 minutes of the Sun's motion — so callers that act on them
+ * (the Variable arrows) are expected to check how close the position sits to
+ * the next boundary. See docs/HUMAN_DESIGN_CALCULATION.md §10.
  */
 export function longitudeToActivation(longitude: number): Activation {
   const normalised = normalise360(longitude);
@@ -39,14 +57,27 @@ export function longitudeToActivation(longitude: number): Activation {
   }
 
   const withinGate = offset - safeIndex * GATE_WIDTH_DEG;
-  const lineIndex = Math.floor(withinGate / LINE_WIDTH_DEG);
-  const safeLineIndex = lineIndex >= LINES_PER_GATE ? LINES_PER_GATE - 1 : lineIndex;
+  const line = subdivision(withinGate, LINE_WIDTH_DEG, LINES_PER_GATE);
+
+  const withinLine = withinGate - (line - 1) * LINE_WIDTH_DEG;
+  const color = subdivision(withinLine, COLOR_WIDTH_DEG, COLORS_PER_LINE);
+
+  const withinColor = withinLine - (color - 1) * COLOR_WIDTH_DEG;
+  const tone = subdivision(withinColor, TONE_WIDTH_DEG, TONES_PER_COLOR);
+
+  const withinTone = withinColor - (tone - 1) * TONE_WIDTH_DEG;
+  const base = subdivision(withinTone, TONE_WIDTH_DEG / BASES_PER_TONE, BASES_PER_TONE);
 
   return {
     longitude: normalised,
     gate,
-    line: safeLineIndex + 1,
+    line,
     lineDecimal: withinGate / LINE_WIDTH_DEG + 1,
+    color,
+    tone,
+    base,
+    /** How far through the current Tone this longitude sits, 0 to 1. */
+    tonePhase: withinTone / TONE_WIDTH_DEG,
   };
 }
 

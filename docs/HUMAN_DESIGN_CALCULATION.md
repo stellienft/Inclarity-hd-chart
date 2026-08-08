@@ -279,11 +279,75 @@ itself, one ulp before, and one ulp after
 
 ### Colour, Tone and Base
 
-Deliberately **not calculated or displayed**. They subdivide each line a further
-6 × 6 × 5 and are extremely sensitive to ephemeris error — the node convention
-alone can flip a Tone. The `Activation` type reserves the fields so the return
-shape stays stable when they are added, but shipping unverified values would be
-worse than omitting them.
+Each line divides into **6 Colours**, each Colour into **6 Tones**, and each
+Tone into **5 Bases** — the one level that is fives rather than sixes, giving
+6 × 6 × 6 × 5 = **1080** distinct positions per gate. Sourced from the published
+descriptions of the substructure, not inferred from a chart.
+
+```
+line   = 5.625 / 6            = 0.9375°      ~22.8 h of the Sun's motion
+colour = 0.9375 / 6           = 0.15625°     ~3.8 h
+tone   = 0.15625 / 6          = 0.0260417°   ~38 min
+base   = 0.0260417 / 5        = 0.0052083°   ~7.6 min
+```
+
+The same half-open `[start, end)` convention applies at every level, using the
+same `floor()`-on-a-non-negative-offset construction, so a longitude exactly on
+a Colour, Tone or Base boundary belongs to the one that begins there.
+
+**Sensitivity is the whole story here.** A Tone is about 38 minutes of solar
+motion; a Base about 7.6. Gate and line are robust to a birth time recorded to
+the nearest five minutes, and Colour largely is too — Tone is not, and Base
+certainly is not. That is why:
+
+- Colour and Tone are **displayed**, but only through the four Variable arrows
+  (§8.1), where they are conventionally read.
+- Base is **calculated and exposed on the type**, but not displayed anywhere.
+  Nothing in the chart currently needs it, and printing a number that moves
+  with a seven-minute birth-time error would imply a precision we do not have.
+- Every arrow carries the distance from its driving longitude to the nearest
+  Tone edge, and the chart warns when that distance is under 4% of a Tone —
+  about 90 seconds of the Sun's motion. This is not hypothetical: the validated
+  1989-06-05 Brisbane chart's Design Sun sits 0.00065° from a Tone boundary,
+  so its Determination arrow genuinely could point either way.
+
+**Internal consistency check.** A body and its opposite are exactly 180° apart,
+and 180 / 5.625 = 32 gates exactly, so they land on the identical fraction of
+their own gates and therefore share line, colour, tone and base. This is why
+the literature quotes "Sun and Earth" and "the Nodes" as single values. It is
+asserted across the wheel in `__tests__/gate-line.test.ts`, and it also holds
+in every published reference chart we have seen.
+
+### 8.1 The four Variable arrows
+
+| Position | Name | Driven by |
+|---|---|---|
+| top-left | Determination | Design Sun / Earth |
+| bottom-left | Environment | Design Nodes |
+| top-right | Motivation | Personality Sun / Earth |
+| bottom-right | Perspective | Personality Nodes |
+
+The left pair is Design and the right pair Personality, matching the activation
+columns. **Colour** names the variable and is the number printed large;
+**Tone** points the arrow — tones 1-3 left (active, focused), tones 4-6 right
+(passive, receptive). Position is fixed; only direction varies, so a top-left
+arrow pointing right is a real result, not a drawing error.
+
+Which member of each pair is read is arithmetically irrelevant (see the 180°
+invariant above); the code reads the Sun and the North Node, and a test asserts
+the pairs agree so an ephemeris change cannot quietly break the assumption.
+
+Sources: [myBodyGraph](https://www.mybodygraph.com/blog/what-is-variable-in-human-design-understanding-the-arrows-in-your-chart),
+[Genetic Matrix](https://www.geneticmatrix.com/learn-hub/variables/index.html),
+[gethumandesign](https://www.gethumandesign.com/docs/variable/color-tone-base/),
+[freehumandesignchart](https://freehumandesignchart.com/human-design-variable/).
+
+**What is still not derived:** the *named* fields these numbers map to — Brain,
+Cognition, Sense, Trajectory, and the rest of the sixteen — come from tables
+published in the Human Design literature that we have no verified, lawfully
+usable copy of. The arrows and their numbers are calculated; the names are
+omitted rather than guessed. Fixing marks (exaltation / detriment) are absent
+for the same reason.
 
 ---
 
@@ -430,10 +494,27 @@ exactly.** Still switchable via `nodeConvention`. The only remaining gap is a
 first-party statement from Jovian Archive, which would be confirmation of a
 result we have already measured.
 
-### 16.2 Colour, Tone and Base — *deferred*
+### 16.2 Colour, Tone and Base — *calculated; arrow rule corroborated, numbers not independently verified*
 
-Not calculated. Requires an ephemeris accuracy budget we have not established,
-and independent verification we do not have. See §8.
+Calculated from the same wheel as gate and line (§8), and surfaced as the four
+Variable arrows (§8.1).
+
+What is verified:
+- The subdivision counts (6/6/6/5) and the tone-to-direction rule are taken
+  from published sources, cited in §8.1.
+- The tone rule is corroborated against a reference chart supplied by the
+  project owner: all four of its arrows point the way its printed Tones
+  predict.
+- The 180° pair invariant holds across the wheel in tests, and holds in every
+  reference chart's printed Sun/Earth and Node line numbers.
+
+What is **not** yet verified: the Colour and Tone *values themselves* against an
+independent calculator for a birth time we know. Doing that needs a published
+chart that prints both the birth data and the arrows; the reference we have
+prints the arrows but not the birth data, and the chart whose birth data we
+have was captured without its arrows. Until then the arrow numbers are backed
+by the constants and the invariants, not by an external match — a weaker
+footing than the gate and line values, and stated as such rather than glossed.
 
 ### 16.3 Incarnation Cross names — *deferred*
 
@@ -482,10 +563,9 @@ The renderer is presentation only — it reads a finished chart and never
 computes anything. Two omissions are deliberate and worth stating, because both
 are visible on charts from other tools:
 
-- **No Variable arrows.** The four arrows some charts print at the top corners
-  encode Digestion, Environment, Awareness and Perspective, which are read off
-  **Colour and Tone**. Those are not calculated here (§8), so the arrows are not
-  drawn. Showing them would mean inventing values.
+- **No named Variable fields.** The four arrows *are* drawn, with their Colour
+  and Tone (§8.1). The sixteen named fields those numbers map to are not — see
+  §16.2. Nor are Fixing marks (exaltation / detriment).
 - **No cross names.** See §15.
 
 Everything the drawing conveys is also available as text: each centre, gate and

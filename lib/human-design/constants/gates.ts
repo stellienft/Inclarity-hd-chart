@@ -47,6 +47,34 @@ export const LINES_PER_GATE = 6;
 export const GATE_WIDTH_DEG = 360 / GATES_IN_WHEEL; // 5.625
 export const LINE_WIDTH_DEG = GATE_WIDTH_DEG / LINES_PER_GATE; // 0.9375
 
+/*
+ * The substructure below the line.
+ *
+ * Each line divides into 6 Colours, each Colour into 6 Tones, each Tone into
+ * 5 Bases — the one level that is fives rather than sixes, which is why a gate
+ * holds 6 x 6 x 6 x 5 = 1080 distinct positions. Sourced from the published
+ * descriptions of the substructure, not inferred from a chart.
+ *
+ * These get small fast, and how small matters for how much birth-time
+ * precision a reader needs:
+ *
+ *   line   0.9375°     ~22.8 hours of the Sun's motion
+ *   colour 0.15625°    ~3.8 hours
+ *   tone   0.0260417°  ~38 minutes
+ *   base   0.0052083°  ~7.6 minutes
+ *
+ * Tone is what turns the Variable arrows left or right, so an arrow is only as
+ * trustworthy as a birth time is to within a few minutes. calculateVariable()
+ * measures the distance to the nearest Tone edge and says so rather than
+ * letting a coin-flip arrow pass as settled.
+ */
+export const COLORS_PER_LINE = 6;
+export const TONES_PER_COLOR = 6;
+export const BASES_PER_TONE = 5;
+export const COLOR_WIDTH_DEG = LINE_WIDTH_DEG / COLORS_PER_LINE; // 0.15625
+export const TONE_WIDTH_DEG = COLOR_WIDTH_DEG / TONES_PER_COLOR; // 0.026041666...
+export const BASE_WIDTH_DEG = TONE_WIDTH_DEG / BASES_PER_TONE; // 0.005208333...
+
 /** Bumped whenever the mapping convention changes, for chart debugging. */
 export const GATE_MAPPING_VERSION = "mandala-2025-01:origin-302.0-ascending";
 

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  BASE_WIDTH_DEG,
+  COLOR_WIDTH_DEG,
   GATE_WHEEL_ORIGIN_DEG,
   GATE_WHEEL_SEQUENCE,
   GATE_WIDTH_DEG,
   LINE_WIDTH_DEG,
+  TONE_WIDTH_DEG,
   getGateStartLongitude,
 } from "../constants/gates";
 import { normalise360, signedAngularDifference, forwardArc } from "../calculate/angles";
@@ -163,6 +166,94 @@ describe("lineDecimal", () => {
     for (let deg = 0; deg < 360; deg += 0.11) {
       const { line, lineDecimal } = longitudeToActivation(deg);
       expect(Math.floor(lineDecimal)).toBe(line);
+    }
+  });
+});
+
+describe("substructure: colour, tone and base", () => {
+  const gateStart = getGateStartLongitude(41);
+
+  it("subdivides a line into 6 colours, 6 tones and 5 bases", () => {
+    expect(COLOR_WIDTH_DEG * 6).toBeCloseTo(LINE_WIDTH_DEG, 12);
+    expect(TONE_WIDTH_DEG * 6).toBeCloseTo(COLOR_WIDTH_DEG, 12);
+    expect(BASE_WIDTH_DEG * 5).toBeCloseTo(TONE_WIDTH_DEG, 12);
+    // 6 lines x 6 colours x 6 tones x 5 bases = 1080 positions in a gate.
+    expect(GATE_WIDTH_DEG / BASE_WIDTH_DEG).toBeCloseTo(1080, 6);
+  });
+
+  it("starts a gate at 1.1.1.1 and ends it just short of the next gate", () => {
+    const first = longitudeToActivation(gateStart);
+    expect([first.line, first.color, first.tone, first.base]).toEqual([1, 1, 1, 1]);
+
+    const last = longitudeToActivation(gateStart + GATE_WIDTH_DEG - EPS);
+    expect([last.line, last.color, last.tone, last.base]).toEqual([6, 6, 6, 5]);
+  });
+
+  it("walks all 1080 positions of a gate in order, without gaps or repeats", () => {
+    const seen: string[] = [];
+    for (let step = 0; step < 1080; step += 1) {
+      // Sample the middle of each base so the test is about ordering, not
+      // about floating-point behaviour exactly on the boundaries.
+      const a = longitudeToActivation(gateStart + (step + 0.5) * BASE_WIDTH_DEG);
+      expect(a.gate).toBe(41);
+      seen.push(`${a.line}.${a.color}.${a.tone}.${a.base}`);
+    }
+    expect(new Set(seen).size).toBe(1080);
+    expect(seen[0]).toBe("1.1.1.1");
+    expect(seen[1]).toBe("1.1.1.2");
+    expect(seen[5]).toBe("1.1.2.1");
+    expect(seen[29]).toBe("1.1.6.5");
+    expect(seen[30]).toBe("1.2.1.1");
+    expect(seen[179]).toBe("1.6.6.5");
+    expect(seen[180]).toBe("2.1.1.1");
+    expect(seen[1079]).toBe("6.6.6.5");
+  });
+
+  it("gives a boundary to the subdivision that begins there, like gates and lines", () => {
+    const onToneEdge = gateStart + TONE_WIDTH_DEG;
+    expect(longitudeToActivation(onToneEdge).tone).toBe(2);
+    expect(longitudeToActivation(onToneEdge - EPS).tone).toBe(1);
+
+    const onColorEdge = gateStart + COLOR_WIDTH_DEG;
+    expect(longitudeToActivation(onColorEdge).color).toBe(2);
+    expect(longitudeToActivation(onColorEdge - EPS).color).toBe(1);
+  });
+
+  it("never reports an out-of-range value, anywhere on the wheel", () => {
+    for (let deg = 0; deg < 360; deg += 0.017) {
+      const { color, tone, base, tonePhase } = longitudeToActivation(deg);
+      expect(color).toBeGreaterThanOrEqual(1);
+      expect(color).toBeLessThanOrEqual(6);
+      expect(tone).toBeGreaterThanOrEqual(1);
+      expect(tone).toBeLessThanOrEqual(6);
+      expect(base).toBeGreaterThanOrEqual(1);
+      expect(base).toBeLessThanOrEqual(5);
+      expect(tonePhase).toBeGreaterThanOrEqual(0);
+      expect(tonePhase).toBeLessThan(1);
+    }
+  });
+
+  it("tonePhase tracks the position within the tone", () => {
+    expect(longitudeToActivation(gateStart).tonePhase).toBeCloseTo(0, 9);
+    expect(longitudeToActivation(gateStart + TONE_WIDTH_DEG / 2).tonePhase).toBeCloseTo(0.5, 9);
+  });
+
+  /**
+   * The reason "Sun and Earth" and "the Nodes" are quoted as single values in
+   * the literature: opposites are 180 degrees apart, 180 / 5.625 = 32 gates
+   * exactly, so they land on the identical fraction of their own gates.
+   */
+  it("gives a body and its opposite the same line, colour, tone and base", () => {
+    for (let deg = 0; deg < 360; deg += 0.37) {
+      const here = longitudeToActivation(deg);
+      const opposite = longitudeToActivation(deg + 180);
+      expect([opposite.line, opposite.color, opposite.tone, opposite.base]).toEqual([
+        here.line,
+        here.color,
+        here.tone,
+        here.base,
+      ]);
+      expect(opposite.gate).not.toBe(here.gate);
     }
   });
 });

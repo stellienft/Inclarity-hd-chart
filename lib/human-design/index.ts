@@ -17,6 +17,7 @@ import { deriveDefinition } from "./derive/definition";
 import { deriveIncarnationCross } from "./derive/incarnation-cross";
 import { deriveProfile } from "./derive/profile";
 import { deriveType, type TypeDerivation } from "./derive/type";
+import { calculateVariable, variableWarnings } from "./derive/variable";
 import type { HumanDesignChart } from "./types/chart";
 
 export const ENGINE_VERSION = "1.0.0";
@@ -100,8 +101,10 @@ export async function calculateChart(
   const authorityDerivation = deriveAuthority(centers.defined, channels, typeDerivation.type);
   const profile = deriveProfile(personality, design);
   const incarnationCross = deriveIncarnationCross(personality, design);
+  const variable = calculateVariable(personality, design);
 
   if (authorityDerivation.warning) warnings.push(authorityDerivation.warning);
+  warnings.push(...variableWarnings(variable));
 
   const chart: HumanDesignChart = {
     subject: {
@@ -134,6 +137,7 @@ export async function calculateChart(
     profileName: profile.name,
     definition: definitionGraph.definition,
     incarnationCross,
+    variable,
     calculationMeta: {
       ephemerisProvider: provider.id,
       engineVersion: ENGINE_VERSION,

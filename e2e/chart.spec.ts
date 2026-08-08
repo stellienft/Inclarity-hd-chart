@@ -63,6 +63,28 @@ test.describe("chart generation", () => {
     await expect(svg.locator("[data-channel]")).toHaveCount(36);
   });
 
+  test("draws the four Variable arrows and repeats them as text", async ({ page }) => {
+    await generateChart(page);
+
+    const arrows = page.locator("[data-testid='variable-arrows'] [data-variable]");
+    await expect(arrows).toHaveCount(4);
+
+    for (const position of ["determination", "environment", "motivation", "perspective"]) {
+      const arrow = arrows.filter({ has: page.locator(`:scope[data-variable='${position}']`) });
+      await expect(arrow).toHaveCount(1);
+      // Direction is a real result, but it is always one of the two.
+      await expect(arrow).toHaveAttribute("data-direction", /^(left|right)$/);
+    }
+
+    // The drawing is never the only carrier: the same four appear as rows in
+    // the Foundation Chart, with their Colour and Tone spelled out.
+    const core = page.getByTestId("core-panel");
+    for (const label of ["Determination", "Environment", "Motivation", "Perspective"]) {
+      await expect(core.getByText(label, { exact: true })).toBeVisible();
+    }
+    await expect(core).toContainText(/Colour \d, Tone \d/);
+  });
+
   test("shows both planetary activation columns with real values", async ({ page }) => {
     await generateChart(page);
 

@@ -61,9 +61,9 @@ export type Side = "personality" | "design";
 /**
  * A single celestial body mapped onto the Rave Mandala.
  *
- * `color`, `tone` and `base` are the deeper substructure. They are modelled
- * here so the return shape is stable, but they are NOT calculated or
- * displayed in v1 — see docs/HUMAN_DESIGN_CALCULATION.md.
+ * `color`, `tone` and `base` are the substructure beneath the line. They are
+ * calculated for every body, but only the Sun/Earth and Node pairs are shown,
+ * as the four Variable arrows — see docs/HUMAN_DESIGN_CALCULATION.md §10.
  */
 export interface Activation {
   /** Geocentric apparent ecliptic longitude, degrees, true equinox of date. */
@@ -73,9 +73,19 @@ export interface Activation {
   line: number;
   /** Fractional position within the gate, expressed in lines. e.g. 3.42 */
   lineDecimal: number;
-  color?: number;
-  tone?: number;
-  base?: number;
+  /** 1-6, a sixth of a line. */
+  color: number;
+  /** 1-6, a sixth of a colour. Sets the direction of a Variable arrow. */
+  tone: number;
+  /** 1-5 — the one level of the substructure that is fives, not sixes. */
+  base: number;
+  /**
+   * How far through the current Tone the longitude sits, 0 to 1.
+   *
+   * Kept so callers can tell a Tone sitting safely mid-band from one a
+   * rounding error away from flipping its arrow.
+   */
+  tonePhase: number;
 }
 
 export interface PlanetaryActivation extends Activation {
