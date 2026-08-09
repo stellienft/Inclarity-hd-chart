@@ -463,18 +463,21 @@ const FIGURE_RIGHT_OUTLINE: Point[] = [
   { x: 352, y: 218 }, // neck — about 45% of the head's width, as on a person
   { x: 350, y: 232 },
   { x: 370, y: 242 }, // trapezius, sloping away fast
-  { x: 414, y: 256 },
-  { x: 460, y: 278 },
-  { x: 491, y: 302 }, // deltoid
-  { x: 505, y: 330 },
-  { x: 510, y: 356 },
-  { x: 507, y: 374 }, // hem of the sleeve
-  { x: 493, y: 380 }, // stepping in to the bare arm
-  { x: 487, y: 404 },
-  { x: 483, y: 448 },
-  { x: 479, y: 490 },
-  { x: 476, y: 524 }, // waist
-  { x: 482, y: 554 },
+  { x: 409, y: 257 },
+  { x: 450, y: 279 },
+  { x: 476, y: 303 }, // deltoid
+  { x: 489, y: 331 },
+  { x: 493, y: 357 },
+  { x: 490, y: 375 }, // hem of the sleeve
+  { x: 482, y: 381 }, // stepping in to the bare arm
+  // The arm runs nearly straight from here to the waist. It cannot come in
+  // any further: the Heart's outer corner is at x 472, and gate 40's marker
+  // reaches 475, so a narrower arm leaves the Heart hanging off the body.
+  { x: 481, y: 405 },
+  { x: 481, y: 449 },
+  { x: 480, y: 491 },
+  { x: 474, y: 524 }, // waist
+  { x: 478, y: 554 },
   { x: 502, y: 580 }, // hip, opening out into the crossed legs
   { x: 536, y: 602 },
   { x: 572, y: 628 },

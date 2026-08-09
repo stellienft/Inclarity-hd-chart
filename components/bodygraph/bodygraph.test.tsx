@@ -312,12 +312,25 @@ describe("body silhouette", () => {
     return edges ? edges.right - edges.left : NaN;
   };
 
+  /** Widest the figure gets anywhere in a band of heights. */
+  const widestBetween = (from: number, to: number) => {
+    let widest = 0;
+    for (let y = from; y <= to; y += 2) {
+      const width = widthAt(y);
+      if (Number.isFinite(width) && width > widest) widest = width;
+    }
+    return widest;
+  };
+
   it("has a head, a neck, shoulders, a waist and a lap, in that order", () => {
     const hair = widthAt(100);
     const neck = widthAt(232);
-    const shoulders = widthAt(300);
-    const waist = widthAt(520);
-    const lap = widthAt(730);
+    // Measured across the band rather than at one height: the widest of the
+    // shoulders is the sleeve, not the top of the deltoid, and pinning it to a
+    // single y makes this pass or fail on where the slope happens to be.
+    const shoulders = widestBetween(260, 400);
+    const waist = widthAt(524);
+    const lap = widestBetween(600, 800);
 
     // A neck at all. Roughly half the head, as on a person.
     expect(neck / hair).toBeGreaterThan(0.35);
@@ -328,7 +341,8 @@ describe("body silhouette", () => {
     expect(shoulders).toBeGreaterThan(hair);
 
     // A waist: narrower than the shoulders above it and the lap below it.
-    // Without this the figure drifts back into a bell.
+    // Without this the figure drifts back into a bell. This has already caught
+    // one narrowing of the shoulders that flattened the taper away entirely.
     expect(waist).toBeLessThan(shoulders);
     expect(lap).toBeGreaterThan(waist);
 
