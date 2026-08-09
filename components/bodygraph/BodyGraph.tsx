@@ -6,6 +6,7 @@ import { CENTER_LABELS, type CenterId } from "@/lib/human-design/types/center";
 import { VARIABLE_POSITIONS, type VariableArrow } from "@/lib/human-design/derive/variable";
 
 import {
+  BODY_ARMS_PATH,
   BODY_SILHOUETTE_PATH,
   CENTERS,
   VARIABLE_SLOTS,
@@ -19,6 +20,7 @@ import {
   variableArrowPath,
 } from "./geometry";
 import {
+  BODY_ARMS_FILL,
   BODY_SILHOUETTE_FILL,
   CENTER_DEFINED_FILL,
   CENTER_DEFINED_STROKE,
@@ -181,7 +183,10 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       <desc id="bodygraph-desc">{description}</desc>
 
       {/* ---- Decorative body silhouette ---- */}
-      <path d={BODY_SILHOUETTE_PATH} fill={BODY_SILHOUETTE_FILL} aria-hidden="true" />
+      <g aria-hidden="true">
+        <path d={BODY_SILHOUETTE_PATH} fill={BODY_SILHOUETTE_FILL} />
+        <path d={BODY_ARMS_PATH} fill={BODY_ARMS_FILL} />
+      </g>
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">

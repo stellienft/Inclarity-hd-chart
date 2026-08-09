@@ -4,12 +4,12 @@ import { describe, expect, it } from "vitest";
 import { calculateChart } from "@/lib/human-design";
 import { CHANNEL_DEFINITIONS } from "@/lib/human-design/constants/channels";
 import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
-import type { CenterId } from "@/lib/human-design/types/center";
 import type { LocationResult } from "@/lib/location/types";
 
 import { BodyGraph } from "./BodyGraph";
 import {
   AXIS_X,
+  BODY_ARMS_PATH,
   BODY_SILHOUETTE_PATH,
   CENTERS,
   GATE_POINTS,
@@ -125,22 +125,22 @@ describe("BodyGraph geometry", () => {
 
 /**
  * The silhouette is decoration, but its proportions are not arbitrary: it is a
- * TORSO holding the spine of the graph, with the Spleen and Solar Plexus
- * reaching out past its sides and the Root sitting below its hem. Drawn any
- * wider it stops reading as a body and becomes an outline round everything.
+ * SEATED figure whose robe broadens all the way to the hem, holding every
+ * centre bar the outermost tips of the Spleen and Solar Plexus, which graze
+ * the outline.
  *
  * Rather than pin the path string — which would fight every redesign — these
  * tests flatten it to a polygon and ask the questions that actually matter:
- * does it hold the centres it should, and does it stay off the ones it
- * shouldn't?
+ * is it symmetric, does it hold what it should, and is it still shaped like
+ * someone sitting rather than like a bell or a blob?
  */
 describe("body silhouette", () => {
   /** Flatten the cubic path to a polygon, sampling each segment evenly. */
-  function silhouettePolygon(steps = 24): Point[] {
+  function flatten(path: string, steps = 24): Point[] {
     const numbers = (text: string) =>
       (text.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
 
-    const commands = BODY_SILHOUETTE_PATH.match(/[MCZ][^MCZ]*/g) ?? [];
+    const commands = path.match(/[MCZ][^MCZ]*/g) ?? [];
     const points: Point[] = [];
     let cursor: Point = { x: 0, y: 0 };
 
@@ -193,7 +193,22 @@ describe("body silhouette", () => {
     return inside;
   }
 
-  const polygon = silhouettePolygon();
+  const polygon = flatten(BODY_SILHOUETTE_PATH);
+  const arms = flatten(BODY_ARMS_PATH);
+
+  /** Left and right edge of the figure at a given height, or null above/below it. */
+  function span(y: number): { left: number; right: number } | null {
+    const crossings: number[] = [];
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+      const a = polygon[i];
+      const b = polygon[j];
+      if (!a || !b) continue;
+      if (a.y > y === b.y > y) continue;
+      crossings.push(((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x);
+    }
+    if (crossings.length < 2) return null;
+    return { left: Math.min(...crossings), right: Math.max(...crossings) };
+  }
 
   it("is a closed shape that stays within the viewBox", () => {
     expect(BODY_SILHOUETTE_PATH.trimEnd().endsWith("Z")).toBe(true);
@@ -205,12 +220,50 @@ describe("body silhouette", () => {
     }
   });
 
-  /** The centres running down the middle of the figure, which it must hold. */
-  const SPINE: CenterId[] = ["head", "ajna", "throat", "g", "heart", "sacral"];
+  /**
+   * An asymmetric figure reads as a mistake rather than as a style, and the
+   * lopsidedness is easy to introduce and hard to spot by eye once the chart
+   * is drawn on top. Checked as a scanline rather than by comparing the path
+   * text, so it holds however the curves are written.
+   */
+  it("is symmetric about the axis at every height", () => {
+    for (let y = 10; y < 836; y += 4) {
+      const edges = span(y);
+      if (!edges) continue;
+      // Half a unit on a 620-wide figure. Loose enough to absorb the polyline
+      // approximation, far tighter than any asymmetry a person could draw.
+      expect(Math.abs(AXIS_X - edges.left) - (edges.right - AXIS_X), `y=${y}`).toBeLessThan(0.5);
+    }
+  });
 
-  it("holds every gate of the centres on its spine, marker edges included", () => {
+  /**
+   * The exact version of the same claim, free of any sampling error: every
+   * point written into the path has a twin at `620 - x` on the same line.
+   */
+  it("pairs every control point with its mirror", () => {
+    const coordinates = (BODY_SILHOUETTE_PATH.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+    const points: Point[] = [];
+    for (let i = 0; i + 1 < coordinates.length; i += 2) {
+      points.push({ x: coordinates[i]!, y: coordinates[i + 1]! });
+    }
+
+    const key = (p: Point) => `${p.x},${p.y}`;
+    const present = new Set(points.map(key));
+    for (const point of points) {
+      expect(
+        present.has(key({ x: 2 * AXIS_X - point.x, y: point.y })),
+        `${point.x},${point.y} has no mirror`,
+      ).toBe(true);
+    }
+  });
+
+  /**
+   * Everything but the two wings. The seated base is wide enough to hold the
+   * Root, which a torso ending at the hips would leave hanging below.
+   */
+  it("holds every gate outside the Spleen and Solar Plexus, marker edges included", () => {
     for (const { gate, center } of GATE_DEFINITIONS) {
-      if (!SPINE.includes(center)) continue;
+      if (center === "spleen" || center === "solarPlexus") continue;
       const marker = gateLabelPoint(gate, center);
       // Check the marker's extremes, not just its middle, so a gate cannot sit
       // half outside the figure and still pass.
@@ -222,49 +275,66 @@ describe("body silhouette", () => {
         [0, GATE_MARKER_RADIUS],
       ]) {
         const probe = { x: marker.x + (dx ?? 0), y: marker.y + (dy ?? 0) };
-        expect(contains(polygon, probe), `gate ${gate} at ${probe.x},${probe.y}`).toBe(true);
+        expect(contains(polygon, probe), `gate ${gate} (${center}) at ${probe.x},${probe.y}`).toBe(
+          true,
+        );
       }
     }
   });
 
   /**
-   * The wings and the Root reaching past the figure is the look being matched,
-   * not an oversight — so it is asserted, and a future widening that swallows
-   * them fails here rather than quietly landing back at a blob.
+   * The wings GRAZE the outline — a few outermost gates sit just past it, the
+   * rest are held. Both failure modes matter: a figure so wide it swallows
+   * them is a blob, and one so narrow they hang off it stops looking like a
+   * body. So this pins the count from both sides rather than asserting a
+   * particular gate is in or out.
    */
-  it("lets the Spleen and Solar Plexus reach out past its sides", () => {
-    for (const center of ["spleen", "solarPlexus"] as CenterId[]) {
-      const outermost = GATE_DEFINITIONS.filter((g) => g.center === center)
-        .map((g) => gateLabelPoint(g.gate, center))
-        .sort((a, b) => Math.abs(b.x - AXIS_X) - Math.abs(a.x - AXIS_X))[0];
-      if (!outermost) throw new Error(`no gates for ${center}`);
-      expect(contains(polygon, outermost), `${center} outermost gate`).toBe(false);
+  it("lets only the outermost wing gates break the outline", () => {
+    const outside = GATE_DEFINITIONS.filter(
+      ({ gate, center }) => !contains(polygon, gateLabelPoint(gate, center)),
+    );
+
+    expect(outside.length).toBeGreaterThan(0);
+    expect(outside.length).toBeLessThanOrEqual(4);
+    for (const { gate, center } of outside) {
+      expect(["spleen", "solarPlexus"], `gate ${gate} is in ${center}`).toContain(center);
     }
   });
 
-  it("stops above the Root rather than wrapping it", () => {
-    const rootGates = GATE_DEFINITIONS.filter((g) => g.center === "root");
-    for (const { gate } of rootGates) {
-      expect(contains(polygon, gateLabelPoint(gate, "root")), `gate ${gate}`).toBe(false);
+  it("broadens all the way down, with no waist and its widest point at the hem", () => {
+    const widths = [300, 420, 540, 660, 780].map((y) => {
+      const edges = span(y);
+      if (!edges) throw new Error(`no span at y=${y}`);
+      return edges.right - edges.left;
+    });
+
+    for (let i = 1; i < widths.length; i += 1) {
+      expect(widths[i]!, `width at sample ${i}`).toBeGreaterThan(widths[i - 1]!);
+    }
+    // Wide, but not so wide it runs out of the frame.
+    expect(widths.at(-1)!).toBeLessThan(VIEWBOX.width);
+  });
+
+  it("keeps the neck about half the width of the head", () => {
+    const head = span(110);
+    const neck = span(230);
+    if (!head || !neck) throw new Error("head or neck missing");
+    const ratio = (neck.right - neck.left) / (head.right - head.left);
+    expect(ratio).toBeGreaterThan(0.4);
+    expect(ratio).toBeLessThan(0.65);
+  });
+
+  it("keeps the arms inside the robe", () => {
+    expect(arms.length).toBeGreaterThan(0);
+    for (const point of arms) {
+      expect(contains(polygon, point), `arm point ${point.x},${point.y}`).toBe(true);
     }
   });
 
-  it("keeps its shoulders close to the graph rather than filling the frame", () => {
-    const widest = polygon.reduce((max, p) => Math.max(max, Math.abs(p.x - AXIS_X)), 0);
-    // Wide enough to clear the Throat and the Heart, narrow enough that the
-    // wings still show. The Heart's far corner is the widest thing it holds.
-    expect(widest).toBeGreaterThan(170);
-    expect(widest).toBeLessThan(VIEWBOX.width / 2 - 60);
-  });
-
-  it("reads as a profile: the face juts left of the back of the head", () => {
-    const head = polygon.filter((p) => p.y < 220);
-    const faceX = Math.min(...head.map((p) => p.x));
-    const backX = Math.max(...head.map((p) => p.x));
-    // A featureless oval would be near-symmetric about the axis. The nose and
-    // chin push the left edge well past halfway.
-    expect(AXIS_X - faceX).toBeGreaterThan(60);
-    expect(backX - AXIS_X).toBeGreaterThan(60);
+  it("has a head tall enough to hold the Head and Ajna centres", () => {
+    // The knot of hair is the only thing above the Head centre's apex.
+    const crown = Math.min(...polygon.filter((p) => Math.abs(p.x - AXIS_X) < 40).map((p) => p.y));
+    expect(crown).toBeLessThan(20);
   });
 });
 

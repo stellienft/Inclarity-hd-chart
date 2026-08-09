@@ -382,27 +382,6 @@ export function channelHalfPath(from: Point, to: Point, mid: Point): string {
   return `M ${from.x} ${from.y} Q ${halfControl.x.toFixed(2)} ${halfControl.y.toFixed(2)} ${mid.x.toFixed(2)} ${mid.y.toFixed(2)}`;
 }
 
-/**
- * The figure behind the graph: a head in LEFT-FACING PROFILE — forehead, brow,
- * nose, mouth, chin — on a body wide enough to enclose the whole BodyGraph,
- * Spleen and Solar Plexus included.
- *
- * Purely decorative; carries no chart information and is marked aria-hidden.
- * It gives the centres something to sit within, which is what stops the graph
- * reading as a floating circuit diagram.
- *
- * Three properties matter and are easy to lose:
- *   1. The profile must read as a face. A plain oval reads as a mummy case.
- *      The nose tip at x=224 is the single feature doing most of that work.
- *   2. The figure is a TORSO, not an outline drawn around everything. It holds
- *      the spine of the graph — Head, Ajna, Throat, G, Heart, Sacral — while
- *      the Spleen and the Solar Plexus reach out past its sides and the Root
- *      sits just below its hem. Widening it until it swallows those turns it
- *      back into a blob; the reference chart keeps the body close to the
- *      gates, which is what makes it read as a body at all.
- *   3. The shoulders crest HIGH, level with the top of the Throat, and the
- *      sides then run close to vertical before drawing in at the hips.
- */
 /* -------------------------------------------------------------------------- */
 /*  Variable arrows                                                            */
 /* -------------------------------------------------------------------------- */
@@ -450,41 +429,95 @@ export function variableArrowPath(at: Point, direction: "left" | "right"): strin
   ].join(" ");
 }
 
+/**
+ * The figure behind the graph: a seated body, symmetric, with a small knot of
+ * hair at the crown, a narrow neck, shoulders at the Throat, and a robe that
+ * broadens all the way to a flat hem with the crossed legs showing below it.
+ *
+ * Purely decorative; carries no chart information and is marked aria-hidden.
+ * It gives the centres something to sit within, which is what stops the graph
+ * reading as a floating circuit diagram.
+ *
+ * Drawn as an exact mirror about AXIS_X: every control point on the right has
+ * its `620 - x` twin on the left, and a test asserts it. An asymmetric figure
+ * reads as a mistake rather than as a style.
+ *
+ * What the proportions have to do, all of it taken off the reference:
+ *   1. The head holds the Head and Ajna centres, and the neck is roughly half
+ *      the head's width — wide enough for the three channels running down to
+ *      the Throat, no wider.
+ *   2. The body widens continuously from the shoulders to the hem. There is no
+ *      waist. The widest point is at the very bottom, not the middle.
+ *   3. The hem sits below the Root, so the base HOLDS the Root — this figure
+ *      encloses it, unlike a torso that stops at the hips.
+ *   4. Only the Spleen and Solar Plexus tips break the outline, and only just.
+ *      They should graze the edge, not hang off it.
+ */
 export const BODY_SILHOUETTE_PATH = [
-  // Crown, then down the back of the head on the right.
-  "M 310 6",
-  "C 352 6, 384 32, 390 72",
-  "C 394 104, 392 134, 384 158",
-  // Nape into the right of the neck.
-  "C 377 178, 366 198, 360 216",
-  "C 358 226, 357 236, 356 244",
-  // Right shoulder, cresting level with the top of the Throat.
-  "C 396 250, 452 268, 486 306",
-  // Upper torso out to the widest point, level with the G.
-  "C 516 342, 532 396, 536 452",
-  "C 540 508, 538 566, 530 614",
-  // Hip, drawing in to a hem that clears the Sacral and stops above the Root.
-  "C 522 640, 500 664, 468 678",
-  "C 422 690, 366 692, 310 692",
-  "C 254 692, 198 690, 152 678",
-  // Left side of the body, then the left shoulder rising to the neck.
-  "C 120 664, 98 640, 90 614",
-  "C 82 566, 80 508, 84 452",
-  "C 88 396, 104 342, 134 306",
-  "C 168 268, 224 250, 264 244",
-  "C 263 236, 262 226, 260 216",
-  // Up the throat to the chin.
-  "C 256 200, 251 187, 248 178",
-  // Chin, jaw, mouth.
-  "C 240 174, 233 168, 236 161",
-  "C 240 156, 246 154, 246 149",
-  // Under the nose, out to the tip, back to the bridge.
-  "C 245 144, 240 142, 238 139",
-  "C 230 136, 221 131, 224 126",
-  "C 227 121, 236 119, 240 114",
-  // Brow, forehead, back to the crown.
-  "C 242 108, 240 102, 238 96",
-  "C 234 74, 244 38, 268 18",
-  "C 280 10, 295 6, 310 6",
+  // Knot of hair at the crown.
+  "M 310 4",
+  "C 326 4, 336 14, 336 26",
+  // Skull, right side.
+  "C 362 36, 386 64, 389 102",
+  "C 392 138, 379 172, 358 192",
+  // Into the neck, which runs straight down to the shoulders.
+  "C 356 202, 354 212, 354 224",
+  "C 354 232, 354 238, 354 244",
+  // Right shoulder, level with the top of the Throat. Broad and near-flat at
+  // the crest rather than a steep slope, which is what makes it read as a
+  // seated figure and not a bell.
+  "C 400 248, 450 258, 478 290",
+  // The side of the robe, widening the whole way down — no waist.
+  "C 504 322, 518 368, 526 418",
+  "C 538 486, 552 554, 562 620",
+  "C 576 682, 590 744, 598 790",
+  // Hem: a rounded outer corner, then flat in to the legs.
+  "C 601 806, 600 818, 586 820",
+  "L 468 820",
+  // The crossed legs, sitting a little below the hem.
+  "C 466 832, 458 838, 444 838",
+  "L 176 838",
+  "C 162 838, 154 832, 152 820",
+  // Back out to the left corner, then up the left side (mirrored).
+  "L 34 820",
+  "C 20 818, 19 806, 22 790",
+  "C 30 744, 44 682, 58 620",
+  "C 68 554, 82 486, 94 418",
+  "C 102 368, 116 322, 142 290",
+  "C 170 258, 220 248, 266 244",
+  // Left of the neck, then the skull.
+  "C 266 238, 266 232, 266 224",
+  "C 266 212, 264 202, 262 192",
+  "C 241 172, 228 138, 231 102",
+  "C 234 64, 258 36, 284 26",
+  // Back over the knot of hair to the crown.
+  "C 284 14, 294 4, 310 4",
+  "Z",
+].join(" ");
+
+/**
+ * The arms, drawn a shade darker inside the robe.
+ *
+ * Two mirrored crescents hugging the outer edge from shoulder to lap. Without
+ * them the figure is a bell; with them it reads as someone sitting. Decorative
+ * and aria-hidden, like the body.
+ */
+export const BODY_ARMS_PATH = [
+  // Right arm: a crescent tapering to a point at the shoulder and again at the
+  // lap, so it reads as a limb rather than a panel stuck on the robe.
+  "M 474 292",
+  "C 502 324, 516 370, 524 420",
+  "C 536 488, 550 556, 560 616",
+  "C 550 590, 542 556, 534 512",
+  "C 524 460, 510 400, 490 354",
+  "C 484 332, 480 310, 474 292",
+  "Z",
+  // Left arm, mirrored.
+  "M 146 292",
+  "C 118 324, 104 370, 96 420",
+  "C 84 488, 70 556, 60 616",
+  "C 70 590, 78 556, 86 512",
+  "C 96 460, 110 400, 130 354",
+  "C 136 332, 140 310, 146 292",
   "Z",
 ].join(" ");

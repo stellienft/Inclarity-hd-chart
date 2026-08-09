@@ -53,6 +53,13 @@ export const CHANNEL_TRACK_FILL = "#FFFFFF";
 export const CHANNEL_TRACK_EDGE = "#E4DFD8";
 
 export const BODY_SILHOUETTE_FILL = "#EEEBE6";
+/**
+ * The arms, a shade darker than the robe.
+ *
+ * Kept very close to the body fill on purpose: the figure sits behind the
+ * whole chart, so anything with real contrast here competes with the gates.
+ */
+export const BODY_ARMS_FILL = "#E5E1D9";
 
 /** Gate numerals on a defined (sage) centre. */
 export const ON_DEFINED_TEXT = "#2B3A36";
