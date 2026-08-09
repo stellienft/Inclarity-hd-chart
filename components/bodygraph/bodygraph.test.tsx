@@ -9,7 +9,7 @@ import type { LocationResult } from "@/lib/location/types";
 import { BodyGraph } from "./BodyGraph";
 import {
   AXIS_X,
-  BODY_ARMS_PATH,
+  FIGURE_OUTLINE,
   BODY_SILHOUETTE_PATH,
   CENTERS,
   GATE_POINTS,
@@ -125,14 +125,15 @@ describe("BodyGraph geometry", () => {
 
 /**
  * The silhouette is decoration, but its proportions are not arbitrary: it is a
- * SEATED figure whose robe broadens all the way to the hem, holding every
- * centre bar the outermost tips of the Spleen and Solar Plexus, which graze
- * the outline.
+ * person sitting cross-legged, and it stops working the moment it stops
+ * reading as one. Earlier drafts failed in exactly two ways — a shape with no
+ * waist became a bell, and a shape with no narrow neck became a blob — so
+ * both are pinned here.
  *
- * Rather than pin the path string — which would fight every redesign — these
- * tests flatten it to a polygon and ask the questions that actually matter:
- * is it symmetric, does it hold what it should, and is it still shaped like
- * someone sitting rather than like a bell or a blob?
+ * Rather than pin the path string, which would fight every redesign, these
+ * tests flatten it to a polygon and measure it: is it symmetric, does it hold
+ * the centres it should, and does its silhouette still have a head, a neck, a
+ * waist and a lap in the right places and the right order?
  */
 describe("body silhouette", () => {
   /** Flatten the cubic path to a polygon, sampling each segment evenly. */
@@ -194,7 +195,6 @@ describe("body silhouette", () => {
   }
 
   const polygon = flatten(BODY_SILHOUETTE_PATH);
-  const arms = flatten(BODY_ARMS_PATH);
 
   /** Left and right edge of the figure at a given height, or null above/below it. */
   function span(y: number): { left: number; right: number } | null {
@@ -237,19 +237,15 @@ describe("body silhouette", () => {
   });
 
   /**
-   * The exact version of the same claim, free of any sampling error: every
-   * point written into the path has a twin at `620 - x` on the same line.
+   * The exact version of the same claim, free of any sampling error. Checked
+   * on the source outline rather than on the generated path: the curve fitter
+   * rounds its control points to two decimals, which can split a mirrored
+   * pair by a hundredth and says nothing about the shape.
    */
-  it("pairs every control point with its mirror", () => {
-    const coordinates = (BODY_SILHOUETTE_PATH.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
-    const points: Point[] = [];
-    for (let i = 0; i + 1 < coordinates.length; i += 2) {
-      points.push({ x: coordinates[i]!, y: coordinates[i + 1]! });
-    }
-
+  it("pairs every point of the outline with its mirror", () => {
     const key = (p: Point) => `${p.x},${p.y}`;
-    const present = new Set(points.map(key));
-    for (const point of points) {
+    const present = new Set(FIGURE_OUTLINE.map(key));
+    for (const point of FIGURE_OUTLINE) {
       expect(
         present.has(key({ x: 2 * AXIS_X - point.x, y: point.y })),
         `${point.x},${point.y} has no mirror`,
@@ -283,52 +279,81 @@ describe("body silhouette", () => {
   });
 
   /**
-   * The wings GRAZE the outline — a few outermost gates sit just past it, the
-   * rest are held. Both failure modes matter: a figure so wide it swallows
-   * them is a blob, and one so narrow they hang off it stops looking like a
-   * body. So this pins the count from both sides rather than asserting a
-   * particular gate is in or out.
+   * The wings GRAZE the outline: their inner halves lie over the body, their
+   * outer tips reach past it. Both failure modes matter — a figure so wide it
+   * swallows them is a blob, and one so narrow they float free of it looks
+   * broken — so this checks each wing keeps a foot on the body AND a tip off
+   * it, rather than counting gates.
    */
-  it("lets only the outermost wing gates break the outline", () => {
-    const outside = GATE_DEFINITIONS.filter(
-      ({ gate, center }) => !contains(polygon, gateLabelPoint(gate, center)),
+  it("lets the wings reach past the body without floating free of it", () => {
+    for (const center of ["spleen", "solarPlexus"] as const) {
+      const markers = GATE_DEFINITIONS.filter((g) => g.center === center).map((g) =>
+        gateLabelPoint(g.gate, center),
+      );
+      const held = markers.filter((m) => contains(polygon, m));
+
+      expect(held.length, `${center} gates over the body`).toBeGreaterThan(0);
+      expect(held.length, `${center} gates past the body`).toBeLessThan(markers.length);
+    }
+
+    // Nothing outside the two wings may break the outline.
+    const strays = GATE_DEFINITIONS.filter(
+      ({ gate, center }) =>
+        center !== "spleen" &&
+        center !== "solarPlexus" &&
+        !contains(polygon, gateLabelPoint(gate, center)),
     );
-
-    expect(outside.length).toBeGreaterThan(0);
-    expect(outside.length).toBeLessThanOrEqual(4);
-    for (const { gate, center } of outside) {
-      expect(["spleen", "solarPlexus"], `gate ${gate} is in ${center}`).toContain(center);
-    }
+    expect(strays.map((g) => `${g.gate}/${g.center}`)).toEqual([]);
   });
 
-  it("broadens all the way down, with no waist and its widest point at the hem", () => {
-    const widths = [300, 420, 540, 660, 780].map((y) => {
-      const edges = span(y);
-      if (!edges) throw new Error(`no span at y=${y}`);
-      return edges.right - edges.left;
-    });
+  /** Measured width at a height, or NaN above/below the figure. */
+  const widthAt = (y: number) => {
+    const edges = span(y);
+    return edges ? edges.right - edges.left : NaN;
+  };
 
-    for (let i = 1; i < widths.length; i += 1) {
-      expect(widths[i]!, `width at sample ${i}`).toBeGreaterThan(widths[i - 1]!);
-    }
-    // Wide, but not so wide it runs out of the frame.
-    expect(widths.at(-1)!).toBeLessThan(VIEWBOX.width);
+  it("has a head, a neck, shoulders, a waist and a lap, in that order", () => {
+    const hair = widthAt(100);
+    const neck = widthAt(232);
+    const shoulders = widthAt(300);
+    const waist = widthAt(520);
+    const lap = widthAt(730);
+
+    // A neck at all. Roughly half the head, as on a person.
+    expect(neck / hair).toBeGreaterThan(0.35);
+    expect(neck / hair).toBeLessThan(0.6);
+
+    // Shoulders much wider than the neck, and wider than the head.
+    expect(shoulders).toBeGreaterThan(neck * 2);
+    expect(shoulders).toBeGreaterThan(hair);
+
+    // A waist: narrower than the shoulders above it and the lap below it.
+    // Without this the figure drifts back into a bell.
+    expect(waist).toBeLessThan(shoulders);
+    expect(lap).toBeGreaterThan(waist);
+
+    // The crossed legs are the widest thing in the drawing.
+    expect(lap).toBeGreaterThan(shoulders);
   });
 
-  it("keeps the neck about half the width of the head", () => {
-    const head = span(110);
-    const neck = span(230);
-    if (!head || !neck) throw new Error("head or neck missing");
-    const ratio = (neck.right - neck.left) / (head.right - head.left);
-    expect(ratio).toBeGreaterThan(0.4);
-    expect(ratio).toBeLessThan(0.65);
+  it("puts its widest point down in the crossed legs", () => {
+    const widest = polygon.reduce((max, p) => (Math.abs(p.x - AXIS_X) > Math.abs(max.x - AXIS_X) ? p : max));
+    expect(widest.y).toBeGreaterThan(VIEWBOX.height * 0.75);
+    // Wide, but still inside the frame.
+    expect(Math.abs(widest.x - AXIS_X)).toBeLessThan(VIEWBOX.width / 2);
   });
 
-  it("keeps the arms inside the robe", () => {
-    expect(arms.length).toBeGreaterThan(0);
-    for (const point of arms) {
-      expect(contains(polygon, point), `arm point ${point.x},${point.y}`).toBe(true);
-    }
+  it("keeps the bob's points beside the jaw, below the widest of the hair", () => {
+    // The two points hang lower than the hair is wide, which is what stops
+    // them reading as horns sticking out of the sides of the head.
+    const widestHair = FIGURE_OUTLINE.reduce((max, p) =>
+      p.y < 160 && p.x > max.x ? p : max,
+    );
+    const lowestHair = FIGURE_OUTLINE.filter((p) => p.y < 240 && p.x > AXIS_X + 40).reduce(
+      (low, p) => (p.y > low.y ? p : low),
+    );
+    expect(lowestHair.y).toBeGreaterThan(widestHair.y + 80);
+    expect(lowestHair.x).toBeLessThan(widestHair.x);
   });
 
   it("has a head tall enough to hold the Head and Ajna centres", () => {
