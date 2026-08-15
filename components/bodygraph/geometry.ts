@@ -108,14 +108,17 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   62: { x: 274, y: 240 },
   23: { x: 310, y: 240 },
   56: { x: 346, y: 240 },
-  16: { x: 250, y: 272 },
-  20: { x: 250, y: 316 },
+  // The side gates pair off across the centre: 16 opposite 35, 20 opposite 12.
+  // 45 hangs below them with nothing facing it, which is how a conventional
+  // chart draws the Throat.
+  16: { x: 250, y: 274 },
+  20: { x: 250, y: 304 },
   31: { x: 274, y: 352 },
   8: { x: 310, y: 352 },
   33: { x: 346, y: 352 },
-  35: { x: 370, y: 268 },
-  12: { x: 370, y: 300 },
-  45: { x: 370, y: 332 },
+  35: { x: 370, y: 274 },
+  12: { x: 370, y: 304 },
+  45: { x: 370, y: 334 },
 
   // G — diamond; upper edges to the Throat, lower to the Sacral.
   1: { x: 310, y: 366 },
@@ -133,14 +136,25 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   26: { x: 433, y: 497 },
   40: { x: 472, y: 498 },
 
-  // Spleen — upper edge to Heart/Throat, lower edge to the Root.
-  44: { x: 61, y: 550 },
-  48: { x: 90, y: 565 },
-  57: { x: 122, y: 582 },
-  50: { x: 122, y: 610 },
-  32: { x: 90, y: 627 },
-  28: { x: 58, y: 644 },
-  18: { x: 42, y: 610 },
+  /*
+   * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
+   * around the perimeter from the top corner: 48, 57, 44 down the upper edge,
+   * 50 at the apex, then 32, 28, 18 back along the lower edge.
+   *
+   * That order is forced by the channels, not chosen. Going up: 48 meets the
+   * Throat at 16, 57 the Throat at 20, 44 the Heart at 26 — targets that get
+   * progressively lower, so the gates must too or their channels cross. Going
+   * down: 32 meets the Root at 54, 28 at 38, 18 at 58, which sit in that order
+   * down the Root's left edge. An earlier layout put 44 at the top and 18 out
+   * on the left edge, and the crossings were visible in the drawing.
+   */
+  48: { x: 61, y: 550 },
+  57: { x: 90, y: 565 },
+  44: { x: 122, y: 582 },
+  50: { x: 149, y: 596 },
+  32: { x: 122, y: 610 },
+  28: { x: 90, y: 627 },
+  18: { x: 58, y: 644 },
 
   // Solar Plexus — upper edge to Throat/Heart, lower edge to the Root.
   36: { x: 559, y: 550 },
@@ -151,24 +165,35 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   55: { x: 530, y: 627 },
   30: { x: 562, y: 644 },
 
-  // Sacral — top edge upward, sides outward, bottom to the Root.
-  34: { x: 262, y: 540 },
-  5: { x: 294, y: 540 },
-  14: { x: 326, y: 540 },
-  29: { x: 358, y: 540 },
-  27: { x: 250, y: 596 },
-  59: { x: 370, y: 596 },
-  9: { x: 268, y: 652 },
+  /*
+   * Sacral — 34 belongs on the LEFT edge, not in the top row: all three of its
+   * channels (57, 10, 20) run up and to the left.
+   *
+   * The bottom row reads 42, 3, 9 left to right so that it lines up with the
+   * Root's 53, 60, 52 and the three channels drop straight down. Reversed, as
+   * it was, they cross in an X below the centre.
+   */
+  5: { x: 274, y: 540 },
+  14: { x: 310, y: 540 },
+  29: { x: 346, y: 540 },
+  34: { x: 250, y: 572 },
+  27: { x: 250, y: 616 },
+  59: { x: 370, y: 616 },
+  42: { x: 274, y: 652 },
   3: { x: 310, y: 652 },
-  42: { x: 352, y: 652 },
+  9: { x: 346, y: 652 },
 
-  // Root — top edge to the Sacral, sides to the Spleen and Solar Plexus.
-  53: { x: 268, y: 700 },
+  /*
+   * Root — the left edge runs 54, 38, 58 downward to meet the Spleen's 32, 28,
+   * 18, mirroring 19, 39, 41 against the Solar Plexus's 49, 55, 30. Swapping
+   * 54 and 58, as an earlier layout did, crosses all three channels.
+   */
+  53: { x: 274, y: 700 },
   60: { x: 310, y: 700 },
-  52: { x: 352, y: 700 },
-  58: { x: 250, y: 724 },
+  52: { x: 346, y: 700 },
+  54: { x: 250, y: 724 },
   38: { x: 250, y: 756 },
-  54: { x: 250, y: 788 },
+  58: { x: 250, y: 788 },
   19: { x: 370, y: 724 },
   39: { x: 370, y: 756 },
   41: { x: 370, y: 788 },

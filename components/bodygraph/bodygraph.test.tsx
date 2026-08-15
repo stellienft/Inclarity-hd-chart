@@ -113,6 +113,83 @@ describe("BodyGraph geometry", () => {
     }
   });
 
+  /**
+   * The Spleen and the Solar Plexus are the same triangle facing opposite
+   * ways, so their gates must sit at mirrored positions. This is not a style
+   * preference: the two sides carry mirrored channels (16-48 against 35-36,
+   * 32-54 against 49-19, and so on), and a Spleen laid out in a different
+   * order than its opposite drags those channels across each other.
+   */
+  it("lays the Spleen out as the exact mirror of the Solar Plexus", () => {
+    const MIRROR: Array<[number, number]> = [
+      [48, 36],
+      [57, 22],
+      [44, 37],
+      [50, 6],
+      [32, 49],
+      [28, 55],
+      [18, 30],
+    ];
+
+    for (const [left, right] of MIRROR) {
+      const a = GATE_POINTS[left];
+      const b = GATE_POINTS[right];
+      if (!a || !b) throw new Error(`missing ${left} or ${right}`);
+      expect(a.x, `gate ${left} against ${right}`).toBeCloseTo(2 * AXIS_X - b.x, 6);
+      expect(a.y, `gate ${left} against ${right}`).toBeCloseTo(b.y, 6);
+    }
+  });
+
+  /**
+   * Channels running between the same pair of centres must not cross one
+   * another.
+   *
+   * This is the property that catches a row of gates written in the wrong
+   * order, which is exactly how the Sacral's bottom edge (42, 3, 9), the
+   * Root's left edge (54, 38, 58) and the whole Spleen went wrong: each
+   * looked fine on its own and only showed up as an X in the drawing. Tested
+   * on the straight chord between anchors — the rendered channel bows away
+   * from the figure's centre, but two chords that do not cross keep bowed
+   * paths on the same sides of each other.
+   */
+  it("never crosses two channels that join the same pair of centres", () => {
+    const centreOf = new Map(GATE_DEFINITIONS.map((g) => [g.gate, g.center]));
+
+    const side = (a: Point, b: Point, p: Point) =>
+      Math.sign((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x));
+
+    const crosses = (p1: Point, p2: Point, q1: Point, q2: Point) =>
+      side(p1, p2, q1) * side(p1, p2, q2) < 0 && side(q1, q2, p1) * side(q1, q2, p2) < 0;
+
+    const byCentrePair = new Map<string, Array<{ id: string; from: Point; to: Point }>>();
+    for (const definition of CHANNEL_DEFINITIONS) {
+      const [gateA, gateB] = definition.gates;
+      const centreA = centreOf.get(gateA);
+      const centreB = centreOf.get(gateB);
+      const from = GATE_POINTS[gateA];
+      const to = GATE_POINTS[gateB];
+      if (!centreA || !centreB || !from || !to) throw new Error(`bad channel ${definition.id}`);
+
+      const key = [centreA, centreB].sort().join("-");
+      const list = byCentrePair.get(key) ?? [];
+      list.push({ id: definition.id, from, to });
+      byCentrePair.set(key, list);
+    }
+
+    for (const [pair, channels] of byCentrePair) {
+      for (let i = 0; i < channels.length; i += 1) {
+        for (let j = i + 1; j < channels.length; j += 1) {
+          const a = channels[i]!;
+          const b = channels[j]!;
+          expect(
+            crosses(a.from, a.to, b.from, b.to),
+            `channels ${a.id} and ${b.id} cross between ${pair}`,
+          ).toBe(false);
+        }
+      }
+    }
+  });
+
   it("pushes gate labels away from their anchor", () => {
     for (const { gate, center } of GATE_DEFINITIONS) {
       const anchor = GATE_POINTS[gate];
