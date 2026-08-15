@@ -331,9 +331,26 @@ export function shapeToPath(shape: CenterShape, radius = CORNER_RADIUS): string 
  * than a handful of special cases.
  */
 const STRAIGHT_BELOW = 90;
-const BOW_FACTOR = 0.18;
-/** Beyond this the arc would swing outside the figure. */
-const MAX_BOW = 46;
+/**
+ * How far a channel bows, per unit of its length.
+ *
+ * The value is set by where channels stop crossing each other, not by taste.
+ * At 0.18 the long arcs stayed too tight and five pairs crossed; widening the
+ * family to 0.24 leaves one — see the crossing test in bodygraph.test.tsx.
+ * Because every arc scales by the same factor, a longer channel always bows
+ * further than a shorter one sharing its corridor, so the set nests instead
+ * of tangling.
+ */
+const BOW_FACTOR = 0.24;
+/**
+ * A ceiling so a future long channel cannot swing outside the figure.
+ *
+ * It does NOT bind at present — the longest channel (16-48) bows about 59 —
+ * and it must not be allowed to. Clamping flattens the longest arcs onto the
+ * medium ones and re-creates exactly the crossings this is here to avoid,
+ * which is what a ceiling of 46 was doing.
+ */
+const MAX_BOW = 70;
 
 export function channelPath(a: Point, b: Point): string {
   const dx = b.x - a.x;
