@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { calculateChart } from "@/lib/human-design";
 import { CHANNEL_DEFINITIONS } from "@/lib/human-design/constants/channels";
 import { GATE_DEFINITIONS } from "@/lib/human-design/constants/gates";
+import type { CenterId } from "@/lib/human-design/types/center";
 import type { LocationResult } from "@/lib/location/types";
 
 import { BodyGraph } from "./BodyGraph";
@@ -266,6 +267,54 @@ describe("BodyGraph geometry", () => {
     }
 
     expect(crossing).toEqual(["10-57 x 20-34"]);
+  });
+
+  /**
+   * Every marker must sit a full radius inside its own centre.
+   *
+   * The collision test above only asks whether markers hit EACH OTHER; it says
+   * nothing about the boundary, and for a long time every one of the eighteen
+   * gates on the three triangles was straddling its own edge — the numerals
+   * looked stuck to the outline rather than placed in the shape. Fixing it
+   * needed the triangles enlarged and their markers solved outright, so this
+   * is the test that keeps them that way.
+   */
+  it("keeps every marker a full radius inside its own centre", () => {
+    const polygonOf = (center: CenterId): Point[] => {
+      const shape = CENTERS.find((c) => c.id === center)?.shape;
+      if (!shape) throw new Error(`no shape for ${center}`);
+      if (shape.kind === "polygon") return [...shape.points];
+      const { x, y, width, height } = shape;
+      return [
+        { x, y },
+        { x: x + width, y },
+        { x: x + width, y: y + height },
+        { x, y: y + height },
+      ];
+    };
+
+    const distanceToEdge = (p: Point, polygon: Point[]): number => {
+      let nearest = Infinity;
+      for (let i = 0; i < polygon.length; i += 1) {
+        const a = polygon[i]!;
+        const b = polygon[(i + 1) % polygon.length]!;
+        const vx = b.x - a.x;
+        const vy = b.y - a.y;
+        const lengthSquared = vx * vx + vy * vy || 1;
+        const t = Math.max(0, Math.min(1, ((p.x - a.x) * vx + (p.y - a.y) * vy) / lengthSquared));
+        nearest = Math.min(nearest, Math.hypot(p.x - (a.x + t * vx), p.y - (a.y + t * vy)));
+      }
+      return nearest;
+    };
+
+    const straddling: string[] = [];
+    for (const { gate, center } of GATE_DEFINITIONS) {
+      const clearance = distanceToEdge(gateLabelPoint(gate, center), polygonOf(center));
+      if (clearance < GATE_MARKER_RADIUS) {
+        straddling.push(`${gate}/${center} clears only ${clearance.toFixed(1)}`);
+      }
+    }
+    expect(straddling).toEqual([]);
   });
 
   it("pushes gate labels away from their anchor", () => {

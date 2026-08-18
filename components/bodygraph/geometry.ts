@@ -55,13 +55,21 @@ const G = {
   bottom: { x: 310, y: 494 },
   left: { x: 238, y: 430 },
 };
+/*
+ * The three triangles are larger than the obvious layout makes them, and the
+ * reason is arithmetic rather than taste: seven gates fit around the Spleen
+ * only if the triangle is big enough to hold seven markers a full diameter
+ * apart AND a marker's radius clear of every edge. At the size these were
+ * before, every one of their eighteen gates crossed its own boundary. See the
+ * clearance test in bodygraph.test.tsx.
+ */
 const HEART = {
-  left: { x: 394, y: 478 },
-  topRight: { x: 472, y: 440 },
-  bottomRight: { x: 472, y: 516 },
+  left: { x: 386, y: 478 },
+  topRight: { x: 478, y: 436 },
+  bottomRight: { x: 478, y: 520 },
 };
-const SPLEEN = { top: { x: 42, y: 540 }, apex: { x: 149, y: 596 }, bottom: { x: 42, y: 652 } };
-const SOLAR = { top: { x: 578, y: 540 }, apex: { x: 471, y: 596 }, bottom: { x: 578, y: 652 } };
+const SPLEEN = { top: { x: 30, y: 536 }, apex: { x: 152, y: 596 }, bottom: { x: 30, y: 656 } };
+const SOLAR = { top: { x: 590, y: 536 }, apex: { x: 468, y: 596 }, bottom: { x: 590, y: 656 } };
 const SACRAL = { x: 250, y: 540, width: 120, height: 112 };
 const ROOT = { x: 250, y: 700, width: 120, height: 112 };
 
@@ -131,11 +139,13 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   15: { x: 274, y: 462 },
   10: { x: 238, y: 430 },
 
-  // Heart / Ego.
-  51: { x: 394, y: 478 },
-  21: { x: 433, y: 459 },
-  26: { x: 433, y: 497 },
-  40: { x: 472, y: 498 },
+  // Heart / Ego — each gate on the edge facing the centre its channel runs to:
+  // 51 at the left vertex for the G, 21 up the top edge for the Throat, 26 on
+  // the bottom edge for the Spleen, 40 on the right edge for the Solar Plexus.
+  51: { x: 386, y: 478 },
+  21: { x: 436.6, y: 454.9 },
+  26: { x: 411.8, y: 489.8 },
+  40: { x: 478, y: 486.4 },
 
   /*
    * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
@@ -149,22 +159,22 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
    * down the Root's left edge. An earlier layout put 44 at the top and 18 out
    * on the left edge, and the crossings were visible in the drawing.
    */
-  48: { x: 61, y: 550 },
-  57: { x: 90, y: 565 },
-  44: { x: 122, y: 582 },
-  50: { x: 149, y: 596 },
-  32: { x: 122, y: 610 },
-  28: { x: 90, y: 627 },
-  18: { x: 58, y: 644 },
+  48: { x: 52, y: 546.8 },
+  57: { x: 84.8, y: 562.9 },
+  44: { x: 121.3, y: 580.9 },
+  50: { x: 152, y: 596 },
+  32: { x: 121.3, y: 611.1 },
+  28: { x: 84.8, y: 629.1 },
+  18: { x: 48.3, y: 647 },
 
   // Solar Plexus — upper edge to Throat/Heart, lower edge to the Root.
-  36: { x: 559, y: 550 },
-  22: { x: 530, y: 565 },
-  37: { x: 498, y: 582 },
-  6: { x: 471, y: 596 },
-  49: { x: 498, y: 610 },
-  55: { x: 530, y: 627 },
-  30: { x: 562, y: 644 },
+  36: { x: 568, y: 546.8 },
+  22: { x: 535.2, y: 562.9 },
+  37: { x: 498.7, y: 580.9 },
+  6: { x: 468, y: 596 },
+  49: { x: 498.7, y: 611.1 },
+  55: { x: 535.2, y: 629.1 },
+  30: { x: 571.7, y: 647 },
 
   /*
    * Sacral — 34 belongs on the LEFT edge, not in the top row: all three of its
@@ -200,37 +210,79 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   41: { x: 370, y: 788 },
 };
 
+/**
+ * Marker positions that are set outright rather than derived.
+ *
+ * The three triangles cannot use the nudge-toward-the-midpoint rule: their
+ * gates start close together and every edge aims at the same spot, so any
+ * inset deep enough to clear the boundary drives neighbours into each other.
+ * These eighteen were solved instead — pushed inward until each cleared its
+ * edges by a marker radius, then relaxed apart until no two overlapped — and
+ * the result is written down so the drawing is stable and reviewable rather
+ * than recomputed on every render.
+ *
+ * The Spleen's and Solar Plexus's values are exact mirrors, which the mirror
+ * test checks.
+ */
+const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
+  // Spleen
+  48: { x: 57.2, y: 560.6 },
+  57: { x: 80.8, y: 572.4 },
+  44: { x: 107.1, y: 585.1 },
+  50: { x: 129.2, y: 596 },
+  32: { x: 107.1, y: 606.9 },
+  28: { x: 80.8, y: 619.6 },
+  18: { x: 54.6, y: 632.6 },
+  // Solar Plexus
+  36: { x: 562.8, y: 560.6 },
+  22: { x: 539.2, y: 572.4 },
+  37: { x: 512.9, y: 585.1 },
+  6: { x: 490.8, y: 596 },
+  49: { x: 512.9, y: 606.9 },
+  55: { x: 539.2, y: 619.6 },
+  30: { x: 565.4, y: 632.6 },
+  // Heart
+  51: { x: 410.2, y: 478 },
+  21: { x: 440.9, y: 464.2 },
+  26: { x: 427.7, y: 486 },
+  40: { x: 467.9, y: 483.6 },
+};
+
 const CENTER_MIDPOINTS: Record<CenterId, Point> = {
   head: { x: 310, y: 75 },
   ajna: { x: 310, y: 155 },
   throat: { x: 310, y: 296 },
   g: { x: 310, y: 430 },
-  heart: { x: 446, y: 478 },
-  spleen: { x: 90, y: 596 },
-  solarPlexus: { x: 530, y: 596 },
+  heart: { x: 447, y: 478 },
+  spleen: { x: 71, y: 596 },
+  solarPlexus: { x: 549, y: 596 },
   sacral: { x: 310, y: 596 },
   root: { x: 310, y: 756 },
 };
 
 /**
- * How far each centre pulls its gate markers inward.
+ * How far each gate marker is pushed inside its own centre.
  *
- * This is per-centre rather than a single constant because the nudge is a
- * fraction of the centre's size: on the small triangles a uniform 11 units
- * dragged gates on opposite edges into one another (21 and 26 ended up 18
- * apart, closer than two markers are wide). The tighter the centre, the
- * smaller its nudge.
+ * Per-centre because the nudge has to be a fraction of the centre's size. The
+ * three small triangles are the binding constraint: seven gates around the
+ * Spleen start barely more than a marker's width apart, so they can take about
+ * nine units before neighbours touch, where the Throat and Sacral take
+ * eighteen.
+ *
+ * These are the largest values that keep every pair of markers in a centre at
+ * least a full marker-diameter apart — the collision test in bodygraph.test.tsx
+ * is what says so, and it has caught this twice.
  */
 const GATE_INSET: Record<CenterId, number> = {
-  head: 11,
-  ajna: 11,
-  throat: 11,
-  g: 11,
-  heart: 8,
-  spleen: 8,
-  solarPlexus: 8,
-  sacral: 11,
-  root: 11,
+  head: 18,
+  ajna: 16,
+  throat: 18,
+  g: 18,
+  heart: 9,
+  spleen: 9,
+  solarPlexus: 9,
+  sacral: 18,
+  root: 18,
 };
 
 /**
@@ -241,10 +293,22 @@ const GATE_INSET: Record<CenterId, number> = {
  * arrangement that avoids collisions. Pushing markers outward sends the two
  * gates of a short channel — 1 and 8, 43 and 23, 25 and 51, 59 and 6 — directly
  * into one another, because "away from my centre" means "toward yours".
+ *
+ * Toward the midpoint, NOT perpendicular to the edge. Perpendicular is the
+ * tempting alternative — it would keep gates sharing an edge exactly as far
+ * apart however deep the inset — but it drives gates on ADJACENT edges
+ * together instead, and every centre has corners: measured, it put the
+ * Throat's 33 and 45 eight units apart, and the Spleen's 32 and 44 the same.
+ * Aiming everything at the midpoint converges gates gently and uniformly, so
+ * one number per centre controls it.
  */
 export function gateLabelPoint(gate: number, center: CenterId, distance?: number): Point {
   const anchor = GATE_POINTS[gate];
   if (!anchor) throw new Error(`No geometry for gate ${gate}`);
+
+  const solved = GATE_MARKER_OVERRIDES[gate];
+  if (solved && distance === undefined) return solved;
+
   const mid = CENTER_MIDPOINTS[center];
   const inset = distance ?? GATE_INSET[center];
 
@@ -336,22 +400,25 @@ const STRAIGHT_BELOW = 90;
  * How far a channel bows, per unit of its length.
  *
  * The value is set by where channels stop crossing each other, not by taste.
- * At 0.18 the long arcs stayed too tight and five pairs crossed; widening the
- * family to 0.24 leaves one — see the crossing test in bodygraph.test.tsx.
+ * Swept against the current gate positions: five pairs cross below 0.32, two
+ * at 0.32, and one — the pair the layout forces — from 0.36 upward. It has
+ * been re-swept twice, because enlarging the three triangles moved their
+ * anchors and re-tangled arcs that had been clear. See the crossing test in
+ * bodygraph.test.tsx.
  * Because every arc scales by the same factor, a longer channel always bows
  * further than a shorter one sharing its corridor, so the set nests instead
  * of tangling.
  */
-const BOW_FACTOR = 0.24;
+const BOW_FACTOR = 0.36;
 /**
  * A ceiling so a future long channel cannot swing outside the figure.
  *
- * It does NOT bind at present — the longest channel (16-48) bows about 59 —
- * and it must not be allowed to. Clamping flattens the longest arcs onto the
- * medium ones and re-creates exactly the crossings this is here to avoid,
- * which is what a ceiling of 46 was doing.
+ * Clamping flattens the longest arcs onto the medium ones and re-creates
+ * exactly the crossings this is here to avoid, which is what a ceiling of 46
+ * was doing. At 88 it binds on only the two longest channels, and the sweep
+ * shows the crossing count is flat from here upward.
  */
-const MAX_BOW = 70;
+const MAX_BOW = 88;
 
 export function channelPath(a: Point, b: Point): string {
   const dx = b.x - a.x;

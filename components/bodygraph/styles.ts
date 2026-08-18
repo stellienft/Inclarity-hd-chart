@@ -50,11 +50,18 @@ export const CENTER_UNDEFINED_FILL = PALETTE.linen;
 export const CENTER_STROKE = "#DBD2CC";
 
 /**
- * Inactive channels are drawn as WHITE "tracks" with a PEBBLE edge, so they
+ * Inactive channels are drawn as WHITE "tracks" with a thin outline, so they
  * read both against the pale figure and against the page behind it.
+ *
+ * The outline is DUSK held back to about half strength rather than a lighter
+ * hex, which keeps it on the palette while giving the line enough definition
+ * to be followed. In PEBBLE it measured 1.10:1 against the page — the long
+ * arcs run in nested families of four or five and simply disappeared into one
+ * another.
  */
 export const CHANNEL_TRACK_FILL = PALETTE.white;
-export const CHANNEL_TRACK_EDGE = PALETTE.pebble;
+export const CHANNEL_TRACK_EDGE = PALETTE.dusk;
+export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
 export const BODY_SILHOUETTE_FILL = PALETTE.pebble;
 
@@ -76,11 +83,28 @@ export const GATE_NUMERAL_WEIGHT = { active: 500, inactive: 400 } as const;
 
 export const STROKE_WIDTH = {
   centre: 1.25,
-  channelTrack: 7,
-  channelTrackEdge: 9,
-  channelActive: 7,
+  /*
+   * Channels are drawn as thin outlined tracks rather than fat white tubes:
+   * a wider stroke in the edge colour with a narrower white one on top, so
+   * what reads is the outline. The long arcs run in nested families and need
+   * visible gaps between them to be followed by eye.
+   */
+  channelTrack: 5.6,
+  channelTrackEdge: 7.2,
+  channelActive: 5.6,
 } as const;
 
+/** Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS. */
+export const GATE_NUMERAL_SIZE = 12;
+
+/**
+ * Marker radius, and the reason it is not larger.
+ *
+ * 9.5 against a 120-wide Throat is the same ratio the reference chart uses.
+ * At 10 the three triangles stop working: the solved layout leaves 26 and 51
+ * in the Heart 19.2 apart, which two 20-wide markers overlap. The numerals
+ * grew instead — see GATE_NUMERAL_SIZE.
+ */
 export const GATE_MARKER_RADIUS = 9.5;
 /** A white ring separates a marker from whatever centre fill sits behind it. */
 export const GATE_MARKER_RING = "#FFFFFF";

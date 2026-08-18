@@ -25,12 +25,14 @@ import {
   CENTER_STROKE,
   CENTER_UNDEFINED_FILL,
   CHANNEL_TRACK_EDGE,
+  CHANNEL_TRACK_EDGE_OPACITY,
   CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
   GATE_MARKER_RADIUS,
   GATE_MARKER_RING,
   GATE_MARKER_RING_WIDTH,
   GATE_MARKER_TEXT,
+  GATE_NUMERAL_SIZE,
   GATE_NUMERAL_WEIGHT,
   ON_DEFINED_TEXT,
   ON_UNDEFINED_TEXT,
@@ -219,7 +221,12 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
             const d = channelPath(a, b);
             return (
               <g key={definition.id} data-channel={definition.id} data-active="false">
-                <path d={d} stroke={CHANNEL_TRACK_EDGE} strokeWidth={STROKE_WIDTH.channelTrackEdge} />
+                <path
+                  d={d}
+                  stroke={CHANNEL_TRACK_EDGE}
+                  strokeOpacity={CHANNEL_TRACK_EDGE_OPACITY}
+                  strokeWidth={STROKE_WIDTH.channelTrackEdge}
+                />
                 <path d={d} stroke={CHANNEL_TRACK_FILL} strokeWidth={STROKE_WIDTH.channelTrack} />
               </g>
             );
@@ -303,7 +310,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       </g>
 
       {/* ---- Gates ---- */}
-      <g fontSize={10.5} textAnchor="middle" dominantBaseline="central">
+      <g fontSize={GATE_NUMERAL_SIZE} textAnchor="middle" dominantBaseline="central">
         {GATE_DEFINITIONS.map(({ gate, center, name }) => {
           const state = gateState.get(gate);
           const style = styleFor(state?.personality ?? false, state?.design ?? false);
