@@ -496,37 +496,49 @@ export function variableArrowPath(at: Point, direction: "left" | "right"): strin
  * editable as a list of points rather than a wall of bezier numbers.
  */
 const FIGURE_RIGHT_OUTLINE: Point[] = [
-  { x: 310, y: 4 }, // crown, on the axis — the parting sits here
-  { x: 331, y: 7 },
-  { x: 359, y: 28 },
-  { x: 382, y: 78 }, // widest of the head
+  { x: 310, y: 9 }, // the centre parting, on the axis — a slight dip
+  { x: 318, y: 5 }, // and the crown rises either side of it
+  { x: 343, y: 15 },
+  { x: 362, y: 40 },
+  { x: 380, y: 83 }, // widest of the head
   // Near-vertical from here to the jaw. This section is what reads as a HEAD:
   // without it the outline flares straight from crown to shoulder and the
   // whole figure comes out as a cone with no one in it.
-  { x: 390, y: 130 },
-  { x: 394, y: 186 },
-  { x: 404, y: 226 }, // and now the hair flares, below the jaw
-  { x: 428, y: 264 },
-  { x: 450, y: 292 }, // the hair falls to its lowest point here
-  { x: 444, y: 308 }, // and tucks in behind the shoulder
-  { x: 463, y: 320 }, // shoulder
-  { x: 475, y: 366 }, // deltoid
-  { x: 486, y: 440 },
-  { x: 497, y: 520 }, // upper arm, running down and slightly out
-  { x: 508, y: 586 }, // elbow
-  { x: 534, y: 650 }, // forearm, opening out toward the knee
-  { x: 574, y: 690 },
-  { x: 600, y: 712 }, // wrist
-  { x: 614, y: 736 }, // hand, resting over the knee
-  { x: 616, y: 764 },
-  { x: 601, y: 784 },
-  { x: 581, y: 781 }, // back in under the hand
-  { x: 588, y: 802 }, // outer edge of the knee
-  { x: 570, y: 824 },
-  { x: 505, y: 834 }, // the base, wide and low
-  { x: 418, y: 837 },
-  { x: 355, y: 838 },
-  { x: 310, y: 838 }, // bottom, on the axis
+  { x: 387, y: 126 },
+  { x: 394, y: 173 },
+  { x: 402, y: 216 }, // and now the hair widens, below the jaw
+  { x: 410, y: 252 },
+  { x: 417, y: 278 }, // the hair falls to its lowest point here
+  { x: 412, y: 294 }, // tapering to a point
+  { x: 402, y: 290 }, // and tucking in behind the shoulder
+  { x: 425, y: 310 }, // shoulder
+  { x: 436, y: 328 },
+  { x: 442, y: 353 }, // deltoid
+  // The upper arm is carried about 10 units wider than the reference draws it.
+  // The Heart centre's outer corner sits at x 472 and its gate-40 marker
+  // reaches 475; drawn to the reference exactly, the arm passes inside that
+  // and the Heart hangs off the figure.
+  { x: 458, y: 397 },
+  { x: 468, y: 447 },
+  { x: 478, y: 497 }, // upper arm, running down and slightly out
+  { x: 486, y: 548 },
+  { x: 487, y: 593 }, // elbow
+  { x: 504, y: 631 }, // forearm, opening out toward the knee
+  { x: 529, y: 660 },
+  { x: 557, y: 681 },
+  { x: 579, y: 692 }, // wrist
+  { x: 594, y: 699 },
+  { x: 603, y: 714 }, // hand, resting over the knee
+  { x: 605, y: 732 }, // fingertips
+  { x: 597, y: 750 },
+  { x: 585, y: 757 }, // and the hand's heel, tucked behind
+  { x: 579, y: 771 }, // outer edge of the knee
+  { x: 569, y: 796 },
+  { x: 541, y: 818 },
+  { x: 492, y: 830 }, // the base, wide and low
+  { x: 417, y: 836 },
+  { x: 349, y: 834 },
+  { x: 310, y: 828 }, // bottom, on the axis — the ankles lift it slightly
 ];
 
 /**
@@ -535,17 +547,25 @@ const FIGURE_RIGHT_OUTLINE: Point[] = [
  *
  * A closed hole in the figure, drawn with fill-rule evenodd. Written for the
  * right side and mirrored, like the outline.
+ *
+ * Its INNER boundary is the side of the body, so the waist lives here rather
+ * than on the outline: between the armpit and the hip the torso draws in to
+ * x 387 and back out again. On the outline that narrowing is hidden behind
+ * the arm, which is why the figure looked waistless until the gaps went in.
  */
 const FIGURE_RIGHT_ARM_GAP: Point[] = [
-  { x: 404, y: 428 }, // armpit — the narrow top of the wedge
-  { x: 432, y: 486 },
-  { x: 455, y: 546 }, // down the inside of the arm
-  { x: 476, y: 606 },
-  { x: 498, y: 660 }, // where arm, hand and thigh meet
-  { x: 455, y: 645 },
-  { x: 420, y: 612 }, // back up along the top of the thigh
-  { x: 402, y: 556 },
-  { x: 398, y: 486 }, // and up the side of the body
+  { x: 408, y: 432 }, // armpit — the narrow top of the wedge
+  { x: 423, y: 476 },
+  { x: 442, y: 533 }, // down the inside of the arm
+  { x: 464, y: 591 },
+  { x: 485, y: 641 },
+  { x: 504, y: 681 }, // where arm, hand and thigh meet
+  { x: 460, y: 674 },
+  { x: 417, y: 656 }, // back up along the top of the thigh
+  { x: 392, y: 620 },
+  { x: 387, y: 562 }, // the waist
+  { x: 394, y: 505 },
+  { x: 404, y: 450 }, // and up under the arm again
 ];
 
 /**

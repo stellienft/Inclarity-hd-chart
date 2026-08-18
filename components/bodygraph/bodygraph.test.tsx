@@ -484,22 +484,41 @@ describe("body silhouette", () => {
     return widest;
   };
 
-  it("has a head, then hair, then shoulders, then the lap", () => {
-    // The head is the near-vertical stretch of the outline between its widest
-    // point and the jaw. It is the whole difference between a person and a
-    // cone, and it was lost twice while drawing this: without it the outline
-    // flares straight from crown to shoulder and nobody is in there.
-    const headRate = (widthAt(186) - widthAt(110)) / (186 - 110);
-    const hairRate = (widthAt(292) - widthAt(226)) / (292 - 226);
-    expect(headRate).toBeGreaterThan(0);
-    expect(hairRate / headRate, "hair must flare far faster than the head").toBeGreaterThan(4);
+  it("has a centre parting at the crown", () => {
+    // The topmost on-axis point sits LOWER than the two beside it, which is
+    // what makes the crown read as hair parted in the middle rather than as a
+    // dome. It is one of the few features of this figure visible at thumbnail
+    // size, so it is worth holding onto.
+    const onAxis = FIGURE_OUTLINE.filter((p) => p.x === AXIS_X && p.y < 100);
+    expect(onAxis).toHaveLength(1);
 
-    // Hair reaches its widest below the head, shoulders below that again.
-    expect(widthAt(292)).toBeGreaterThan(widthAt(186));
-    expect(widthAt(320)).toBeGreaterThan(widthAt(292));
+    // The highest point of the whole figure is therefore NOT on the axis, and
+    // the axis dips measurably below it.
+    const highest = Math.min(...FIGURE_OUTLINE.map((p) => p.y));
+    const onTheLine = FIGURE_OUTLINE.filter((p) => p.y === highest);
+    expect(onTheLine.every((p) => p.x !== AXIS_X)).toBe(true);
+    expect(onAxis[0]!.y - highest).toBeGreaterThanOrEqual(3);
+  });
 
-    // And the crossed legs are wider than anything above them.
-    expect(widestBetween(640, 800)).toBeGreaterThan(widestBetween(300, 600));
+  it("keeps the hair a narrow column, then steps out at the shoulder", () => {
+    // Long hair, not a bob and not a cone: through the head and hair the
+    // outline stays well under the shoulder width. Earlier drafts flared
+    // straight from crown to shoulder and read as a bell with nobody in it.
+    expect(widthAt(250) / widthAt(353)).toBeLessThan(0.85);
+
+    // The hair tapers to a point and tucks behind the shoulder, so the outline
+    // narrows before it widens again. That notch is the shoulder.
+    expect(widthAt(294)).toBeLessThan(widthAt(278));
+    expect(widthAt(310)).toBeGreaterThan(widthAt(294));
+  });
+
+  it("broadens from the shoulders down to the crossed legs", () => {
+    const widths = [353, 450, 550, 650].map(widthAt);
+    for (let i = 1; i < widths.length; i += 1) {
+      expect(widths[i]!, `width at sample ${i}`).toBeGreaterThan(widths[i - 1]!);
+    }
+    // And the lap is wider than anything above it.
+    expect(widestBetween(660, 800)).toBeGreaterThan(widestBetween(300, 650));
   });
 
   /**
