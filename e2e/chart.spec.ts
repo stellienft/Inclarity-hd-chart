@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
 import { VIEWBOX } from "../components/bodygraph/geometry";
 
 /**
@@ -166,6 +167,95 @@ test.describe("validation and accessibility", () => {
     await page.goto("/");
     await expect(page.getByRole("link", { name: /skip to content/i })).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
+  });
+});
+
+/**
+ * The figure behind the graph is supplied artwork with holes in it — the gaps
+ * between the arms and the body, and the slivers between locks of hair. Where
+ * it is actually PAINTED can only be answered by something that understands
+ * fill rules, so it is asked here, of the browser, rather than approximated by
+ * flattening the path in a unit test.
+ */
+test.describe("the figure behind the graph", () => {
+  const SPINE = ["head", "ajna", "throat", "g", "sacral", "root"];
+  const WINGS = ["heart", "spleen", "solarPlexus"];
+
+  /** Which gates the figure is painted under, keyed by gate number. */
+  async function paintedGates(page: Page): Promise<Record<number, boolean>> {
+    await generateChart(page);
+    return page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")!;
+      const group = svg.querySelector("g[transform]")!;
+      const path = group.querySelector("path") as SVGPathElement;
+
+      // Undo the placement transform: isPointInFill works in the path's own
+      // coordinates, which are the artwork's, not the BodyGraph's.
+      const [tx, ty, sx, sy] = (group
+        .getAttribute("transform")!
+        .match(/translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+) ([\d.]+)\)/) ?? [])
+        .slice(1)
+        .map(Number) as [number, number, number, number];
+
+      const result: Record<number, boolean> = {};
+      for (const element of svg.querySelectorAll("[data-gate]")) {
+        const label = element.querySelector("text")!;
+        const x = (Number(label.getAttribute("x")) - tx) / sx;
+        const y = (Number(label.getAttribute("y")) - ty) / sy;
+        result[Number(element.getAttribute("data-gate"))] = path.isPointInFill(
+          new DOMPoint(x, y),
+        );
+      }
+      return result;
+    });
+  }
+
+  const gatesOf = (centre: string) =>
+    GATE_DEFINITIONS.filter((g) => g.center === centre).map((g) => g.gate);
+
+  test("backs every centre running down the middle", async ({ page }) => {
+    const painted = await paintedGates(page);
+
+    for (const centre of SPINE) {
+      const missing = gatesOf(centre).filter((gate) => !painted[gate]);
+      expect(missing, `${centre} gates sitting on bare page`).toEqual([]);
+    }
+  });
+
+  test("lets the outer centres graze its edge without floating free", async ({ page }) => {
+    const painted = await paintedGates(page);
+
+    for (const centre of WINGS) {
+      const gates = gatesOf(centre);
+      const on = gates.filter((gate) => painted[gate]);
+      expect(on.length, `${centre} has nothing over the figure`).toBeGreaterThan(0);
+      expect(on.length, `${centre} is entirely swallowed by the figure`).toBeLessThan(
+        gates.length,
+      );
+    }
+  });
+
+  /**
+   * The Spleen and Solar Plexus are laid out as mirrors of each other, so the
+   * gates that fall past the figure should mirror too. If they stop matching,
+   * either the wings have drifted apart or the artwork is no longer sitting
+   * square in the frame — and this catches both without measuring either.
+   */
+  test("drops the same gates either side, proving the figure sits square", async ({ page }) => {
+    const painted = await paintedGates(page);
+    const MIRROR: Array<[number, number]> = [
+      [48, 36],
+      [57, 22],
+      [44, 37],
+      [50, 6],
+      [32, 49],
+      [28, 55],
+      [18, 30],
+    ];
+
+    for (const [left, right] of MIRROR) {
+      expect(painted[left], `gate ${left} against its mirror ${right}`).toBe(painted[right]);
+    }
   });
 });
 

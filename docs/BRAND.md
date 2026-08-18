@@ -88,3 +88,47 @@ failed; the shared preview link had simply stopped matching the application.
 colour, that no other colour reaches the theme, that every text-on-brand pair
 clears 4.5:1, and that no source file references a retired token or declares a
 second theme.
+
+
+## The figure behind the BodyGraph
+
+`components/bodygraph/figure.ts` holds the seated silhouette the project owner
+supplied as an Illustrator SVG export. The path is used **verbatim** — no
+points moved, nothing simplified — and everything about placing it lives in a
+transform beside it, so the artwork can be swapped by replacing one string.
+
+It is nine subpaths: the outer contour, six slivers between locks of hair, and
+the two gaps between the arms and the body. The holes are cut by winding
+direction, so it must be filled with the **default nonzero rule**; forcing
+`evenodd` inverts the hair slivers.
+
+### The scale is not uniform
+
+The artwork's aspect is 0.820 wide-to-tall and the space it fills is 0.735.
+Scaling uniformly leaves two options, both worse:
+
+- fit the **width** and the figure is 747 tall — too short to reach from the
+  Head centre past the Root, leaving the bottom of the Root off the lap;
+- fit the **height** and it is 682 wide, clipping about 31 units of hand off
+  each side.
+
+Widening the BodyGraph viewBox to 682 instead would shrink every centre and
+numeral by 9% at the same container width, which costs legibility on a phone.
+So the figure is stretched about 10% vertically. On a flat decorative
+silhouette that reads as a slightly taller person.
+
+### How it is tested
+
+Nothing about a supplied drawing's *shape* is worth asserting — only where it
+lands, and what it ends up backing.
+
+- `figure.test.ts` checks the placement arithmetic: nine subpaths present and
+  the path unedited, the bounding box landing exactly at 4,4–616,836, and the
+  distortion staying under 15%.
+- `e2e/chart.spec.ts` asks the **browser** what is actually painted, using
+  `SVGGeometryElement.isPointInFill()`, which understands the fill rule and the
+  holes as no flattened approximation would. Every gate of the six centres down
+  the middle must sit on the figure; the Heart, Spleen and Solar Plexus must
+  each keep at least one gate on it and at least one past it; and the gates
+  that fall past it on the left must mirror those on the right, which catches
+  both a drifting wing layout and artwork that is no longer square.

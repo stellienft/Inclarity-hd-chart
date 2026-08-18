@@ -5,8 +5,8 @@ import { CENTER_LABELS, type CenterId } from "@/lib/human-design/types/center";
 
 import { VARIABLE_POSITIONS, type VariableArrow } from "@/lib/human-design/derive/variable";
 
+import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
-  BODY_SILHOUETTE_PATH,
   CENTERS,
   VARIABLE_SLOTS,
   VIEWBOX,
@@ -181,13 +181,15 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       <title id="bodygraph-title">{accessibleTitle}</title>
       <desc id="bodygraph-desc">{description}</desc>
 
-      {/* ---- Decorative body silhouette ---- */}
-      <path
-        d={BODY_SILHOUETTE_PATH}
-        fill={BODY_SILHOUETTE_FILL}
-        fillRule="evenodd"
-        aria-hidden="true"
-      />
+      {/*
+        Decorative body silhouette — supplied artwork, used verbatim and placed
+        by transform. Its holes (the hair slivers and the two arm gaps) are cut
+        by winding direction, so it takes the DEFAULT nonzero fill rule; evenodd
+        inverts them.
+      */}
+      <g transform={figureTransformAttr()} aria-hidden="true">
+        <path d={FIGURE_ARTWORK_PATH} fill={BODY_SILHOUETTE_FILL} />
+      </g>
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">
