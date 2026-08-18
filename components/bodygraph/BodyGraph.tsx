@@ -182,7 +182,12 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       <desc id="bodygraph-desc">{description}</desc>
 
       {/* ---- Decorative body silhouette ---- */}
-      <path d={BODY_SILHOUETTE_PATH} fill={BODY_SILHOUETTE_FILL} aria-hidden="true" />
+      <path
+        d={BODY_SILHOUETTE_PATH}
+        fill={BODY_SILHOUETTE_FILL}
+        fillRule="evenodd"
+        aria-hidden="true"
+      />
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">

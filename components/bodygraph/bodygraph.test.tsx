@@ -10,6 +10,8 @@ import { BodyGraph } from "./BodyGraph";
 import {
   AXIS_X,
   FIGURE_OUTLINE,
+  BODY_ARM_GAP_PATHS,
+  BODY_OUTLINE_PATH,
   BODY_SILHOUETTE_PATH,
   CENTERS,
   GATE_POINTS,
@@ -351,7 +353,10 @@ describe("body silhouette", () => {
     return inside;
   }
 
-  const polygon = flatten(BODY_SILHOUETTE_PATH);
+  // The OUTER contour only. Flattening the whole silhouette would splice the
+  // two arm gaps onto the outline and give one self-crossing polygon.
+  const polygon = flatten(BODY_OUTLINE_PATH);
+  const armGaps = BODY_ARM_GAP_PATHS.map((gap) => flatten(gap));
 
   /** Left and right edge of the figure at a given height, or null above/below it. */
   function span(y: number): { left: number; right: number } | null {
@@ -479,32 +484,60 @@ describe("body silhouette", () => {
     return widest;
   };
 
-  it("has a head, a neck, shoulders, a waist and a lap, in that order", () => {
-    const hair = widthAt(100);
-    const neck = widthAt(232);
-    // Measured across the band rather than at one height: the widest of the
-    // shoulders is the sleeve, not the top of the deltoid, and pinning it to a
-    // single y makes this pass or fail on where the slope happens to be.
-    const shoulders = widestBetween(260, 400);
-    const waist = widthAt(524);
-    const lap = widestBetween(600, 800);
+  it("has a head, then hair, then shoulders, then the lap", () => {
+    // The head is the near-vertical stretch of the outline between its widest
+    // point and the jaw. It is the whole difference between a person and a
+    // cone, and it was lost twice while drawing this: without it the outline
+    // flares straight from crown to shoulder and nobody is in there.
+    const headRate = (widthAt(186) - widthAt(110)) / (186 - 110);
+    const hairRate = (widthAt(292) - widthAt(226)) / (292 - 226);
+    expect(headRate).toBeGreaterThan(0);
+    expect(hairRate / headRate, "hair must flare far faster than the head").toBeGreaterThan(4);
 
-    // A neck at all. Roughly half the head, as on a person.
-    expect(neck / hair).toBeGreaterThan(0.35);
-    expect(neck / hair).toBeLessThan(0.6);
+    // Hair reaches its widest below the head, shoulders below that again.
+    expect(widthAt(292)).toBeGreaterThan(widthAt(186));
+    expect(widthAt(320)).toBeGreaterThan(widthAt(292));
 
-    // Shoulders much wider than the neck, and wider than the head.
-    expect(shoulders).toBeGreaterThan(neck * 2);
-    expect(shoulders).toBeGreaterThan(hair);
+    // And the crossed legs are wider than anything above them.
+    expect(widestBetween(640, 800)).toBeGreaterThan(widestBetween(300, 600));
+  });
 
-    // A waist: narrower than the shoulders above it and the lap below it.
-    // Without this the figure drifts back into a bell. This has already caught
-    // one narrowing of the shoulders that flattened the taper away entirely.
-    expect(waist).toBeLessThan(shoulders);
-    expect(lap).toBeGreaterThan(waist);
+  /**
+   * The gap between each arm and the body.
+   *
+   * These are real holes — the path is drawn with fill-rule evenodd — and they
+   * are what makes the pose read as lotus rather than as a seated bell. Two of
+   * them, mirrored, each closed and wholly within the outline.
+   */
+  it("cuts an arm gap either side, inside the figure and clear of the spine", () => {
+    expect(armGaps).toHaveLength(2);
 
-    // The crossed legs are the widest thing in the drawing.
-    expect(lap).toBeGreaterThan(shoulders);
+    const [right, left] = armGaps as [Point[], Point[]];
+    const bounds = (points: Point[]) => ({
+      minX: Math.min(...points.map((p) => p.x)),
+      maxX: Math.max(...points.map((p) => p.x)),
+      minY: Math.min(...points.map((p) => p.y)),
+      maxY: Math.max(...points.map((p) => p.y)),
+    });
+    const r = bounds(right);
+    const l = bounds(left);
+
+    // Mirrored about the axis.
+    expect(2 * AXIS_X - r.maxX).toBeCloseTo(l.minX, 6);
+    expect(r.minY).toBeCloseTo(l.minY, 6);
+
+    // Every point of both gaps lies inside the outline — a hole that breaks
+    // the edge is a notch, not a gap.
+    for (const point of [...right, ...left]) {
+      expect(contains(polygon, point), `gap point ${point.x},${point.y}`).toBe(true);
+    }
+
+    // And neither may eat into the column of centres running down the middle,
+    // which would leave the spine of the chart sitting on bare page.
+    const SPINE_LEFT = 238;
+    const SPINE_RIGHT = 382;
+    expect(r.minX, "right gap reaches the spine").toBeGreaterThan(SPINE_RIGHT);
+    expect(l.maxX, "left gap reaches the spine").toBeLessThan(SPINE_LEFT);
   });
 
   it("puts its widest point down in the crossed legs", () => {
@@ -512,19 +545,6 @@ describe("body silhouette", () => {
     expect(widest.y).toBeGreaterThan(VIEWBOX.height * 0.75);
     // Wide, but still inside the frame.
     expect(Math.abs(widest.x - AXIS_X)).toBeLessThan(VIEWBOX.width / 2);
-  });
-
-  it("keeps the bob's points beside the jaw, below the widest of the hair", () => {
-    // The two points hang lower than the hair is wide, which is what stops
-    // them reading as horns sticking out of the sides of the head.
-    const widestHair = FIGURE_OUTLINE.reduce((max, p) =>
-      p.y < 160 && p.x > max.x ? p : max,
-    );
-    const lowestHair = FIGURE_OUTLINE.filter((p) => p.y < 240 && p.x > AXIS_X + 40).reduce(
-      (low, p) => (p.y > low.y ? p : low),
-    );
-    expect(lowestHair.y).toBeGreaterThan(widestHair.y + 80);
-    expect(lowestHair.x).toBeLessThan(widestHair.x);
   });
 
   it("has a head tall enough to hold the Head and Ajna centres", () => {
