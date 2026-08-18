@@ -26,7 +26,7 @@ export interface PlanetColumnProps {
  */
 export function PlanetColumn({ activations, side }: PlanetColumnProps) {
   const isDesign = side === "design";
-  const chip = isDesign ? "bg-design" : "bg-ink";
+  const chip = isDesign ? "bg-ochre-deep" : "bg-espresso";
 
   return (
     <section
@@ -36,7 +36,7 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
     >
       <h3
         id={`${side}-column-heading`}
-        className={`mb-2 font-display text-[9px] font-semibold uppercase tracking-[0.12em] text-plum sm:mb-3 sm:text-[11px] sm:tracking-[0.18em] ${
+        className={`mb-2 font-display text-[9px] font-light uppercase tracking-[0.12em] text-dusk sm:mb-3 sm:text-[11px] sm:tracking-[0.18em] ${
           isDesign ? "text-left" : "text-right"
         }`}
       >
@@ -88,12 +88,12 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
                   <>
                     <th
                       scope="row"
-                      className={`w-5 rounded-l-md ${chip} py-1 pl-1.5 text-left font-normal text-white sm:w-9 sm:py-1.5 sm:pl-2.5`}
+                      className={`w-5 rounded-l-md ${chip} py-1 pl-1.5 text-left font-extralight text-white sm:w-9 sm:py-1.5 sm:pl-2.5`}
                     >
                       {glyph}
                     </th>
                     <td
-                      className={`rounded-r-md ${chip} py-1 pr-1.5 text-right font-semibold tabular-nums text-white sm:py-1.5 sm:pr-2.5`}
+                      className={`rounded-r-md ${chip} py-1 pr-1.5 text-right font-light tabular-nums text-white sm:py-1.5 sm:pr-2.5`}
                     >
                       {value}
                     </td>
@@ -101,13 +101,13 @@ export function PlanetColumn({ activations, side }: PlanetColumnProps) {
                 ) : (
                   <>
                     <td
-                      className={`rounded-l-md ${chip} py-1 pl-1.5 text-left font-semibold tabular-nums text-white sm:py-1.5 sm:pl-2.5`}
+                      className={`rounded-l-md ${chip} py-1 pl-1.5 text-left font-light tabular-nums text-white sm:py-1.5 sm:pl-2.5`}
                     >
                       {value}
                     </td>
                     <th
                       scope="row"
-                      className={`w-5 rounded-r-md ${chip} py-1 pr-1.5 text-right font-normal text-white sm:w-9 sm:py-1.5 sm:pr-2.5`}
+                      className={`w-5 rounded-r-md ${chip} py-1 pr-1.5 text-right font-extralight text-white sm:w-9 sm:py-1.5 sm:pr-2.5`}
                     >
                       {glyph}
                     </th>

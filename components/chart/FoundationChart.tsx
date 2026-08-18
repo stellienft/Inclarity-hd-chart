@@ -7,15 +7,15 @@ import type { HumanDesignChart } from "@/lib/human-design/types/chart";
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[minmax(0,11rem)_minmax(0,1fr)] gap-x-4 gap-y-0.5 py-1 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]">
-      <dt className="text-sm font-semibold text-ink">{label}</dt>
-      <dd className="text-sm text-plum">{children}</dd>
+      <dt className="text-sm font-light text-espresso">{label}</dt>
+      <dd className="text-sm text-dusk">{children}</dd>
     </div>
   );
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mt-6 font-display text-base font-semibold text-sagedeep first:mt-0">
+    <h3 className="mt-6 font-display text-base text-dusk first:mt-0">
       {children}
     </h3>
   );
@@ -49,11 +49,11 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
 
   return (
     <section aria-labelledby="foundation-heading" className="print-sheet" data-testid="core-panel">
-      <h2 id="foundation-heading" className="font-display text-2xl text-ink">
+      <h2 id="foundation-heading" className="font-display text-2xl text-espresso">
         Foundation Chart
       </h2>
 
-      <dl className="mt-5 divide-y divide-offgrey/70">
+      <dl className="mt-5 divide-y divide-pebble/70">
         <Row label="Name">{subject.name?.trim() || "—"}</Row>
         <Row label="Birth Date (Local)">
           {local.toFormat("dd LLLL yyyy, HH:mm")} ({formatOffset(subject.offsetMinutes)})
@@ -66,7 +66,7 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
         <Row label="Age">{age} years</Row>
       </dl>
 
-      <dl className="mt-5 divide-y divide-offgrey/70">
+      <dl className="mt-5 divide-y divide-pebble/70">
         <Row label="Type">{chart.type}</Row>
         <Row label="Profile">
           {chart.profile} — {chart.profileName}
@@ -74,7 +74,7 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
         <Row label="Definition">{chart.definition}</Row>
         <Row label="Incarnation Cross">
           {chart.incarnationCross.angle} {chart.incarnationCross.notation}
-          <span className="block text-xs text-plum/60">
+          <span className="block text-xs text-dusk/60">
             Gates only — we do not yet hold a verified cross-name table
           </span>
         </Row>
@@ -86,7 +86,7 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
       </dl>
 
       <SectionHeading>Design</SectionHeading>
-      <dl className="mt-2 divide-y divide-offgrey/70">
+      <dl className="mt-2 divide-y divide-pebble/70">
         <Row label="Design Date (UTC)">{design.toFormat("dd LLLL yyyy, HH:mm:ss")}</Row>
         <Row label="Solar arc">
           88° before the birth Sun, solved to{" "}
@@ -96,7 +96,7 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
       </dl>
 
       <SectionHeading>Variable</SectionHeading>
-      <dl className="mt-2 divide-y divide-offgrey/70">
+      <dl className="mt-2 divide-y divide-pebble/70">
         {VARIABLE_POSITIONS.map((position) => {
           const arrow = chart.variable.arrows[position];
           return (
@@ -107,7 +107,7 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
               {" — "}
               <span aria-hidden="true">{arrow.direction === "left" ? "←" : "→"}</span>{" "}
               {arrow.direction === "left" ? "Left" : "Right"}
-              <span className="block text-xs text-plum/60">
+              <span className="block text-xs text-dusk/60">
                 {arrow.side === "design" ? "Design" : "Personality"}{" "}
                 {position === "determination" || position === "motivation" ? "Sun" : "Nodes"}
                 {arrow.nearToneBoundary
@@ -119,14 +119,14 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
         })}
         <Row label="Notation">
           <span className="tabular-nums">{chart.variable.notation}</span>
-          <span className="block text-xs text-plum/60">
+          <span className="block text-xs text-dusk/60">
             Design pair, then Personality pair. Tone sets the direction: 1–3 left, 4–6 right.
           </span>
         </Row>
       </dl>
 
       <SectionHeading>Channels</SectionHeading>
-      <dl className="mt-2 divide-y divide-offgrey/70">
+      <dl className="mt-2 divide-y divide-pebble/70">
         <Row label={`Channels (${chart.channels.length})`}>
           {chart.channels.length === 0 ? (
             "None — every centre is open"
@@ -143,22 +143,22 @@ export function FoundationChart({ chart }: { chart: HumanDesignChart }) {
         {chart.hangingGates.length > 0 ? (
           <Row label={`Hanging gates (${chart.hangingGates.length})`}>
             <span className="tabular-nums">{chart.hangingGates.join(", ")}</span>
-            <span className="block text-xs text-plum/60">
+            <span className="block text-xs text-dusk/60">
               Activated, but their channel is incomplete, so they define no centre
             </span>
           </Row>
         ) : null}
       </dl>
 
-      <p className="mt-6 border-t border-offgrey pt-4 text-xs leading-relaxed text-plum/70">
-        <span className="font-semibold text-plum">Not shown:</span> the named Variable fields —
+      <p className="mt-6 border-t border-pebble pt-4 text-xs leading-relaxed text-dusk/70">
+        <span className="font-light text-dusk">Not shown:</span> the named Variable fields —
         Brain, Cognition, Sense, Trajectory and the rest — which read the Colour and Tone above
         off tables published in the Human Design literature. The arrows and their numbers are
         calculated here; the names those numbers map to are not, so they are omitted rather than
         guessed. Also absent are Fixing marks (exaltation and detriment), for the same reason.
       </p>
 
-      <p className="mt-3 text-xs leading-relaxed text-plum/70">
+      <p className="mt-3 text-xs leading-relaxed text-dusk/70">
         A Tone is roughly 38 minutes of the Sun&rsquo;s motion, so the arrows depend on the birth
         time far more sharply than the rest of the chart does. Where one sits close to a boundary,
         the chart says so instead of presenting it as settled.

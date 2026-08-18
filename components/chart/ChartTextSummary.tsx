@@ -17,14 +17,14 @@ export function ChartTextSummary({ chart }: { chart: HumanDesignChart }) {
     <section aria-labelledby="summary-heading" className="print-sheet">
       <h2
         id="summary-heading"
-        className="font-display text-sm font-semibold uppercase tracking-[0.14em] text-plum"
+        className="font-display text-sm font-light uppercase tracking-[0.14em] text-dusk"
       >
         Centres and channels
       </h2>
 
       <div className="mt-4 grid gap-6 sm:grid-cols-2">
         <div>
-          <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-plum/70">
+          <h3 className="text-[11px] font-light uppercase tracking-[0.12em] text-dusk/70">
             The nine centres
           </h3>
           <ul className="mt-2 space-y-1 text-sm">
@@ -32,12 +32,12 @@ export function ChartTextSummary({ chart }: { chart: HumanDesignChart }) {
               const defined = definedSet.has(center);
               return (
                 <li key={center} className="flex items-center justify-between gap-3">
-                  <span className="text-ink">{CENTER_LABELS[center]}</span>
+                  <span className="text-espresso">{CENTER_LABELS[center]}</span>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-light ${
                       defined
-                        ? "bg-plum text-warmwhite"
-                        : "border border-offgrey bg-warmwhite text-plum/70"
+                        ? "bg-dusk text-linen"
+                        : "border border-pebble bg-linen text-dusk/70"
                     }`}
                   >
                     {defined ? "Defined" : "Undefined"}
@@ -49,11 +49,11 @@ export function ChartTextSummary({ chart }: { chart: HumanDesignChart }) {
         </div>
 
         <div>
-          <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-plum/70">
+          <h3 className="text-[11px] font-light uppercase tracking-[0.12em] text-dusk/70">
             Defined channels ({chart.channels.length})
           </h3>
           {chart.channels.length === 0 ? (
-            <p className="mt-2 text-sm text-plum/80">
+            <p className="mt-2 text-sm text-dusk/80">
               No channels are defined, so every centre is open. This is the Reflector
               configuration.
             </p>
@@ -61,8 +61,8 @@ export function ChartTextSummary({ chart }: { chart: HumanDesignChart }) {
             <ul className="mt-2 space-y-1 text-sm">
               {chart.channels.map((channel) => (
                 <li key={channel.id} className="flex items-baseline gap-2">
-                  <span className="font-medium tabular-nums text-ink">{channel.id}</span>
-                  <span className="text-plum/80">{channel.name}</span>
+                  <span className="font-light tabular-nums text-espresso">{channel.id}</span>
+                  <span className="text-dusk/80">{channel.name}</span>
                 </li>
               ))}
             </ul>
@@ -70,13 +70,13 @@ export function ChartTextSummary({ chart }: { chart: HumanDesignChart }) {
 
           {chart.hangingGates.length > 0 ? (
             <>
-              <h3 className="mt-5 text-[11px] font-medium uppercase tracking-[0.12em] text-plum/70">
+              <h3 className="mt-5 text-[11px] font-light uppercase tracking-[0.12em] text-dusk/70">
                 Activated gates without a partner ({chart.hangingGates.length})
               </h3>
-              <p className="mt-1.5 text-sm tabular-nums text-plum/80">
+              <p className="mt-1.5 text-sm tabular-nums text-dusk/80">
                 {chart.hangingGates.join(", ")}
               </p>
-              <p className="mt-1 text-xs text-plum/60">
+              <p className="mt-1 text-xs text-dusk/60">
                 These gates are activated but their channel is incomplete, so they do not define
                 their centre.
               </p>

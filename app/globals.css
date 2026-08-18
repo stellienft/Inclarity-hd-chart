@@ -1,28 +1,61 @@
 @import "tailwindcss";
 
 /*
-  Inclarity Space design tokens.
-  Plum, dusty pink, dark grey, brown and off grey, on warm neutral grounds.
+  ============================================================================
+   INCLARITY BRAND TOKENS
+  ============================================================================
+   Taken verbatim from the Inclarity Mini Brand Guide (Indeko Creative, April
+   2026). Every hex below is quoted from that sheet — do not adjust one to make
+   a layout work; change the layout.
+
+   PRIMARY  | use these the most
+     DUSK      #6A5960     SKYLIGHT  #C7E0DF     LINEN   #F4F2ED
+     OCHRE     #A17D6C     PEBBLE    #ECE7E4
+   ACCENT   | for contrast and balance
+     ROSE CLAY #D7B5A9     WHITE     #FFFFFF     ESPRESSO #40393B
+
+   Three shades are DERIVED, not invented: each keeps its parent's hue and
+   saturation and only drops lightness, and each exists for a measured reason
+   recorded beside it. Nothing else is added to the palette.
 */
 @theme {
-  --color-plum: #7a5f60;
-  --color-dusty: #b18f90;
-  --color-ink: #443e3d;
-  --color-brown: #a27e6b;
-  --color-offgrey: #eae7e1;
-  --color-warmwhite: #fbfaf8;
-  --color-parchment: #f4f1ec;
-  --color-design: #8f6a4e;
-  --color-sage: #c9ddd7;
-  --color-sagedeep: #55736c;
+  /* --- Primary ------------------------------------------------------- */
+  --color-dusk: #6a5960;
+  --color-skylight: #c7e0df;
+  --color-linen: #f4f2ed;
+  --color-ochre: #a17d6c;
+  --color-pebble: #ece7e4;
 
-  /* Self-hosted via next/font; the literal names are the fallback if the
-     variables are ever absent (e.g. a bare component render in a test). */
-  --font-display: var(--font-display-loaded), "Bricolage Grotesque", "Inter",
-    ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-sans-loaded), "Inter", ui-sans-serif, system-ui,
-    -apple-system, "Segoe UI", sans-serif;
+  /* --- Accent -------------------------------------------------------- */
+  --color-roseclay: #d7b5a9;
+  --color-espresso: #40393b;
+
+  /*
+    OCHRE darkened 6% in lightness, same hue and saturation.
+
+    White on OCHRE measures 3.71:1 — short of the 4.5:1 that small text needs,
+    and the Design gate markers and planetary chips both put white numerals
+    directly on this fill. This shade measures 4.62:1. It is the ONLY place the
+    palette is bent, and it is bent to keep the chart readable rather than to
+    taste.
+  */
+  --color-ochre-deep: #916d5d;
+
+  /* Outlines, each its parent darkened just enough to read as an edge. */
+  --color-skylight-edge: #a0cac8;
+  --color-pebble-edge: #dbd2cc;
+
+  /*
+    ONE typeface, as the guide specifies: Bricolage Grotesque throughout, Light
+    for display and Extra Light for body. Inter is gone — it was never a brand
+    font. Bricolage is variable (200-800), so both weights come from one file.
+  */
+  --font-display: var(--font-brand-loaded), "Bricolage Grotesque", ui-sans-serif,
+    system-ui, sans-serif;
+  --font-sans: var(--font-brand-loaded), "Bricolage Grotesque", ui-sans-serif,
+    system-ui, sans-serif;
 }
+
 
 :root {
   color-scheme: light;
@@ -32,10 +65,35 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/*
+  ============================================================================
+   TYPE — from the guide's font table
+  ============================================================================
+   Titles     Bricolage Grotesque Light,       tracking -10, line spacing 1.1
+   Headings   Bricolage Grotesque Light,       tracking -10, line spacing 1.1
+   Body       Bricolage Grotesque Extra Light, tracking   0, line spacing 1.0
+   Nav/Button Bricolage Grotesque Light UPPER, tracking  50, line spacing 1.0
+
+   Canva's tracking is thousandths of an em, so -10 is -0.01em and 50 is
+   0.05em. Both are applied exactly.
+
+   TWO THINGS ARE ADAPTED FOR SCREEN, deliberately:
+
+   1. Sizes. The guide's 14/12/8pt is a print scale; 8pt body is about 11px and
+      unreadable on a display. The RATIOS are kept instead — 1.75 : 1.5 : 1 off
+      a 16px body, giving 28px titles and 24px headings.
+   2. Paragraph leading. Canva line spacing 1.0 is roughly 1.2 in CSS, which is
+      far too tight for running text on screen; WCAG 1.4.12 expects body copy
+      to survive 1.5. Headings take the specified 1.1 exactly, and compact UI
+      rows stay tight, but paragraphs are set at 1.6.
+*/
 body {
-  background-color: var(--color-warmwhite);
-  color: var(--color-ink);
+  background-color: var(--color-linen);
+  color: var(--color-espresso);
   font-family: var(--font-sans);
+  font-weight: 200;
+  font-size: 1rem;
+  line-height: 1.6;
   font-feature-settings: "kern", "liga";
   -webkit-font-smoothing: antialiased;
 }
@@ -43,14 +101,38 @@ body {
 h1,
 h2,
 h3,
+h4,
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+/*
+  Extra Light gets spindly below about 14px, so small print steps up to Light.
+  The guide's weight applies to body copy, not to 10px captions.
+*/
+small,
+.text-xs,
+.text-\[10px\],
+.text-\[11px\],
+table {
+  font-weight: 300;
+}
+
+/* Navigation and buttons: upper case, Light, +50 tracking. */
+.brand-nav {
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
 }
 
 /* Visible, high-contrast focus for keyboard users everywhere. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-plum);
+  outline: 2px solid var(--color-dusk);
   outline-offset: 2px;
   border-radius: 3px;
 }

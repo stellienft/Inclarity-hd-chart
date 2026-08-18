@@ -135,7 +135,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
 
   return (
     <div ref={containerRef} className="relative">
-      <label htmlFor={inputId} className="block text-sm font-medium text-ink">
+      <label htmlFor={inputId} className="block text-sm font-light text-espresso">
         Birth place
       </label>
 
@@ -151,8 +151,8 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
         aria-invalid={error ? true : undefined}
         aria-activedescendant={activeIndex >= 0 ? `${listId}-option-${activeIndex}` : undefined}
         placeholder="Brisbane, Queensland, Australia"
-        className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink placeholder:text-plum/40 ${
-          error ? "border-design" : "border-offgrey"
+        className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso placeholder:text-dusk/40 ${
+          error ? "border-ochre-deep" : "border-pebble"
         }`}
         value={query}
         onChange={(event) => {
@@ -165,7 +165,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
         }}
       />
 
-      <p id={statusId} className="mt-1.5 text-xs text-plum/70" aria-live="polite">
+      <p id={statusId} className="mt-1.5 text-xs text-dusk/70" aria-live="polite">
         {loading && !tooShort
           ? "Searching…"
           : value
@@ -176,7 +176,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
       </p>
 
       {error ? (
-        <p id={errorId} role="alert" className="mt-1 text-sm text-design">
+        <p id={errorId} role="alert" className="mt-1 text-sm text-dusk">
           {error}
         </p>
       ) : null}
@@ -186,7 +186,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
           id={listId}
           role="listbox"
           aria-label="Birth place suggestions"
-          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-offgrey bg-white py-1 shadow-lg"
+          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-pebble bg-white py-1 shadow-lg"
         >
           {results.map((result, index) => (
             <li
@@ -195,7 +195,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
               role="option"
               aria-selected={index === activeIndex}
               className={`cursor-pointer px-3 py-2 text-sm ${
-                index === activeIndex ? "bg-parchment text-ink" : "text-ink"
+                index === activeIndex ? "bg-pebble text-espresso" : "text-espresso"
               }`}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseDown={(event) => {
@@ -204,7 +204,7 @@ export function LocationSearch({ value, onChange, error }: LocationSearchProps) 
               }}
             >
               <span className="block">{result.displayName}</span>
-              <span className="block text-xs text-plum/70">{result.timezone}</span>
+              <span className="block text-xs text-dusk/70">{result.timezone}</span>
             </li>
           ))}
         </ul>

@@ -19,20 +19,20 @@ export function Orientation() {
     <section aria-labelledby="orientation-heading" className="print-sheet">
       <h2
         id="orientation-heading"
-        className="font-display text-xl text-ink sm:text-2xl"
+        className="font-display text-xl text-espresso sm:text-2xl"
       >
         A place to begin
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-plum">
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dusk">
         These are starting points for observation rather than conclusions. Human Design is
         something to test against your own experience over time.
       </p>
 
       <dl className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
         {ENTRIES.map(({ term, definition }) => (
-          <div key={term} className="border-t border-offgrey pt-3">
-            <dt className="font-display text-base text-ink">{term}</dt>
-            <dd className="mt-1 text-sm text-plum">{definition}</dd>
+          <div key={term} className="border-t border-pebble pt-3">
+            <dt className="font-display text-base text-espresso">{term}</dt>
+            <dd className="mt-1 text-sm text-dusk">{definition}</dd>
           </div>
         ))}
       </dl>

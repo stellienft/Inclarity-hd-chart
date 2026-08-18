@@ -1,29 +1,27 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Inter } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 
 import { siteConfig } from "@/lib/config/site";
 
 import "./globals.css";
 
 /**
- * Fonts are self-hosted via `next/font`, which downloads and serves them from
- * our own origin at build time. That removes the third-party request to Google
- * Fonts entirely — better for privacy, and it avoids the flash of unstyled text
- * a blocking <link> would cause. Both declare a system fallback stack, so the
- * page stays fully legible if a font fails to load.
+ * ONE typeface, as the brand guide specifies: Bricolage Grotesque, Light for
+ * display and Extra Light for body. Inter has been removed — it was never a
+ * brand font.
+ *
+ * Loaded as the VARIABLE font (no `weight` array), so a single file covers the
+ * whole 200-800 axis and both brand weights arrive in one request.
+ *
+ * Self-hosted via `next/font`, which downloads and serves it from our own
+ * origin at build time. That removes the third-party request to Google Fonts
+ * entirely — better for privacy — and avoids the flash of unstyled text a
+ * blocking <link> would cause. A system fallback stack keeps the page legible
+ * if it fails to load.
  */
-const display = Bricolage_Grotesque({
+const brand = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-display-loaded",
-  display: "swap",
-  fallback: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-sans-loaded",
+  variable: "--font-brand-loaded",
   display: "swap",
   fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
 });
@@ -38,11 +36,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" className={brand.variable}>
       <body>
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-plum focus:px-4 focus:py-2 focus:text-warmwhite"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 brand-nav focus:bg-dusk focus:px-4 focus:py-2 focus:text-linen"
         >
           Skip to content
         </a>

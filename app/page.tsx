@@ -24,13 +24,13 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="mx-auto max-w-2xl">
-            <p className="font-display text-xs uppercase tracking-[0.2em] text-plum/70">
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-dusk/70">
               {siteConfig.brand}
             </p>
-            <h1 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-5xl">
+            <h1 className="mt-4 font-display text-4xl leading-tight text-espresso sm:text-5xl">
               Create your Human Design chart
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-plum">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-dusk">
               Enter your birth details to generate your Human Design BodyGraph and explore the
               mechanics that shape your design.
             </p>
@@ -42,13 +42,13 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="no-print mt-8 border-t border-offgrey">
+      <footer className="no-print mt-8 border-t border-pebble">
         <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-          <p className="max-w-3xl text-xs leading-relaxed text-plum/70">{siteConfig.disclaimer}</p>
-          <p className="mt-3 text-xs text-plum/60">
+          <p className="max-w-3xl text-xs leading-relaxed text-dusk/70">{siteConfig.disclaimer}</p>
+          <p className="mt-3 text-xs text-dusk/60">
             {siteConfig.privacyNote}
           </p>
-          <p className="mt-4 font-display text-xs uppercase tracking-[0.2em] text-plum/50">
+          <p className="mt-4 font-display text-xs uppercase tracking-[0.2em] text-dusk/50">
             {siteConfig.brand}
           </p>
         </div>

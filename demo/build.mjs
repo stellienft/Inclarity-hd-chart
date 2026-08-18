@@ -58,10 +58,12 @@ const fontFace = (family, file, weights) =>
   `${readFileSync(join(root, "demo/fonts", file)).toString("base64")}) format('woff2');}`;
 
 const fonts = [
-  fontFace("Bricolage Grotesque", "bricolage-grotesque.woff2", "400 700"),
-  fontFace("Inter", "inter.woff2", "400 600"),
-  ":root{--font-display-loaded:'Bricolage Grotesque';--font-sans-loaded:'Inter';}",
-  "html,body{background:#FBFAF8;}",
+  // One family, the full variable weight axis (200-800) from a single file,
+  // so the brand's Light and Extra Light both resolve without a second
+  // request. This is the same font next/font serves in the app.
+  fontFace("Bricolage Grotesque", "bricolage-grotesque.woff2", "200 800"),
+  ":root{--font-brand-loaded:'Bricolage Grotesque';}",
+  "html,body{background:#F4F2ED;}",
 ].join("\n");
 
 const html = [

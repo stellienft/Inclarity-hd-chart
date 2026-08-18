@@ -26,26 +26,26 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
   return (
     <div className="space-y-14">
       {/* ---- Header ---- */}
-      <header className="print-sheet border-b border-offgrey pb-8">
-        <p className="font-display text-xs uppercase tracking-[0.2em] text-plum/70">
+      <header className="print-sheet border-b border-pebble pb-8">
+        <p className="font-display text-xs uppercase tracking-[0.2em] text-dusk/70">
           {siteConfig.brand} · Human Design Chart
         </p>
-        <h1 className="mt-3 font-display text-3xl text-ink sm:text-4xl">
+        <h1 className="mt-3 font-display text-3xl text-espresso sm:text-4xl">
           {name ? name : "Your Human Design"}
         </h1>
-        <p className="mt-2 text-sm text-plum">{formatBirthLine(chart)}</p>
+        <p className="mt-2 text-sm text-dusk">{formatBirthLine(chart)}</p>
       </header>
 
       {/* ---- Anything the engine wants the reader to know ---- */}
       {chart.calculationMeta.warnings.length > 0 ? (
         <div
           role="note"
-          className="print-sheet rounded-md border border-brown/40 bg-brown/5 px-5 py-4"
+          className="print-sheet rounded-md border border-ochre/40 bg-ochre/5 px-5 py-4"
         >
-          <h2 className="font-display text-sm font-semibold text-ink">
+          <h2 className="font-display text-sm font-light text-espresso">
             Worth knowing about this chart
           </h2>
-          <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-plum">
+          <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-dusk">
             {chart.calculationMeta.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
@@ -93,19 +93,19 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
           </div>
         </div>
 
-        <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-plum/80">
+        <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-dusk/80">
           <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-ink" />
+            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-espresso" />
             Personality (conscious)
           </span>
           <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-design" />
+            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-ochre-deep" />
             Design (unconscious)
           </span>
           <span className="inline-flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="inline-block h-1 w-6 rounded-full bg-design"
+              className="inline-block h-1 w-6 rounded-full bg-ochre-deep"
               style={{
                 backgroundImage:
                   "repeating-linear-gradient(90deg,#4A403A 0 4px,transparent 4px 8px)",
@@ -125,33 +125,33 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
       {/* ---- Call to action ---- */}
       <section
         aria-labelledby="cta-heading"
-        className="no-print rounded-lg bg-parchment px-6 py-8 sm:px-10 sm:py-10"
+        className="no-print rounded-lg bg-pebble px-6 py-8 sm:px-10 sm:py-10"
       >
-        <h2 id="cta-heading" className="font-display text-xl text-ink sm:text-2xl">
+        <h2 id="cta-heading" className="font-display text-xl text-espresso sm:text-2xl">
           Want to explore your chart more deeply?
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-plum">
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dusk">
           Your chart contains much more than a set of labels. In a personalised Inclarity Space
           session, we explore how these mechanics show up within the context of your life.
         </p>
         <div className="mt-6 flex flex-wrap gap-4">
           <a
             href={siteConfig.bookingUrl}
-            className="rounded-md bg-plum px-6 py-3 font-display text-base font-medium text-warmwhite transition-opacity hover:opacity-90"
+            className="rounded-md bg-dusk px-6 py-3 font-display text-base font-light text-linen transition-opacity hover:opacity-90"
           >
             Explore a 1:1
           </a>
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-md border border-plum px-6 py-3 font-display text-base font-medium text-plum transition-colors hover:bg-plum/5"
+            className="rounded-md border border-dusk px-6 py-3 font-display text-base font-light text-dusk transition-colors hover:bg-dusk/5"
           >
             Print or save as PDF
           </button>
           <button
             type="button"
             onClick={onReset}
-            className="rounded-md px-6 py-3 font-display text-base font-medium text-plum underline underline-offset-4 hover:opacity-80"
+            className="rounded-md px-6 py-3 font-display text-base font-light text-dusk underline underline-offset-4 hover:opacity-80"
           >
             Create another chart
           </button>
@@ -159,7 +159,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
       </section>
 
       {/* ---- Print-only footer ---- */}
-      <div className="print-only border-t border-offgrey pt-4 text-[8pt] text-plum">
+      <div className="print-only border-t border-pebble pt-4 text-[8pt] text-dusk">
         <p>
           {siteConfig.brand} — Human Design Chart Generator · {siteConfig.bookingUrl}
         </p>

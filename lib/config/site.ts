@@ -6,6 +6,8 @@
  */
 export const siteConfig = {
   brand: "Inclarity Space",
+  /** The tagline set beneath the wordmark in the brand guide. */
+  tagline: "An orientation back to self",
   product: "Human Design Chart Generator",
   bookingUrl: process.env.NEXT_PUBLIC_INCLARITY_BOOKING_URL ?? "https://inclarity.space",
   disclaimer:

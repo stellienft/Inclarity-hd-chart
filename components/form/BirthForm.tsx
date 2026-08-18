@@ -76,8 +76,8 @@ export function BirthForm({ onChart }: BirthFormProps) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6" data-testid="birth-form">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-ink">
-          Name <span className="font-normal text-plum/60">(optional)</span>
+        <label htmlFor="name" className="block text-sm font-light text-espresso">
+          Name <span className="font-extralight text-dusk/60">(optional)</span>
         </label>
         <input
           id="name"
@@ -86,14 +86,14 @@ export function BirthForm({ onChart }: BirthFormProps) {
           maxLength={80}
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="mt-1.5 w-full rounded-md border border-offgrey bg-white px-3 py-2.5 text-ink placeholder:text-plum/40"
+          className="mt-1.5 w-full rounded-md border border-pebble bg-white px-3 py-2.5 text-espresso placeholder:text-dusk/40"
           placeholder="How you'd like the chart addressed"
         />
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-ink">
+          <label htmlFor="date" className="block text-sm font-light text-espresso">
             Birth date
           </label>
           <input
@@ -106,19 +106,19 @@ export function BirthForm({ onChart }: BirthFormProps) {
             onChange={(event) => setDate(event.target.value)}
             aria-invalid={errors.date ? true : undefined}
             aria-describedby={errors.date ? "date-error" : undefined}
-            className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink ${
-              errors.date ? "border-design" : "border-offgrey"
+            className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso ${
+              errors.date ? "border-ochre-deep" : "border-pebble"
             }`}
           />
           {errors.date ? (
-            <p id="date-error" role="alert" className="mt-1 text-sm text-design">
+            <p id="date-error" role="alert" className="mt-1 text-sm text-dusk">
               {errors.date}
             </p>
           ) : null}
         </div>
 
         <div>
-          <label htmlFor="time" className="block text-sm font-medium text-ink">
+          <label htmlFor="time" className="block text-sm font-light text-espresso">
             Birth time
           </label>
           <input
@@ -129,16 +129,16 @@ export function BirthForm({ onChart }: BirthFormProps) {
             onChange={(event) => setTime(event.target.value)}
             aria-invalid={errors.time ? true : undefined}
             aria-describedby={`time-help${errors.time ? " time-error" : ""}`}
-            className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink ${
-              errors.time ? "border-design" : "border-offgrey"
+            className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso ${
+              errors.time ? "border-ochre-deep" : "border-pebble"
             }`}
           />
-          <p id="time-help" className="mt-1.5 text-xs text-plum/70">
+          <p id="time-help" className="mt-1.5 text-xs text-dusk/70">
             Your birth time can affect the details of your chart. Use the most accurate time
             available to you.
           </p>
           {errors.time ? (
-            <p id="time-error" role="alert" className="mt-1 text-sm text-design">
+            <p id="time-error" role="alert" className="mt-1 text-sm text-dusk">
               {errors.time}
             </p>
           ) : null}
@@ -152,7 +152,7 @@ export function BirthForm({ onChart }: BirthFormProps) {
       />
 
       {errors.form ? (
-        <p role="alert" className="rounded-md border border-design/30 bg-design/5 px-4 py-3 text-sm text-design">
+        <p role="alert" className="rounded-md border border-ochre-deep/30 bg-ochre-deep/5 px-4 py-3 text-sm text-dusk">
           {errors.form}
         </p>
       ) : null}
@@ -161,11 +161,11 @@ export function BirthForm({ onChart }: BirthFormProps) {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-plum px-6 py-3 font-display text-base font-medium text-warmwhite transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-dusk px-6 py-3 font-display text-base font-light text-linen transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Calculating…" : "Generate my chart"}
         </button>
-        <p className="text-xs text-plum/70">{siteConfig.privacyNote}</p>
+        <p className="text-xs text-dusk/70">{siteConfig.privacyNote}</p>
       </div>
 
       <p aria-live="polite" className="sr-only">

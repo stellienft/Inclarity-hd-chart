@@ -61,7 +61,7 @@ function LocationPicker({
 
   return (
     <div ref={containerRef} className="relative">
-      <label htmlFor="place" className="block text-sm font-medium text-ink">
+      <label htmlFor="place" className="block text-sm font-light text-espresso">
         Birth place
       </label>
       <input
@@ -75,8 +75,8 @@ function LocationPicker({
         aria-activedescendant={activeIndex >= 0 ? `place-option-${activeIndex}` : undefined}
         aria-describedby="place-help"
         placeholder="Brisbane, Queensland, Australia"
-        className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink placeholder:text-plum/40 ${
-          error ? "border-design" : "border-offgrey"
+        className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso placeholder:text-dusk/40 ${
+          error ? "border-ochre-deep" : "border-pebble"
         }`}
         value={query}
         onChange={(event) => {
@@ -106,13 +106,13 @@ function LocationPicker({
           }
         }}
       />
-      <p id="place-help" className="mt-1.5 text-xs text-plum/70" aria-live="polite">
+      <p id="place-help" className="mt-1.5 text-xs text-dusk/70" aria-live="polite">
         {value
           ? `Selected: ${value.displayName} · timezone ${value.timezone}`
           : `This shared build searches ${STATIC_CITY_COUNT} major cities offline. The live app searches worldwide.`}
       </p>
       {error ? (
-        <p role="alert" className="mt-1 text-sm text-design">
+        <p role="alert" className="mt-1 text-sm text-dusk">
           {error}
         </p>
       ) : null}
@@ -122,7 +122,7 @@ function LocationPicker({
           id="place-listbox"
           role="listbox"
           aria-label="Birth place suggestions"
-          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-offgrey bg-white py-1 shadow-lg"
+          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-pebble bg-white py-1 shadow-lg"
         >
           {results.map((result, index) => (
             <li
@@ -131,7 +131,7 @@ function LocationPicker({
               role="option"
               aria-selected={index === activeIndex}
               className={`cursor-pointer px-3 py-2 text-sm ${
-                index === activeIndex ? "bg-parchment text-ink" : "text-ink"
+                index === activeIndex ? "bg-pebble text-espresso" : "text-espresso"
               }`}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseDown={(event) => {
@@ -140,7 +140,7 @@ function LocationPicker({
               }}
             >
               <span className="block">{result.displayName}</span>
-              <span className="block text-xs text-plum/70">{result.timezone}</span>
+              <span className="block text-xs text-dusk/70">{result.timezone}</span>
             </li>
           ))}
         </ul>
@@ -199,21 +199,21 @@ function App() {
           </div>
         ) : (
           <div className="mx-auto max-w-2xl">
-            <p className="font-display text-xs uppercase tracking-[0.2em] text-plum/70">
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-dusk/70">
               Inclarity Space
             </p>
-            <h1 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-5xl">
+            <h1 className="mt-4 font-display text-4xl leading-tight text-espresso sm:text-5xl">
               Create your Human Design chart
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-plum">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-dusk">
               Enter your birth details to generate your Human Design BodyGraph and explore the
               mechanics that shape your design.
             </p>
 
             <form onSubmit={onSubmit} noValidate className="mt-12 space-y-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-ink">
-                  Name <span className="font-normal text-plum/60">(optional)</span>
+                <label htmlFor="name" className="block text-sm font-light text-espresso">
+                  Name <span className="font-extralight text-dusk/60">(optional)</span>
                 </label>
                 <input
                   id="name"
@@ -222,13 +222,13 @@ function App() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="How you'd like the chart addressed"
-                  className="mt-1.5 w-full rounded-md border border-offgrey bg-white px-3 py-2.5 text-ink placeholder:text-plum/40"
+                  className="mt-1.5 w-full rounded-md border border-pebble bg-white px-3 py-2.5 text-espresso placeholder:text-dusk/40"
                 />
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-ink">
+                  <label htmlFor="date" className="block text-sm font-light text-espresso">
                     Birth date
                   </label>
                   <input
@@ -239,18 +239,18 @@ function App() {
                     max="2100-12-31"
                     onChange={(e) => setDate(e.target.value)}
                     aria-invalid={errors.date ? true : undefined}
-                    className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink ${
-                      errors.date ? "border-design" : "border-offgrey"
+                    className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso ${
+                      errors.date ? "border-ochre-deep" : "border-pebble"
                     }`}
                   />
                   {errors.date ? (
-                    <p role="alert" className="mt-1 text-sm text-design">
+                    <p role="alert" className="mt-1 text-sm text-dusk">
                       {errors.date}
                     </p>
                   ) : null}
                 </div>
                 <div>
-                  <label htmlFor="time" className="block text-sm font-medium text-ink">
+                  <label htmlFor="time" className="block text-sm font-light text-espresso">
                     Birth time
                   </label>
                   <input
@@ -260,16 +260,16 @@ function App() {
                     onChange={(e) => setTime(e.target.value)}
                     aria-invalid={errors.time ? true : undefined}
                     aria-describedby="time-help"
-                    className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-ink ${
-                      errors.time ? "border-design" : "border-offgrey"
+                    className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso ${
+                      errors.time ? "border-ochre-deep" : "border-pebble"
                     }`}
                   />
-                  <p id="time-help" className="mt-1.5 text-xs text-plum/70">
+                  <p id="time-help" className="mt-1.5 text-xs text-dusk/70">
                     Your birth time can affect the details of your chart. Use the most accurate
                     time available to you.
                   </p>
                   {errors.time ? (
-                    <p role="alert" className="mt-1 text-sm text-design">
+                    <p role="alert" className="mt-1 text-sm text-dusk">
                       {errors.time}
                     </p>
                   ) : null}
@@ -285,7 +285,7 @@ function App() {
               {errors.form ? (
                 <p
                   role="alert"
-                  className="rounded-md border border-design/30 bg-design/5 px-4 py-3 text-sm text-design"
+                  className="rounded-md border border-ochre-deep/30 bg-ochre-deep/5 px-4 py-3 text-sm text-dusk"
                 >
                   {errors.form}
                 </p>
@@ -295,26 +295,26 @@ function App() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-md bg-plum px-6 py-3 font-display text-base font-medium text-warmwhite transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className="rounded-md bg-dusk px-6 py-3 font-display text-base font-light text-linen transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
                   {busy ? "Calculating…" : "Generate my chart"}
                 </button>
-                <p className="text-xs text-plum/70">
+                <p className="text-xs text-dusk/70">
                   Everything runs in your browser. Nothing is sent anywhere or stored.
                 </p>
               </div>
             </form>
 
-            <div className="mt-10 rounded-md border border-offgrey bg-parchment/50 px-5 py-4">
-              <h2 className="font-display text-sm font-semibold text-ink">Try one</h2>
-              <p className="mt-1.5 text-sm text-plum">
+            <div className="mt-10 rounded-md border border-pebble bg-pebble/50 px-5 py-4">
+              <h2 className="font-display text-sm font-light text-espresso">Try one</h2>
+              <p className="mt-1.5 text-sm text-dusk">
                 9 April 1948, 00:05, Montreal — the founder of Human Design. The engine returns
                 Manifestor, Splenic authority, 5/1 profile and cross gates 51/57 | 61/62, matching
                 his published chart.
               </p>
               <button
                 type="button"
-                className="mt-3 text-sm font-medium text-plum underline underline-offset-4"
+                className="mt-3 text-sm font-light text-dusk underline underline-offset-4"
                 onClick={() => {
                   setName("Ra Uru Hu");
                   setDate("1948-04-09");
@@ -331,14 +331,14 @@ function App() {
         )}
       </main>
 
-      <footer className="no-print mt-8 border-t border-offgrey">
+      <footer className="no-print mt-8 border-t border-pebble">
         <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-          <p className="max-w-3xl text-xs leading-relaxed text-plum/70">
+          <p className="max-w-3xl text-xs leading-relaxed text-dusk/70">
             Human Design is a framework for personal reflection and experimentation. It is not
             scientifically validated and should not replace medical, psychological, legal or
             financial advice.
           </p>
-          <p className="mt-3 max-w-3xl text-xs text-plum/60">
+          <p className="mt-3 max-w-3xl text-xs text-dusk/60">
             Shared preview of the Inclarity Space chart generator. The calculation engine is
             identical to the live application; birth-place search is limited to{" "}
             {STATIC_CITY_COUNT} major cities because this page runs without a server.

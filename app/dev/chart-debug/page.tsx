@@ -37,9 +37,9 @@ const DEFAULTS = {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[minmax(0,240px)_1fr] gap-4 border-b border-offgrey py-1.5">
-      <dt className="text-plum">{label}</dt>
-      <dd className="font-mono text-[13px] break-all text-ink">{value}</dd>
+    <div className="grid grid-cols-[minmax(0,240px)_1fr] gap-4 border-b border-pebble py-1.5">
+      <dt className="text-dusk">{label}</dt>
+      <dd className="font-mono text-[13px] break-all text-espresso">{value}</dd>
     </div>
   );
 }
@@ -72,14 +72,14 @@ export default async function ChartDebugPage({
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 text-sm">
-      <h1 className="font-display text-2xl text-ink">Chart calculation inspector</h1>
-      <p className="mt-2 text-plum">
+      <h1 className="font-display text-2xl text-espresso">Chart calculation inspector</h1>
+      <p className="mt-2 text-dusk">
         Development tool. Override with query parameters:{" "}
         <code className="font-mono text-xs">?date=&amp;time=&amp;lat=&amp;lon=&amp;tz=&amp;place=</code>
       </p>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-ink">1 · Birth data conversion</h2>
+        <h2 className="font-display text-lg text-espresso">1 · Birth data conversion</h2>
         <dl className="mt-3">
           <Row label="Local date / time (input)" value={`${params.date} ${params.time}`} />
           <Row label="Requested timezone" value={params.tz} />
@@ -97,7 +97,7 @@ export default async function ChartDebugPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-ink">2 · Design moment (88° solar arc)</h2>
+        <h2 className="font-display text-lg text-espresso">2 · Design moment (88° solar arc)</h2>
         <dl className="mt-3">
           <Row label="Birth Sun longitude" value={`${solver.birthSunLongitude.toFixed(9)}°`} />
           <Row label="Target Sun longitude" value={`${solver.targetSunLongitude.toFixed(9)}°`} />
@@ -115,11 +115,11 @@ export default async function ChartDebugPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-ink">3 · Raw longitudes and gate mapping</h2>
+        <h2 className="font-display text-lg text-espresso">3 · Raw longitudes and gate mapping</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full border-collapse text-left font-mono text-[12px]">
             <thead>
-              <tr className="border-b border-plum/40 text-plum">
+              <tr className="border-b border-dusk/40 text-dusk">
                 <th className="py-1.5 pr-4">Body</th>
                 <th className="py-1.5 pr-4">Design longitude</th>
                 <th className="py-1.5 pr-4">Design</th>
@@ -133,15 +133,15 @@ export default async function ChartDebugPage({
                 const d = chart.design[planet];
                 const p = chart.personality[planet];
                 return (
-                  <tr key={planet} className="border-b border-offgrey">
-                    <td className="py-1 pr-4 text-plum">{PLANET_LABELS[planet]}</td>
+                  <tr key={planet} className="border-b border-pebble">
+                    <td className="py-1 pr-4 text-dusk">{PLANET_LABELS[planet]}</td>
                     <td className="py-1 pr-4">{d.longitude.toFixed(6)}°</td>
-                    <td className="py-1 pr-4 text-ink">
+                    <td className="py-1 pr-4 text-espresso">
                       {formatGateLine(d)}
                       {d.retrograde ? " ℞" : ""}
                     </td>
                     <td className="py-1 pr-4">{p.longitude.toFixed(6)}°</td>
-                    <td className="py-1 pr-4 text-ink">
+                    <td className="py-1 pr-4 text-espresso">
                       {formatGateLine(p)}
                       {p.retrograde ? " ℞" : ""}
                     </td>
@@ -155,7 +155,7 @@ export default async function ChartDebugPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-ink">4 · Derivation</h2>
+        <h2 className="font-display text-lg text-espresso">4 · Derivation</h2>
         <dl className="mt-3">
           <Row label="Active gates" value={chart.activeGates.map((g) => g.gate).join(", ")} />
           <Row label="Hanging gates" value={chart.hangingGates.join(", ") || "(none)"} />
@@ -190,7 +190,7 @@ export default async function ChartDebugPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="font-display text-lg text-ink">5 · Calculation metadata</h2>
+        <h2 className="font-display text-lg text-espresso">5 · Calculation metadata</h2>
         <dl className="mt-3">
           <Row label="Ephemeris provider" value={chart.calculationMeta.ephemerisProvider} />
           <Row label="Node convention" value={chart.calculationMeta.nodeConvention} />

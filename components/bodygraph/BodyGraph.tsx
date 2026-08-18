@@ -31,6 +31,7 @@ import {
   GATE_MARKER_RING,
   GATE_MARKER_RING_WIDTH,
   GATE_MARKER_TEXT,
+  GATE_NUMERAL_WEIGHT,
   ON_DEFINED_TEXT,
   ON_UNDEFINED_TEXT,
   PERSONALITY_COLOR,
@@ -124,10 +125,10 @@ function VariableArrowGlyph({ arrow, color }: { arrow: VariableArrow; color: str
         fill={color}
         aria-hidden="true"
       >
-        <tspan fontSize={22} fontWeight={700}>
+        <tspan fontSize={22} fontWeight={400}>
           {arrow.color}
         </tspan>
-        <tspan fontSize={14} fontWeight={600} dy={7}>
+        <tspan fontSize={14} fontWeight={400} dy={7}>
           {arrow.tone}
         </tspan>
       </text>
@@ -295,7 +296,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       </g>
 
       {/* ---- Gates ---- */}
-      <g fontSize={10.5} fontWeight={600} textAnchor="middle" dominantBaseline="central">
+      <g fontSize={10.5} textAnchor="middle" dominantBaseline="central">
         {GATE_DEFINITIONS.map(({ gate, center, name }) => {
           const state = gateState.get(gate);
           const style = styleFor(state?.personality ?? false, state?.design ?? false);
@@ -339,7 +340,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                       ? ON_DEFINED_TEXT
                       : ON_UNDEFINED_TEXT
                 }
-                fontWeight={active ? 700 : 500}
+                fontWeight={active ? GATE_NUMERAL_WEIGHT.active : GATE_NUMERAL_WEIGHT.inactive}
                 aria-hidden="true"
               >
                 {gate}
