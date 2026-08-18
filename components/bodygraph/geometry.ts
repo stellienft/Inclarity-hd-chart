@@ -139,13 +139,30 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   15: { x: 274, y: 462 },
   10: { x: 238, y: 430 },
 
-  // Heart / Ego — each gate on the edge facing the centre its channel runs to:
-  // 51 at the left vertex for the G, 21 up the top edge for the Throat, 26 on
-  // the bottom edge for the Spleen, 40 on the right edge for the Solar Plexus.
-  51: { x: 386, y: 478 },
-  21: { x: 436.6, y: 454.9 },
+  /*
+   * Heart / Ego — read around the triangle the way the reference template
+   * draws it: 21 at the top vertex, 51 partway down the upper-left edge, then
+   * 26 and 40 on the two lower edges.
+   *
+   * That order is what keeps the four channels untangled. 21 meets the Throat
+   * at 45 (370, 334) and 51 the G at 25 (382, 430) — both up and to the left,
+   * but 45 sits a hundred units higher, so the gate reaching it has to start
+   * higher too or the two arcs swap sides. Below them 26 leaves for the
+   * Spleen's 44, far out to the left, and 40 for the Solar Plexus's 37, out to
+   * the right, so they part company at once.
+   *
+   * 26 is the one gate that cannot take the template's position. The template
+   * puts it on the left vertex, at (386, 478); from there its channel to 44
+   * has to cross x = 346 — where 29-46 runs as a straight vertical from y 462
+   * to 540 — and it only has forty units of width in which to drop below 540.
+   * Swept: no bow value clears it. Every position from t = 0.27 down the lower
+   * edge is clean, so 26 sits at the first of them, as far toward the vertex
+   * as the drawing allows.
+   */
+  21: { x: 478, y: 436 },
+  51: { x: 436.6, y: 454.9 },
   26: { x: 411.8, y: 489.8 },
-  40: { x: 478, y: 486.4 },
+  40: { x: 478, y: 520 },
 
   /*
    * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
@@ -241,11 +258,13 @@ const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
   49: { x: 512.9, y: 606.9 },
   55: { x: 539.2, y: 619.6 },
   30: { x: 565.4, y: 632.6 },
-  // Heart
-  51: { x: 410.2, y: 478 },
-  21: { x: 440.9, y: 464.2 },
-  26: { x: 427.7, y: 486 },
-  40: { x: 467.9, y: 483.6 },
+  // Heart — 21 and 40 sit on their corner's angle bisector, which is the only
+  // direction that clears both edges of a vertex at once; 51 and 26 come
+  // straight in along the normal of the edge they sit on.
+  21: { x: 468.5, y: 450.8 },
+  51: { x: 441, y: 464.5 },
+  26: { x: 416.2, y: 480.2 },
+  40: { x: 468.5, y: 505.2 },
 };
 
 const CENTER_MIDPOINTS: Record<CenterId, Point> = {
