@@ -192,49 +192,81 @@ describe("BodyGraph geometry", () => {
   });
 
   /**
-   * How many pairs of channels cross, counting the RENDERED curves rather than
-   * the straight chords — the bow is what makes a set of arcs nest or tangle,
+   * Which pairs of channels cross, counting the RENDERED curves rather than the
+   * straight chords — the curvature is what makes a set of arcs nest or tangle,
    * and the chord test above cannot see it.
    *
-   * Two crossings are expected, and both are forced by the layout rather than
-   * by the routing.
+   * Every crossing here belongs to 26-44, and the reference artwork draws all
+   * of them. 26 sits on the Heart and 44 out on the Spleen, so the channel has
+   * to traverse the corridor between the G's lower vertex and the Sacral's top
+   * edge, straight across the three bars running down it.
    *
-   * 10-57 x 20-34: the 20-34 channel has to swing left of the G's left vertex
-   * to get past it, which encloses gate 10 sitting on that vertex, while gate
-   * 57 is out in the Spleen beyond the arc. Any path from 10 to 57 crosses it.
+   * The artwork says so in its own line work: it leaves two small counters
+   * there — the subpaths at (384, 879) and (426, 878), seven units wide, far
+   * too small to be channels — which are the slivers of 26-44 visible BETWEEN
+   * the bars it crosses. Their height is the check: the reference crosses that
+   * corridor at y = 878, and the arc drawn here crosses it at y = 877.
    *
-   * 26-44 x 29-46: gate 26 sits on the Heart, to the right of the column that
-   * 29-46 runs down, and gate 44 sits on the Spleen, far to the left of it and
-   * below. Any continuous path between them crosses that column somewhere, and
-   * the only heights at which it would miss 29-46 are above the G's lower edge
-   * or below the Sacral's upper one — neither reachable from the Heart. The
-   * reference artwork draws this crossing too: it leaves two small counters in
-   * the line work where 26-44 passes over the G-to-Sacral bars.
-   *
-   * Nothing else may cross. The parameter sweep behind BOW_FACTOR found six
-   * crossings at low bow values, all of them arcs flattened onto one another.
+   * Everything else nests. That is only achievable because the channels are
+   * circular arcs — concentric circles nest by construction, where the
+   * quadratic Beziers this replaced could not get below two crossings at any
+   * bow setting, because each bulges hardest at its own midpoint and so splays
+   * away from its neighbours in a shared corridor.
    */
-  it("crosses exactly the two pairs the layout forces", () => {
+  it("crosses only where the reference artwork crosses", () => {
     type Segmented = { id: string; gates: readonly [number, number]; points: Point[] };
 
+    /**
+     * Sample a rendered channel path.
+     *
+     * The renderer emits either "M x0 y0 L x1 y1" or an SVG arc,
+     * "M x0 y0 A r r 0 0 sweep x1 y1". The arc is reconstructed from the path
+     * STRING rather than from the geometry module, so this test still sees what
+     * actually gets drawn. Its centre is one of the two points at height h off
+     * the chord's midpoint, and with the large-arc flag at 0 exactly one of
+     * them sweeps start to end through at most pi in the direction the sweep
+     * flag names.
+     */
     const sample = (path: string): Point[] => {
       const numbers = (path.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
-      if (!path.includes("Q")) {
+
+      if (!path.includes("A")) {
         const [x0, y0, x1, y1] = numbers;
         return [
           { x: x0!, y: y0! },
           { x: x1!, y: y1! },
         ];
       }
-      const [x0, y0, cx, cy, x1, y1] = numbers;
+
+      const [x0, y0, r, , , , sweep, x1, y1] = numbers;
+      const dx = x1! - x0!;
+      const dy = y1! - y0!;
+      const chord = Math.hypot(dx, dy);
+      const mx = (x0! + x1!) / 2;
+      const my = (y0! + y1!) / 2;
+      const h = Math.sqrt(Math.max(r! * r! - (chord * chord) / 4, 0));
+      const nx = -dy / chord;
+      const ny = dx / chord;
+
+      const arcFrom = (cx: number, cy: number) => {
+        const a0 = Math.atan2(y0! - cy, x0! - cx);
+        const a1 = Math.atan2(y1! - cy, x1! - cx);
+        let delta = a1 - a0;
+        if (sweep === 1 && delta < 0) delta += 2 * Math.PI;
+        if (sweep === 0 && delta > 0) delta -= 2 * Math.PI;
+        return { cx, cy, a0, delta };
+      };
+
+      const candidates = [
+        arcFrom(mx + nx * h, my + ny * h),
+        arcFrom(mx - nx * h, my - ny * h),
+      ];
+      const arc = candidates.find((c) => Math.abs(c.delta) <= Math.PI + 1e-9) ?? candidates[0]!;
+
       const points: Point[] = [];
-      for (let step = 0; step <= 48; step += 1) {
-        const t = step / 48;
-        const u = 1 - t;
-        points.push({
-          x: u * u * x0! + 2 * u * t * cx! + t * t * x1!,
-          y: u * u * y0! + 2 * u * t * cy! + t * t * y1!,
-        });
+      for (let step = 0; step <= 64; step += 1) {
+        const angle = arc.a0 + (arc.delta * step) / 64;
+        points.push({ x: arc.cx + r! * Math.cos(angle), y: arc.cy + r! * Math.sin(angle) });
       }
       return points;
     };
@@ -248,7 +280,7 @@ describe("BodyGraph geometry", () => {
       id: definition.id,
       gates: definition.gates,
       points: sample(
-        channelPath(getGatePoint(definition.gates[0]), getGatePoint(definition.gates[1])),
+        channelPath(getGatePoint(definition.gates[0]), getGatePoint(definition.gates[1]), definition.id),
       ),
     }));
 
@@ -273,7 +305,17 @@ describe("BodyGraph geometry", () => {
       }
     }
 
-    expect(crossing).toEqual(["10-57 x 20-34", "26-44 x 29-46"]);
+    expect(crossing).toEqual([
+      // In definition order. 26-44 over the three bars running G to Sacral
+      // (2-14, 5-15, 29-46) and over the three channels arriving at the
+      // Sacral's left edge (10-34, 20-34, 34-57).
+      "2-14 x 26-44",
+      "5-15 x 26-44",
+      "10-34 x 26-44",
+      "20-34 x 26-44",
+      "26-44 x 29-46",
+      "26-44 x 34-57",
+    ]);
   });
 
   /**

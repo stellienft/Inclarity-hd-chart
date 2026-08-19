@@ -218,7 +218,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           if (!active) {
             // Two strokes: a faint wider edge, then white on top. That reads as
             // an empty "track" both over the pale silhouette and over the page.
-            const d = channelPath(a, b);
+            const d = channelPath(a, b, definition.id);
             return (
               <g key={definition.id} data-channel={definition.id} data-active="false">
                 <path
@@ -236,7 +236,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const sidesB = active.activation[gateB] ?? { personality: false, design: false };
           const styleA = styleFor(sidesA.personality, sidesA.design);
           const styleB = styleFor(sidesB.personality, sidesB.design);
-          const mid = channelMidpoint(a, b);
+          const mid = channelMidpoint(a, b, definition.id);
 
           /**
            * Each half is painted for the gate that owns it, so a channel
@@ -247,7 +247,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
            * printing.
            */
           const half = (from: typeof a, style: ActivationStyle, gate: number) => {
-            const d = channelHalfPath(from, from === a ? b : a, mid);
+            const d = channelHalfPath(from, from === a ? b : a, mid, definition.id);
             const key = `${definition.id}-${gate}`;
 
             if (style === "both") {

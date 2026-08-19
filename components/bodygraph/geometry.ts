@@ -21,13 +21,17 @@ import type { CenterId } from "@/lib/human-design/types/center";
  * the drawing wobbles by a unit or two either side of centre and the Spleen
  * and Solar Plexus must mirror each other exactly.
  *
- * The artwork's own channel bars are NOT used as channels. It draws five bars
- * between the Head and the Ajna where Human Design has three, and similar
- * decorative bundles elsewhere, so its bars cannot be mapped one-to-one onto
- * the 36 channels; colouring them would light up lines that do not exist.
- * Channels are routed here instead, from the gate anchors below, and the
- * artwork's bar centre-lines are what set those anchors' columns — the three
- * real channels in each vertical bundle land on the columns the drawing uses.
+ * CHANNELS come from it too. The artwork is line art, so what it contains are
+ * white regions between strokes: a bundle of n channels leaves 2n-1 of them,
+ * n track interiors alternating with n-1 gaps. Counted that way the file holds
+ * exactly 36 channels, which is the whole point — five regions between the
+ * Head and the Ajna is three channels, not five. (An earlier reading of this
+ * file took each region for a channel, concluded the drawing was decorative,
+ * and routed the channels independently. That was wrong.)
+ *
+ * The channels are drawn here as CIRCULAR ARCS with radii solved from the
+ * artwork, which is what makes the two drawings match: see
+ * CHANNEL_ARC_RADIUS.
  */
 
 export const VIEWBOX = { width: 813, height: 1370.3 } as const;
@@ -475,90 +479,92 @@ export function shapeToPath(shape: CenterShape, radius = CORNER_RADIUS): string 
  * scales with length, so the whole set reads as one family of curves rather
  * than a handful of special cases.
  */
+/**
+ * Channels are CIRCULAR ARCS, and the radii come off the reference artwork.
+ *
+ * They used to be quadratic Beziers with a bow proportional to length. That is
+ * not what the reference draws, and it is why the two charts did not match: a
+ * family of Beziers whose bow scales with the chord does not nest — each one
+ * bulges hardest at its own midpoint, so arcs sharing a corridor cross and
+ * splay. The reference draws concentric circles, which nest by construction.
+ *
+ * Each radius below is solved from HOW FAR the artwork's own track for that
+ * channel reaches — the extreme of its bounding box in the file, pulled in by
+ * 7 to get from the track's outer edge to its centre-line — by binary search
+ * on the radius of an arc through this drawing's two gate anchors.
+ *
+ * Solving from the reach rather than from a circle fit matters because the
+ * gate anchors here are not pixel-identical to the artwork's junctions, and an
+ * arc that borrowed the artwork's radius but not its endpoints missed the
+ * envelope by fifty units and tangled with its neighbours.
+ *
+ * The check that it is right: the left and right families were solved
+ * INDEPENDENTLY, from separate bounding boxes, and landed on the same numbers
+ * — 134/134, 162/162, 191/191 down to the Root, 116/115 around the Sacral.
+ * Two independent measurements agreeing to the unit is what rules out the
+ * solver having invented them.
+ */
+const CHANNEL_ARC_RADIUS: Readonly<Record<string, number>> = {
+  // Throat out to the Spleen and the Solar Plexus — the widest sweeps.
+  "16-48": 348,
+  "35-36": 348,
+  "20-57": 346,
+  "12-22": 346,
+  // Spleen and Solar Plexus down to the Root, nested three deep.
+  "32-54": 134,
+  "19-49": 134,
+  "28-38": 162,
+  "39-55": 162,
+  "18-58": 191,
+  "30-41": 191,
+  // The two that skirt the Sacral.
+  "27-50": 116,
+  "6-59": 116,
+  // Throat down and round into the Heart.
+  "21-45": 123,
+};
+
+/**
+ * Anything shorter than this is drawn straight, which is what the reference
+ * does with the stacked bundles — Head to Ajna, Ajna to Throat, Throat to G, G
+ * to Sacral, Sacral to Root are all dead straight in the artwork.
+ */
 const STRAIGHT_BELOW = 180;
-/**
- * How far a channel bows, per unit of its length.
- *
- * The value is set by where channels stop crossing each other, not by taste.
- * Swept against the current gate positions: five pairs cross below 0.32, two
- * at 0.32, and one — the pair the layout forces — from 0.36 upward. It has
- * been re-swept twice, because enlarging the three triangles moved their
- * anchors and re-tangled arcs that had been clear. See the crossing test in
- * bodygraph.test.tsx.
- * Because every arc scales by the same factor, a longer channel always bows
- * further than a shorter one sharing its corridor, so the set nests instead
- * of tangling.
- */
-const BOW_FACTOR = 0.9;
-/**
- * A ceiling so a future long channel cannot swing outside the figure.
- *
- * Clamping flattens the longest arcs onto the medium ones and re-creates
- * exactly the crossings this is here to avoid, which is what a ceiling of 46
- * was doing. At 88 it binds on only the two longest channels, and the sweep
- * shows the crossing count is flat from here upward.
- */
-const MAX_BOW = 220;
 
-export function channelPath(a: Point, b: Point): string {
+/**
+ * The fallback for a long channel with no measured radius: 3 chords.
+ *
+ * Only the left-hand reaches use it — 10-20, 10-34, 10-57, 20-34 and 34-57,
+ * whose tracks the artwork splits into fragments where other channels cross
+ * them, so no single circle could be fitted to them with confidence.
+ *
+ * The value is measured, not chosen: swept from 0.8 to 4.0 against the
+ * measured radii, the whole set is free of crossings from 2.7 to 3.8, and 3
+ * sits in the middle of that band. Below 2.7 the unmeasured reaches curve
+ * harder than their measured neighbours and cut across them.
+ */
+const FALLBACK_RADIUS_PER_CHORD = 3;
+
+interface ChannelGeometry {
+  straight: boolean;
+  /** Unit normal pointing away from the figure's centre. */
+  nx: number;
+  ny: number;
+  chordMid: Point;
+  radius: number;
+  /** How far the arc's midpoint stands off the chord. */
+  sagitta: number;
+  sweep: 0 | 1;
+}
+
+function channelGeometry(a: Point, b: Point, id?: string): ChannelGeometry {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const length = Math.hypot(dx, dy);
+  const chordMid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
 
-  if (length <= STRAIGHT_BELOW) return `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
-
-  const bow = Math.min((length - STRAIGHT_BELOW) * BOW_FACTOR, MAX_BOW);
-  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-
-  // Unit normal to the chord.
-  let nx = -dy / length;
-  let ny = dx / length;
-
-  // Flip it if it points toward the figure's centre; we always bow away.
-  const towardCenter = { x: FIGURE_CENTER.x - mid.x, y: FIGURE_CENTER.y - mid.y };
-  if (nx * towardCenter.x + ny * towardCenter.y > 0) {
-    nx = -nx;
-    ny = -ny;
-  }
-
-  const control = { x: mid.x + nx * bow, y: mid.y + ny * bow };
-  return `M ${a.x} ${a.y} Q ${control.x.toFixed(2)} ${control.y.toFixed(2)} ${b.x} ${b.y}`;
-}
-
-/** The point halfway along a channel, where its two coloured halves meet. */
-export function channelMidpoint(a: Point, b: Point): Point {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const length = Math.hypot(dx, dy);
-  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-
-  if (length <= STRAIGHT_BELOW) return mid;
-
-  const bow = Math.min((length - STRAIGHT_BELOW) * BOW_FACTOR, MAX_BOW);
-  let nx = -dy / length;
-  let ny = dx / length;
-  const towardCenter = { x: FIGURE_CENTER.x - mid.x, y: FIGURE_CENTER.y - mid.y };
-  if (nx * towardCenter.x + ny * towardCenter.y > 0) {
-    nx = -nx;
-    ny = -ny;
-  }
-
-  // A quadratic Bezier at t = 0.5 sits halfway between the chord midpoint and
-  // the control point, not at the control point itself.
-  return { x: mid.x + (nx * bow) / 2, y: mid.y + (ny * bow) / 2 };
-}
-
-/** Half of a channel, from one gate to the midpoint, following the same curve. */
-export function channelHalfPath(from: Point, to: Point, mid: Point): string {
-  // de Casteljau: the control point of each half of a quadratic split at
-  // t = 0.5 is the midpoint of the original control point and that endpoint.
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const length = Math.hypot(dx, dy);
-  if (length <= STRAIGHT_BELOW) return `M ${from.x} ${from.y} L ${mid.x} ${mid.y}`;
-
-  const chordMid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
-  const bow = Math.min((length - STRAIGHT_BELOW) * BOW_FACTOR, MAX_BOW);
+  // Unit normal to the chord, flipped so it always points away from the
+  // figure's centre of mass: channels bow outward, around what they pass.
   let nx = -dy / length;
   let ny = dx / length;
   const towardCenter = { x: FIGURE_CENTER.x - chordMid.x, y: FIGURE_CENTER.y - chordMid.y };
@@ -566,10 +572,67 @@ export function channelHalfPath(from: Point, to: Point, mid: Point): string {
     nx = -nx;
     ny = -ny;
   }
-  const control = { x: chordMid.x + nx * bow, y: chordMid.y + ny * bow };
-  const halfControl = { x: (from.x + control.x) / 2, y: (from.y + control.y) / 2 };
 
-  return `M ${from.x} ${from.y} Q ${halfControl.x.toFixed(2)} ${halfControl.y.toFixed(2)} ${mid.x.toFixed(2)} ${mid.y.toFixed(2)}`;
+  if (length <= STRAIGHT_BELOW) {
+    return { straight: true, nx, ny, chordMid, radius: 0, sagitta: 0, sweep: 0 };
+  }
+
+  const measured = id === undefined ? undefined : CHANNEL_ARC_RADIUS[id];
+  // A circle cannot pass through both ends with a radius under half the chord.
+  const radius = Math.max(measured ?? length * FALLBACK_RADIUS_PER_CHORD, length / 2 + 0.5);
+
+  // Centre sits on the far side from the bulge, at h from the chord midpoint.
+  const h = Math.sqrt(Math.max(radius * radius - (length * length) / 4, 0));
+  const sagitta = radius - h;
+
+  /*
+   * Which way SVG has to sweep to bulge along +n rather than -n.
+   *
+   * The circle's centre sits at chordMid - n*h, so the cross product of the
+   * two radius vectors works out to -h * (dx*ny - dy*nx). SVG's sweep flag is
+   * 1 when that cross product is POSITIVE, which is the opposite sign, and
+   * getting this backwards silently bows every arc the wrong way — the whole
+   * set still draws, it just tangles. Fourteen crossings, when it was wrong.
+   */
+  const sweep: 0 | 1 = dx * ny - dy * nx > 0 ? 0 : 1;
+
+  return { straight: false, nx, ny, chordMid, radius, sagitta, sweep };
+}
+
+export function channelPath(a: Point, b: Point, id?: string): string {
+  const g = channelGeometry(a, b, id);
+  if (g.straight) return `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+  const r = g.radius.toFixed(2);
+  return `M ${a.x} ${a.y} A ${r} ${r} 0 0 ${g.sweep} ${b.x} ${b.y}`;
+}
+
+/** The point halfway along a channel, where its two coloured halves meet. */
+export function channelMidpoint(a: Point, b: Point, id?: string): Point {
+  const g = channelGeometry(a, b, id);
+  if (g.straight) return g.chordMid;
+  return { x: g.chordMid.x + g.nx * g.sagitta, y: g.chordMid.y + g.ny * g.sagitta };
+}
+
+/**
+ * Half of a channel, from one gate to the midpoint, following the same curve.
+ *
+ * Both halves are arcs of the SAME circle, so each is drawn with the parent's
+ * radius; only the sweep flag has to be worked out again, because the two
+ * halves run in opposite directions around it.
+ */
+export function channelHalfPath(from: Point, to: Point, mid: Point, id?: string): string {
+  const g = channelGeometry(from, to, id);
+  if (g.straight) return `M ${from.x} ${from.y} L ${mid.x} ${mid.y}`;
+
+  const r = g.radius.toFixed(2);
+  // Centre of the parent circle, then the sweep for this half around it.
+  const cx = g.chordMid.x - g.nx * (g.radius - g.sagitta);
+  const cy = g.chordMid.y - g.ny * (g.radius - g.sagitta);
+  const cross =
+    (from.x - cx) * (mid.y - cy) - (from.y - cy) * (mid.x - cx);
+  const sweep = cross > 0 ? 1 : 0;
+
+  return `M ${from.x} ${from.y} A ${r} ${r} 0 0 ${sweep} ${mid.x.toFixed(2)} ${mid.y.toFixed(2)}`;
 }
 
 /* -------------------------------------------------------------------------- */

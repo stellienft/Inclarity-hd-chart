@@ -117,14 +117,30 @@ a unit or two either side of centre and the Spleen and Solar Plexus have to
 mirror each other exactly. The three vertical columns the gates sit on — the
 axis and 42.3 either side — are the centre-lines of the artwork's own bars.
 
-### Why the artwork's channels are not used as channels
+### Reading the channels out of it
 
-The reference is a *stylised* BodyGraph, not a machine-readable one. It draws
-five bars between the Head and the Ajna where Human Design has three channels,
-and similar decorative bundles elsewhere; its bars cannot be mapped one-to-one
-onto the 36 channels. Colouring them would light up lines that do not exist, so
-channels are routed here instead, from the gate anchors, and only the layout is
-taken from the drawing.
+The reference is line art, so what it contains are white regions between
+strokes. A bundle of *n* channels leaves *2n − 1* of them: *n* track interiors
+alternating with *n − 1* gaps. Counted that way the file holds exactly 36
+channels — five regions between the Head and the Ajna is three channels, not
+five.
+
+Channels are drawn as **circular arcs**, which is what makes the two drawings
+match. Each radius is solved from how far the artwork's own track for that
+channel reaches — the extreme of its bounding box in the file, pulled in by 7
+to get from the track's outer edge to its centre-line — by binary search on the
+radius of an arc through this drawing's two gate anchors. Solving from the
+reach rather than from a circle fit matters, because the gate anchors here are
+not pixel-identical to the artwork's junctions, and an arc that borrowed the
+radius but not the endpoints missed the envelope by fifty units and tangled.
+
+The check is that the left and right families were solved **independently**,
+from separate bounding boxes, and landed on the same numbers: 134/134, 162/162
+and 191/191 down to the Root, 116/115 around the Sacral. Arcs also fixed a
+problem the previous quadratic Béziers could not: concentric circles nest by
+construction, where a family of Béziers each bulging hardest at its own
+midpoint splays apart and crosses. The only crossings left are the six the
+reference itself draws, all of them 26-44.
 
 Two things were changed deliberately:
 
