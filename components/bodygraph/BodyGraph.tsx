@@ -17,10 +17,12 @@ import {
   shapeToPath,
   variableArrowPath,
 } from "./geometry";
+import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
   CENTER_DEFINED_FILL,
   CENTER_DEFINED_STROKE,
   CENTER_STROKE,
+  BODY_SILHOUETTE_FILL,
   CENTER_UNDEFINED_FILL,
   CHANNEL_TRACK_EDGE,
   CHANNEL_TRACK_EDGE_OPACITY,
@@ -180,6 +182,16 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
     >
       <title id="bodygraph-title">{accessibleTitle}</title>
       <desc id="bodygraph-desc">{description}</desc>
+
+      {/*
+        Decorative silhouette — supplied artwork, used verbatim and placed by
+        transform. Its holes (the hair slivers and the two arm gaps) are cut by
+        winding direction, so it takes the DEFAULT nonzero fill rule; evenodd
+        inverts them.
+      */}
+      <g data-figure="silhouette" transform={figureTransformAttr()} aria-hidden="true">
+        <path d={FIGURE_ARTWORK_PATH} fill={BODY_SILHOUETTE_FILL} />
+      </g>
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">

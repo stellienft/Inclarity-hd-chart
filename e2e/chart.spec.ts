@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { VIEWBOX } from "../components/bodygraph/geometry";
+import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
 import { GATE_MARKER_RADIUS } from "../components/bodygraph/styles";
 
 /**
@@ -256,6 +257,87 @@ test.describe("gate markers against the drawn centres", () => {
       boxes.left.x + boxes.left.w + boxes.right.x,
       1,
     );
+  });
+});
+
+/**
+ * Where the figure is actually PAINTED.
+ *
+ * The silhouette has holes in it — the gaps between the arms and the body, and
+ * the slivers between locks of hair — so "is this gate on the figure" is a
+ * question about fill rules that only a browser can answer. The path is mapped
+ * back into its own coordinates through the rendered matrices rather than by
+ * re-deriving the transform, so the test cannot drift from the drawing.
+ */
+test.describe("the figure behind the graph", () => {
+  async function paintedGates(page: Page): Promise<Record<number, boolean>> {
+    await generateChart(page);
+    return page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")! as SVGSVGElement;
+      const path = svg.querySelector(
+        "[data-figure='silhouette'] path",
+      ) as SVGGeometryElement;
+      // Exact: compose the path's screen matrix inverse with the root's, so a
+      // point in viewBox coordinates lands in the artwork's own space.
+      const toLocal = path.getScreenCTM()!.inverse().multiply(svg.getScreenCTM()!);
+
+      const result: Record<number, boolean> = {};
+      for (const element of svg.querySelectorAll("[data-gate]")) {
+        const label = element.querySelector("text")!;
+        const at = new DOMPoint(
+          Number(label.getAttribute("x")),
+          Number(label.getAttribute("y")),
+        ).matrixTransform(toLocal);
+        result[Number(element.getAttribute("data-gate"))] = path.isPointInFill(at);
+      }
+      return result;
+    });
+  }
+
+  const gatesOf = (centre: string) =>
+    GATE_DEFINITIONS.filter((g) => g.center === centre).map((g) => g.gate);
+
+  test("backs the centres down the middle, from the Head to the Sacral", async ({ page }) => {
+    const painted = await paintedGates(page);
+
+    for (const centre of ["head", "ajna", "throat", "g"]) {
+      const bare = gatesOf(centre).filter((gate) => !painted[gate]);
+      expect(bare, `${centre} gates sitting on bare page`).toEqual([]);
+    }
+  });
+
+  /**
+   * The figure is fitted to the width, so it ends at its own base rather than
+   * at the foot of the graph. The Root standing clear below it is the intended
+   * composition, not an oversight — asserted so a future refit cannot bury it
+   * without someone deciding to.
+   */
+  test("leaves the Root standing clear below the figure", async ({ page }) => {
+    const painted = await paintedGates(page);
+    const onFigure = gatesOf("root").filter((gate) => painted[gate]);
+    expect(onFigure, "Root gates have ended up on the figure").toEqual([]);
+  });
+
+  /**
+   * The Spleen and Solar Plexus are exact mirrors, so whatever the figure
+   * covers on one side it must cover on the other. This catches a figure that
+   * has drifted off the axis as well as wings that have.
+   */
+  test("drops the same gates either side, proving the figure sits square", async ({ page }) => {
+    const painted = await paintedGates(page);
+    const MIRROR: Array<[number, number]> = [
+      [48, 36],
+      [57, 22],
+      [44, 37],
+      [50, 6],
+      [32, 49],
+      [28, 55],
+      [18, 30],
+    ];
+
+    for (const [left, right] of MIRROR) {
+      expect(painted[left], `gate ${left} against its mirror ${right}`).toBe(painted[right]);
+    }
   });
 });
 

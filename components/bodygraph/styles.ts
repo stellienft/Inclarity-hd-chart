@@ -78,6 +78,15 @@ export const CHANNEL_TRACK_FILL = PALETTE.white;
 export const CHANNEL_TRACK_EDGE = PALETTE.dusk;
 export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
+/**
+ * The figure behind the graph — PEBBLE, the palest of the primaries.
+ *
+ * It has to sit under white channel tracks and white undefined centres without
+ * swallowing either, which is what makes those shapes read: white on Pebble is
+ * a 1.14:1 whisper, just enough separation to see an outline against a fill.
+ */
+export const BODY_SILHOUETTE_FILL = PALETTE.pebble;
+
 /** Gate numerals on a defined (skylight) centre — ESPRESSO, 8.1:1. */
 export const ON_DEFINED_TEXT = PALETTE.espresso;
 /**

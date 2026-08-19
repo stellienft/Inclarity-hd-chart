@@ -134,11 +134,28 @@ Two things were changed deliberately:
 - **Corner rounding is 26, not 30.** Rounding removes area exactly where the
   gates cluster, and 30 left markers overhanging the curves.
 
-There is no longer a figure behind the graph. The supplied reference is a
-complete design with nothing behind it, and the previous seated silhouette has
-an aspect of 0.82 against this drawing's 0.59 — fitting one inside the other
-means either a 38% vertical stretch or leaving a third of the graph unbacked.
-The silhouette is in git history if it is wanted back.
+### The figure behind it
+
+`components/bodygraph/figure.ts` holds the seated silhouette the project owner
+supplied as an Illustrator SVG export. The path is used **verbatim** — nine
+subpaths, the outer contour plus six hair slivers and two arm gaps, cut by
+winding direction, so it must take the **default nonzero fill rule**; forcing
+`evenodd` inverts the hair.
+
+**The scale is uniform.** It was not when the graph was 620 × 840: the artwork
+is 0.820 wide-to-tall against a space of 0.735, close enough that a 10%
+vertical stretch was the least-bad way to fill it. The reference BodyGraph is
+0.593, and stretching a figure by 38% makes a different person. So it is fitted
+to the **width** and allowed to end at its own base — the crossed legs — around
+y = 992.
+
+That leaves the Root standing clear below it, which is the composition the
+client's reference uses rather than a compromise: head and torso behind the
+graph, Root at or past the lower edge. `figure.test.ts` pins the arithmetic and
+that the scale stays uniform; `e2e/chart.spec.ts` asks the browser which gates
+are actually painted, using `isPointInFill` through the rendered matrices, and
+requires the Head, Ajna, Throat and G fully backed, the Root fully clear, and
+the Spleen and Solar Plexus to drop the same gates as each other.
 
 ### How it is tested
 

@@ -7,6 +7,7 @@ import {
   CENTER_DEFINED_FILL,
   CENTER_UNDEFINED_FILL,
   CHANNEL_TRACK_EDGE,
+  BODY_SILHOUETTE_FILL,
   CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
   ON_DEFINED_TEXT,
@@ -120,6 +121,7 @@ describe("brand palette", () => {
     expect(CENTER_UNDEFINED_FILL).toBe(GUIDE.accent.WHITE);
     expect(CHANNEL_TRACK_FILL).toBe(GUIDE.accent.WHITE);
     expect(CHANNEL_TRACK_EDGE).toBe(GUIDE.primary.DUSK);
+    expect(BODY_SILHOUETTE_FILL).toBe(GUIDE.primary.PEBBLE);
   });
 
   /**
