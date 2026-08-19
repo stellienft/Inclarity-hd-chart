@@ -108,47 +108,47 @@ second theme.
 
 ## The BodyGraph drawing
 
-The layout comes from the reference BodyGraph the project owner supplied as an
-Illustrator SVG export (813 × 1370.3, one path of 74 subpaths). Its nine centre
-shapes were measured off the file and are reproduced in
-`components/bodygraph/geometry.ts`: bounding boxes, vertices, and the ~30-unit
-corner rounding, symmetrised about the vertical axis because the drawing wobbles
-a unit or two either side of centre and the Spleen and Solar Plexus have to
-mirror each other exactly. The three vertical columns the gates sit on — the
-axis and 42.3 either side — are the centre-lines of the artwork's own bars.
+**The drawing IS the client's file.** `components/bodygraph/artwork.ts` holds
+their Illustrator export (813 × 1370.3) split into its 74 subpaths, used
+verbatim. It was reconstructed from measurements for a while — centre shapes,
+then circular arcs with radii solved from it — and reconstruction kept landing
+close but not identical. Now the file itself is the line work.
+
+Rendering order is: centre fills, then channel fills, then the artwork's ink on
+top. The ink is the whole file as one path; filled with the default nonzero rule
+it covers everything except its holes, so the fills beneath show through exactly
+the regions the drawing leaves open.
 
 ### Reading the channels out of it
 
-The reference is line art, so what it contains are white regions between
-strokes. A bundle of *n* channels leaves *2n − 1* of them: *n* track interiors
-alternating with *n − 1* gaps. Counted that way the file holds exactly 36
-channels — five regions between the Head and the Ajna is three channels, not
+It is line art, so what it contains are white regions between strokes. A bundle
+of *n* channels leaves *2n − 1* of them: *n* track interiors alternating with
+*n − 1* gaps. Five regions between the Head and the Ajna is three channels, not
 five.
 
-Channels are drawn as **circular arcs**, which is what makes the two drawings
-match. Each radius is solved from how far the artwork's own track for that
-channel reaches — the extreme of its bounding box in the file, pulled in by 7
-to get from the track's outer edge to its centre-line — by binary search on the
-radius of an arc through this drawing's two gate anchors. Solving from the
-reach rather than from a circle fit matters, because the gate anchors here are
-not pixel-identical to the artwork's junctions, and an arc that borrowed the
-radius but not the endpoints missed the envelope by fifty units and tangled.
+Every region touching every centre was ordered around that centre's perimeter
+and alternate ones taken. That maps **32 of the 36 channels**. Several are more
+than one region: where a channel crosses another, the drawing splits the track
+it crosses into fragments, and the channel is all of them — which is why an
+activated track is **filled** rather than stroked. 37-40 is a single fragment
+out by the Solar Plexus that an approximate arc misses entirely.
 
-The check is that the left and right families were solved **independently**,
-from separate bounding boxes, and landed on the same numbers: 134/134, 162/162
-and 191/191 down to the Root, 116/115 around the Sacral. Arcs also fixed a
-problem the previous quadratic Béziers could not: concentric circles nest by
-construction, where a family of Béziers each bulging hardest at its own
-midpoint splays apart and crosses. The only crossings left are the six the
-reference itself draws, all of them 26-44.
+The four it does not map are the integration group — 10-20, 10-34, 10-57 and
+20-34. The drawing merges them into one web at the G's left vertex, where a
+single track junction exists rather than three, so no region belongs to any one
+of them alone. Those four are stroked over the artwork instead.
 
-Two things were changed deliberately:
+### What the artwork costs
 
-- **The Heart is enlarged**, from the artwork's 104 × 90 to 130 × 114. Four
-  markers of radius 14 will not sit inside a triangle that small once its
-  corners are rounded. It keeps its left vertex where the drawing puts it.
-- **Corner rounding is 26, not 30.** Rounding removes area exactly where the
-  gates cluster, and 30 left markers overhanging the curves.
+- **The Heart's markers shrank to radius 11.** A centre cannot be resized to
+  suit its numbers any more; the numbers give way. The artwork fillets the
+  Heart's corners so hard that its bbox corners are not its vertices, so the
+  polygon the geometry uses is *smaller* than the drawn shape — its four
+  markers are solved against the rendered path instead, and the unit clearance
+  test exempts it.
+- **The Spleen and Solar Plexus are no longer exact mirrors.** The drawing is
+  hand-made and wobbles: 163.9 wide against 165.3, outer edges 1.6 apart about
+  the axis. The e2e mirror test allows two units of that and no more.
 
 ### The figure behind it
 

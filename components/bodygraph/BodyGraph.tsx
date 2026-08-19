@@ -11,24 +11,22 @@ import {
   VIEWBOX,
   channelHalfPath,
   channelMidpoint,
-  channelPath,
   gateLabelPoint,
   getGatePoint,
-  shapeToPath,
   variableArrowPath,
 } from "./geometry";
+import { ARTWORK_INK, CENTRE_REGION, CHANNEL_REGION } from "./artwork";
 import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
   CENTER_DEFINED_FILL,
-  CENTER_DEFINED_STROKE,
-  CENTER_STROKE,
   BODY_SILHOUETTE_FILL,
   CENTER_UNDEFINED_FILL,
-  CHANNEL_TRACK_EDGE,
-  CHANNEL_TRACK_EDGE_OPACITY,
+  ARTWORK_INK_COLOR,
+  ARTWORK_INK_OPACITY,
+  FLOOD_WIDTH,
   CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
-  GATE_MARKER_RADIUS,
+  markerRadius,
   GATE_MARKER_RING,
   GATE_MARKER_RING_WIDTH,
   GATE_MARKER_TEXT,
@@ -38,6 +36,7 @@ import {
   ON_UNDEFINED_TEXT,
   PERSONALITY_COLOR,
   STROKE_WIDTH,
+  activationColor,
   describeActivation,
   type ActivationStyle,
 } from "./styles";
@@ -207,97 +206,22 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
         })}
       </g>
 
-      {/* ---- Channels, beneath the centres ---- */}
-      <g strokeLinecap="round" fill="none">
-        {CHANNEL_DEFINITIONS.map((definition) => {
-          const [gateA, gateB] = definition.gates;
-          const a = getGatePoint(gateA);
-          const b = getGatePoint(gateB);
-          const active = activeChannelById.get(definition.id);
+      {/*
+        ---- The drawing ----
 
-          if (!active) {
-            // Two strokes: a faint wider edge, then white on top. That reads as
-            // an empty "track" both over the pale silhouette and over the page.
-            const d = channelPath(a, b, definition.id);
-            return (
-              <g key={definition.id} data-channel={definition.id} data-active="false">
-                <path
-                  d={d}
-                  stroke={CHANNEL_TRACK_EDGE}
-                  strokeOpacity={CHANNEL_TRACK_EDGE_OPACITY}
-                  strokeWidth={STROKE_WIDTH.channelTrackEdge}
-                />
-                <path d={d} stroke={CHANNEL_TRACK_FILL} strokeWidth={STROKE_WIDTH.channelTrack} />
-              </g>
-            );
-          }
-
-          const sidesA = active.activation[gateA] ?? { personality: false, design: false };
-          const sidesB = active.activation[gateB] ?? { personality: false, design: false };
-          const styleA = styleFor(sidesA.personality, sidesA.design);
-          const styleB = styleFor(sidesB.personality, sidesB.design);
-          const mid = channelMidpoint(a, b, definition.id);
-
-          /**
-           * Each half is painted for the gate that owns it, so a channel
-           * activated from both imprints is visibly split rather than
-           * flattened to one colour. A gate carrying both Personality and
-           * Design is drawn as a design-coloured stroke with a dashed
-           * personality overlay, so the distinction survives greyscale
-           * printing.
-           */
-          const half = (from: typeof a, style: ActivationStyle, gate: number) => {
-            const d = channelHalfPath(from, from === a ? b : a, mid, definition.id);
-            const key = `${definition.id}-${gate}`;
-
-            if (style === "both") {
-              return (
-                <g key={key}>
-                  <path d={d} stroke={DESIGN_COLOR} strokeWidth={STROKE_WIDTH.channelActive} />
-                  <path
-                    d={d}
-                    stroke={PERSONALITY_COLOR}
-                    strokeWidth={STROKE_WIDTH.channelActive}
-                    strokeDasharray="7 7"
-                  />
-                </g>
-              );
-            }
-            return (
-              <path
-                key={key}
-                d={d}
-                stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
-                strokeWidth={STROKE_WIDTH.channelActive}
-              />
-            );
-          };
-
-          return (
-            <g key={definition.id} data-channel={definition.id} data-active="true">
-              <title>
-                {`Channel ${definition.id} — ${definition.name}. `}
-                {`Gate ${gateA}: ${describeActivation(styleA)}. `}
-                {`Gate ${gateB}: ${describeActivation(styleB)}.`}
-              </title>
-              {half(a, styleA, gateA)}
-              {half(b, styleB, gateB)}
-            </g>
-          );
-        })}
-      </g>
-
-      {/* ---- Centres ---- */}
+        Centre and channel fills go down first, then the artwork's own ink on
+        top of them. The ink is the client's file as one path: filled with the
+        default nonzero rule it covers everything except its holes, so the
+        fills beneath show through exactly the regions the drawing leaves open.
+      */}
       <g>
         {CENTERS.map((centre) => {
           const defined = definedCenters.has(centre.id);
           return (
             <path
               key={centre.id}
-              d={shapeToPath(centre.shape)}
+              d={CENTRE_REGION[centre.id]}
               fill={defined ? CENTER_DEFINED_FILL : CENTER_UNDEFINED_FILL}
-              stroke={defined ? CENTER_DEFINED_STROKE : CENTER_STROKE}
-              strokeWidth={STROKE_WIDTH.centre}
               data-center-shape={centre.id}
               data-defined={defined ? "true" : "false"}
             >
@@ -309,6 +233,143 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
         })}
       </g>
 
+      <g strokeLinecap="butt" fill="none">
+        {CHANNEL_DEFINITIONS.map((definition) => {
+          const [gateA, gateB] = definition.gates;
+          const a = getGatePoint(gateA);
+          const b = getGatePoint(gateB);
+          const active = activeChannelById.get(definition.id);
+          const regions = CHANNEL_REGION[definition.id];
+
+          const sidesA = active?.activation[gateA] ?? { personality: false, design: false };
+          const sidesB = active?.activation[gateB] ?? { personality: false, design: false };
+          const styleA = styleFor(sidesA.personality, sidesA.design);
+          const styleB = styleFor(sidesB.personality, sidesB.design);
+          const mid = channelMidpoint(a, b, definition.id);
+
+          const label = (
+            <title>
+              {`Channel ${definition.id} — ${definition.name}. `}
+              {active
+                ? `Gate ${gateA}: ${describeActivation(styleA)}. Gate ${gateB}: ${describeActivation(styleB)}.`
+                : "Not defined."}
+            </title>
+          );
+
+          /**
+           * One half of the channel, painted for the gate that owns it, so a
+           * channel activated from both imprints is visibly split rather than
+           * flattened to one colour. A gate carrying both Personality and
+           * Design gets a design-coloured stroke with a dashed personality
+           * overlay, so the distinction survives greyscale printing.
+           */
+          const half = (from: typeof a, style: ActivationStyle, gate: number, width: number) => {
+            const d = channelHalfPath(from, from === a ? b : a, mid, definition.id);
+            const key = `${definition.id}-${gate}`;
+
+            if (style === "both") {
+              return (
+                <g key={key}>
+                  <path d={d} stroke={DESIGN_COLOR} strokeWidth={width} />
+                  <path
+                    d={d}
+                    stroke={PERSONALITY_COLOR}
+                    strokeWidth={width}
+                    strokeDasharray="7 7"
+                  />
+                </g>
+              );
+            }
+            return (
+              <path
+                key={key}
+                d={d}
+                stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
+                strokeWidth={width}
+              />
+            );
+          };
+
+          /*
+           * A channel the artwork draws as its own track is filled in place.
+           * When it is activated the two halves are painted as strokes wide
+           * enough to flood the track, CLIPPED to the track itself — so the
+           * colour takes the drawing's exact shape while the split still falls
+           * where the two gates meet.
+           */
+          if (regions) {
+            const clipId = `track-${definition.id}`;
+            /*
+             * An activated track is FILLED, not stroked. Filling is what makes
+             * a fragmented channel work: where another channel crosses one,
+             * the drawing splits its track into pieces, and 37-40 is a single
+             * fragment out by the Solar Plexus that an approximate arc misses
+             * entirely. The fill covers whatever the drawing actually contains.
+             *
+             * The clipped strokes on top are only there to place the seam
+             * where the two gates meet, for a channel whose two halves are
+             * activated differently. If the arc misses, the base fill still
+             * shows the channel as defined.
+             */
+            const base = active
+              ? styleA === "none"
+                ? activationColor(styleB)
+                : activationColor(styleA)
+              : CHANNEL_TRACK_FILL;
+
+            return (
+              <g key={definition.id} data-channel={definition.id} data-active={active ? "true" : "false"}>
+                {label}
+                {regions.map((d, index) => (
+                  <path key={index} d={d} fill={base} />
+                ))}
+                {active && styleA !== styleB ? (
+                  <>
+                    <clipPath id={clipId}>
+                      {regions.map((d, index) => (
+                        <path key={index} d={d} />
+                      ))}
+                    </clipPath>
+                    <g clipPath={`url(#${clipId})`}>
+                      {half(a, styleA, gateA, FLOOD_WIDTH)}
+                      {half(b, styleB, gateB, FLOOD_WIDTH)}
+                    </g>
+                  </>
+                ) : null}
+              </g>
+            );
+          }
+
+          /*
+           * The integration group. The drawing merges 10-20, 10-34, 10-57 and
+           * 20-34 into one web at the G's left vertex — a single track junction
+           * where there should be three — so none of them owns a region of its
+           * own. They are stroked over the artwork instead.
+           */
+          if (!active) {
+            return (
+              <g key={definition.id} data-channel={definition.id} data-active="false">
+                {label}
+              </g>
+            );
+          }
+          return (
+            <g key={definition.id} data-channel={definition.id} data-active="true">
+              {label}
+              {half(a, styleA, gateA, STROKE_WIDTH.channelActive)}
+              {half(b, styleB, gateB, STROKE_WIDTH.channelActive)}
+            </g>
+          );
+        })}
+      </g>
+
+      <path
+        d={ARTWORK_INK}
+        fill={ARTWORK_INK_COLOR}
+        fillOpacity={ARTWORK_INK_OPACITY}
+        aria-hidden="true"
+      />
+
       {/* ---- Gates ---- */}
       <g fontSize={GATE_NUMERAL_SIZE} textAnchor="middle" dominantBaseline="central">
         {GATE_DEFINITIONS.map(({ gate, center, name }) => {
@@ -319,7 +380,13 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const active = style !== "none";
 
           return (
-            <g key={gate} data-gate={gate} data-activation={style} data-center={center}>
+            <g
+              key={gate}
+              data-gate={gate}
+              data-activation={style}
+              data-center={center}
+              data-marker-radius={markerRadius(center)}
+            >
               <title>
                 {`Gate ${gate} — ${name}, ${CENTER_LABELS[center]} centre, ${describeActivation(style)}`}
               </title>
@@ -331,12 +398,12 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
               */}
               {active ? (
                 style === "both" ? (
-                  <SplitGateMarker cx={at.x} cy={at.y} r={GATE_MARKER_RADIUS} />
+                  <SplitGateMarker cx={at.x} cy={at.y} r={markerRadius(center)} />
                 ) : (
                   <circle
                     cx={at.x}
                     cy={at.y}
-                    r={GATE_MARKER_RADIUS}
+                    r={markerRadius(center)}
                     fill={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
                     stroke={GATE_MARKER_RING}
                     strokeWidth={GATE_MARKER_RING_WIDTH}

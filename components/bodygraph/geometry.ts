@@ -88,18 +88,15 @@ const G = {
   left: { x: 301.5, y: 753.5 },
 };
 /*
- * The Heart is the one centre enlarged beyond what the artwork draws. The
- * reference gives it 104 x 90, which is fine for line art carrying no
- * numbers, but four markers of radius 14 will not sit inside a triangle that
- * small once its corners are rounded. 130 x 114 is the smallest that holds
- * them a full radius clear of every edge and a full diameter apart; it keeps
- * the left vertex where the drawing puts it, against the G, and still leaves
- * 55 units of gap to the Solar Plexus for the 37-40 channel.
+ * The Heart, at the size the artwork draws it. It was enlarged for a while, to
+ * 130 x 114, so that four markers of radius 14 would fit; now that the drawing
+ * IS the artwork, the shape has to be the artwork's and the markers have to
+ * give way instead — see GATE_MARKER_RADIUS_BY_CENTRE.
  */
 const HEART = {
-  left: { x: 455, y: 820 },
-  topRight: { x: 585, y: 763 },
-  bottomRight: { x: 585, y: 877 },
+  left: { x: 459.7, y: 820 },
+  topRight: { x: 564, y: 775.1 },
+  bottomRight: { x: 564, y: 865 },
 };
 const SPLEEN = {
   top: { x: 6.4, y: 943.1 },
@@ -211,10 +208,10 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
    * first position down the lower edge that the crossing test passes, as far
    * toward the vertex as the drawing allows.
    */
-  21: { x: 585, y: 763 },
-  51: { x: 500.5, y: 800 },
-  26: { x: 491.4, y: 835.9 },
-  40: { x: 585, y: 877 },
+  21: { x: 564, y: 775.1 },
+  51: { x: 496.2, y: 804.3 },
+  26: { x: 488.9, y: 832.6 },
+  40: { x: 564, y: 865 },
 
   /*
    * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
@@ -294,40 +291,41 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
  * test checks.
  */
 const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
-  // Spleen
-  48: { x: 48.5, y: 982.9 },
-  57: { x: 81.2, y: 1001 },
-  44: { x: 114.2, y: 1019.3 },
-  50: { x: 140.9, y: 1034.1 },
-  32: { x: 114.2, y: 1048.9 },
-  28: { x: 81.2, y: 1067.1 },
-  18: { x: 48.4, y: 1085.3 },
+  // Spleen — radius 12 here, not 14; see GATE_MARKER_RADIUS_BY_CENTRE.
+  48: { x: 48.3, y: 980.5 },
+  57: { x: 82.2, y: 999.3 },
+  44: { x: 116.6, y: 1018.4 },
+  50: { x: 145.1, y: 1034.1 },
+  32: { x: 116.6, y: 1049.8 },
+  28: { x: 82.2, y: 1068.8 },
+  18: { x: 48.2, y: 1087.6 },
   // Solar Plexus — the exact mirror of the Spleen about AXIS_X.
-  36: { x: 762.5, y: 982.9 },
-  22: { x: 729.8, y: 1001 },
-  37: { x: 696.8, y: 1019.3 },
-  6: { x: 670.1, y: 1034.1 },
-  49: { x: 696.8, y: 1048.9 },
-  55: { x: 729.8, y: 1067.1 },
-  30: { x: 762.6, y: 1085.3 },
-  // Heart — 21 and 40 on their corner's angle bisector, which is the only
-  // direction that clears both edges of a vertex at once; 51 and 26 straight
-  // in along the normal of the edge they sit on.
-  21: { x: 570.5, y: 785.2 },
-  51: { x: 524.7, y: 805.3 },
-  26: { x: 504.1, y: 825.7 },
-  40: { x: 570.5, y: 854.8 },
+  36: { x: 762.7, y: 980.5 },
+  22: { x: 728.8, y: 999.3 },
+  37: { x: 694.4, y: 1018.4 },
+  6: { x: 665.9, y: 1034.1 },
+  49: { x: 694.4, y: 1049.8 },
+  55: { x: 728.8, y: 1068.8 },
+  30: { x: 762.8, y: 1087.6 },
+  /*
+   * Heart — solved against the DRAWN region, not the polygon.
+   *
+   * The artwork rounds this triangle's corners hard: chords of about 60 units,
+   * which is a fillet of radius 43 on a shape only 104 x 90. Solving against
+   * the sharp polygon put 21 and 40 out on corners the drawing does not have,
+   * and the browser found both markers entirely outside the painted shape.
+   * These four were relaxed inside the rendered path instead, and clear it by
+   * 18.5 at worst.
+   */
+  21: { x: 516.7, y: 804.6 },
+  51: { x: 493.7, y: 813.4 },
+  26: { x: 493.7, y: 835.8 },
+  40: { x: 518.7, y: 836.6 },
   /*
    * The Ajna's apex, and only the apex. A vertex needs its marker on the angle
    * bisector, and the Ajna's is sharp enough that the inset the rest of the
-   * centre can afford leaves 43 straddling its edges.
-   *
-   * It has to clear the ROUNDED apex, not the sharp one. With CORNER_RADIUS
-   * 26 the drawn boundary there is an arc of radius 26 centred at (405.5,
-   * 309.2), so the marker's centre has to stay within 12 of that point for its
-   * own 14 to fit inside. At the clearance the sharp polygon alone asks for it
-   * sat at y = 332.8 and spilled over the curve; the e2e disc check is what
-   * measures this.
+   * centre can afford leaves 43 straddling its edges. It also has to clear the
+   * ROUNDED apex, not the sharp one — the e2e disc check is what measures it.
    */
   43: { x: 405.5, y: 320 },
 };

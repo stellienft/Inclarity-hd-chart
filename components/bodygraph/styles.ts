@@ -75,6 +75,26 @@ export const CENTER_STROKE = "#DBD2CC";
  * another.
  */
 export const CHANNEL_TRACK_FILL = PALETTE.white;
+/**
+ * The line work of the reference drawing itself — DUSK at 55%.
+ *
+ * The artwork is one path filled with the nonzero rule, so this single colour
+ * is every outline in the chart: centres, channel tracks, the lot. Full-
+ * strength Dusk makes it heavier than the reference reads at, and it has to
+ * stay lighter than an activated channel or the empty tracks compete with the
+ * defined ones.
+ */
+export const ARTWORK_INK_COLOR = PALETTE.dusk;
+export const ARTWORK_INK_OPACITY = 0.55;
+
+/**
+ * Stroke width used to flood an activated channel's track through a clip.
+ *
+ * It only has to exceed the widest track in the drawing (14) by enough that a
+ * stroke centred on an approximate arc still covers the whole region; the clip
+ * is what gives the paint its shape.
+ */
+export const FLOOD_WIDTH = 46;
 export const CHANNEL_TRACK_EDGE = PALETTE.dusk;
 export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
@@ -137,6 +157,23 @@ export const GATE_NUMERAL_SIZE = 17;
  * a bulge in it.
  */
 export const GATE_MARKER_RADIUS = 14;
+
+/**
+ * Per-centre marker radius, where 14 does not fit.
+ *
+ * The drawing is the client's artwork now, so a centre cannot be resized to
+ * suit its numbers — the numbers give way instead. The Heart is 104 x 90 and
+ * carries four gates; the three triangles are the only shapes tight enough to
+ * need this.
+ */
+export const GATE_MARKER_RADIUS_BY_CENTRE: Readonly<Partial<Record<string, number>>> = {
+  heart: 11,
+  spleen: 12,
+  solarPlexus: 12,
+};
+
+export const markerRadius = (centre: string): number =>
+  GATE_MARKER_RADIUS_BY_CENTRE[centre] ?? GATE_MARKER_RADIUS;
 /** A white ring separates a marker from whatever centre fill sits behind it. */
 export const GATE_MARKER_RING = "#FFFFFF";
 export const GATE_MARKER_RING_WIDTH = 2;

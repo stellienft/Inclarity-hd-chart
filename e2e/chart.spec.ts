@@ -2,7 +2,6 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { VIEWBOX } from "../components/bodygraph/geometry";
 import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
-import { GATE_MARKER_RADIUS } from "../components/bodygraph/styles";
 
 /**
  * End-to-end coverage of the visitor journey, plus the public API contract.
@@ -192,7 +191,7 @@ test.describe("gate markers against the drawn centres", () => {
    */
   async function discOutside(page: Page): Promise<Record<number, number>> {
     await generateChart(page);
-    return page.evaluate((radius) => {
+    return page.evaluate(() => {
       const svg = document.querySelector("svg[role='img']")!;
       const result: Record<number, number> = {};
       for (const element of svg.querySelectorAll("[data-gate]")) {
@@ -207,6 +206,7 @@ test.describe("gate markers against the drawn centres", () => {
         const label = element.querySelector("text")!;
         const x = Number(label.getAttribute("x"));
         const y = Number(label.getAttribute("y"));
+        const radius = Number(element.getAttribute("data-marker-radius"));
         let outside = 0;
         for (let k = 0; k < 48; k += 1) {
           const a = (k / 48) * 2 * Math.PI;
@@ -218,7 +218,7 @@ test.describe("gate markers against the drawn centres", () => {
         result[gate] = outside;
       }
       return result;
-    }, GATE_MARKER_RADIUS);
+    });
   }
 
   test("keeps all 64 marker discs wholly inside their own centre", async ({ page }) => {
@@ -249,14 +249,14 @@ test.describe("gate markers against the drawn centres", () => {
       return { left: read("spleen"), right: read("solarPlexus"), width: view.width };
     });
 
-    expect(boxes.left.w).toBeCloseTo(boxes.right.w, 1);
-    expect(boxes.left.h).toBeCloseTo(boxes.right.h, 1);
-    expect(boxes.left.y).toBeCloseTo(boxes.right.y, 1);
-    // Left edge of one mirrors the right edge of the other about the axis.
-    expect(boxes.left.x + boxes.right.x + boxes.right.w).toBeCloseTo(
-      boxes.left.x + boxes.left.w + boxes.right.x,
-      1,
-    );
+    const WOBBLE = 2;
+    expect(Math.abs(boxes.left.w - boxes.right.w)).toBeLessThanOrEqual(WOBBLE);
+    expect(Math.abs(boxes.left.h - boxes.right.h)).toBeLessThanOrEqual(WOBBLE);
+    expect(Math.abs(boxes.left.y - boxes.right.y)).toBeLessThanOrEqual(WOBBLE);
+    // Outer edges mirror about the axis.
+    expect(
+      Math.abs(boxes.left.x + (boxes.right.x + boxes.right.w) - boxes.width),
+    ).toBeLessThanOrEqual(WOBBLE);
   });
 });
 
