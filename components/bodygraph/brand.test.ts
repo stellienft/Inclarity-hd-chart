@@ -114,10 +114,10 @@ describe("brand palette", () => {
     expect(PALETTE.white).toBe(GUIDE.accent.WHITE);
     expect(PALETTE.espresso).toBe(GUIDE.accent.ESPRESSO);
 
-    expect(PERSONALITY_COLOR).toBe(GUIDE.accent.ESPRESSO);
+    expect(PERSONALITY_COLOR).toBe(GUIDE.primary.DUSK);
     expect(DESIGN_COLOR).toBe(DERIVED["ochre-deep"]);
     expect(CENTER_DEFINED_FILL).toBe(GUIDE.primary.SKYLIGHT);
-    expect(CENTER_UNDEFINED_FILL).toBe(GUIDE.primary.LINEN);
+    expect(CENTER_UNDEFINED_FILL).toBe(GUIDE.accent.WHITE);
     expect(CHANNEL_TRACK_FILL).toBe(GUIDE.accent.WHITE);
     expect(CHANNEL_TRACK_EDGE).toBe(GUIDE.primary.DUSK);
   });
@@ -143,6 +143,7 @@ describe("brand palette", () => {
       ["gate numeral on a Design marker", GATE_MARKER_TEXT, DESIGN_COLOR],
       ["gate numeral on a defined centre", ON_DEFINED_TEXT, CENTER_DEFINED_FILL],
       ["gate numeral on an undefined centre", ON_UNDEFINED_TEXT, CENTER_UNDEFINED_FILL],
+      ["planetary chip label, Personality", GUIDE.accent.WHITE, PERSONALITY_COLOR],
       ["body text on the page", GUIDE.accent.ESPRESSO, GUIDE.primary.LINEN],
       ["secondary text on the page", GUIDE.primary.DUSK, GUIDE.primary.LINEN],
       ["button label on DUSK", GUIDE.accent.WHITE, GUIDE.primary.DUSK],
@@ -151,6 +152,24 @@ describe("brand palette", () => {
     for (const [what, fg, bg] of pairs) {
       expect(contrast(fg, bg), `${what} (${fg} on ${bg})`).toBeGreaterThanOrEqual(4.5);
     }
+  });
+
+  /**
+   * The two imprints have to be told apart at the width of a channel.
+   *
+   * They are no longer a dark and a light — both are mid-tone primaries — so
+   * the separation is hue, and this is the check that it stays wide enough to
+   * survive. Measured between them the ratio is small by design; what matters
+   * is that neither collapses into the other or into the white track between
+   * them.
+   */
+  it("keeps Personality and Design distinct from each other and from the track", () => {
+    expect(PERSONALITY_COLOR).not.toBe(DESIGN_COLOR);
+    expect(contrast(PERSONALITY_COLOR, CHANNEL_TRACK_FILL)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(DESIGN_COLOR, CHANNEL_TRACK_FILL)).toBeGreaterThanOrEqual(4.5);
+    // An inactive numeral must not be the same ink as an activated marker.
+    expect(ON_UNDEFINED_TEXT).not.toBe(PERSONALITY_COLOR);
+    expect(ON_DEFINED_TEXT).not.toBe(PERSONALITY_COLOR);
   });
 
   /**
@@ -237,6 +256,37 @@ describe("no stale palette anywhere in the source", () => {
           const pattern = new RegExp(`(?<![\\w-])${prefix}-${name}(?![\\w-])`, "g");
           if (pattern.test(text)) offenders.push(`${file}: ${prefix}-${name}`);
         }
+      }
+    }
+    expect([...new Set(offenders)]).toEqual([]);
+  });
+
+  /**
+   * A colour written straight into a component, bypassing the palette.
+   *
+   * This is how #4A403A — a hex on no palette anywhere — ended up striping the
+   * legend's "both imprints" swatch: the checks above read the @theme block,
+   * and a literal in a style prop is invisible to them. Comments are stripped
+   * first, so prose naming a retired hex does not trip it.
+   */
+  it("writes no colour literal that is not on the palette", () => {
+    const allowed = new Set(
+      [
+        ...Object.values(GUIDE.primary),
+        ...Object.values(GUIDE.accent),
+        ...Object.values(DERIVED),
+        // Print falls back to ink on paper; neither is a brand colour.
+        "#000000",
+      ].map((h) => h.toUpperCase()),
+    );
+
+    const offenders: string[] = [];
+    for (const file of sources) {
+      const code = readFileSync(file, "utf8")
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/^\s*\/\/.*$/gm, "");
+      for (const match of code.matchAll(/#[0-9a-fA-F]{6}/g)) {
+        if (!allowed.has(match[0]!.toUpperCase())) offenders.push(`${file}: ${match[0]}`);
       }
     }
     expect([...new Set(offenders)]).toEqual([]);

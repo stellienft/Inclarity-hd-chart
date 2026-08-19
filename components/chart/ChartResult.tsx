@@ -95,7 +95,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
 
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-dusk/80">
           <span className="inline-flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-espresso" />
+            <span aria-hidden="true" className="inline-block h-1 w-6 rounded-full bg-dusk" />
             Personality (conscious)
           </span>
           <span className="inline-flex items-center gap-2">
@@ -108,7 +108,7 @@ export function ChartResult({ chart, onReset }: ChartResultProps) {
               className="inline-block h-1 w-6 rounded-full bg-ochre-deep"
               style={{
                 backgroundImage:
-                  "repeating-linear-gradient(90deg,#4A403A 0 4px,transparent 4px 8px)",
+                  "repeating-linear-gradient(90deg,#6A5960 0 4px,transparent 4px 8px)",
               }}
             />
             Both

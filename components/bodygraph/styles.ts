@@ -7,13 +7,15 @@
  * This deliberately does NOT use the canonical Human Design colour scheme
  * (yellow Head, green Ajna, red Sacral and so on).
  *
- * PERSONALITY / DESIGN: the two imprints are ESPRESSO and OCHRE — the guide's
- * darkest accent against its warm primary, which is the strongest separation
- * the palette offers without leaving it. That distinction is required (a
- * trained reader relies on it), so the two tones carry channels, gate markers
- * and the planetary columns alike. Colour is never the only signal: every
- * centre, gate and channel carries a <title> stating its state in words, and
- * `ChartTextSummary` repeats all of it as prose.
+ * PERSONALITY / DESIGN: the two imprints are DUSK and OCHRE — the guide's
+ * cool primary against its warm one, which is how the reference chart the
+ * client supplied separates them. It is a hue difference rather than a
+ * light-dark one, so the two stay legible against each other at the width of a
+ * channel. That distinction is required (a trained reader relies on it), so the
+ * two tones carry channels, gate markers and the planetary columns alike.
+ * Colour is never the only signal: every centre, gate and channel carries a
+ * <title> stating its state in words, and `ChartTextSummary` repeats all of it
+ * as prose.
  */
 
 /** The guide's palette, named as the guide names it. */
@@ -30,8 +32,14 @@ export const PALETTE = {
   espresso: "#40393B",
 } as const;
 
-/** Personality / conscious — ESPRESSO, the guide's darkest accent. */
-export const PERSONALITY_COLOR = PALETTE.espresso;
+/**
+ * Personality / conscious — DUSK, the guide's cool primary.
+ *
+ * ESPRESSO was here, and reads as black at channel width; the reference chart
+ * uses the plum. White numerals on it measure 6.49:1, so the markers and the
+ * planetary chips still clear AA comfortably.
+ */
+export const PERSONALITY_COLOR = PALETTE.dusk;
 /**
  * Design / unconscious — OCHRE, darkened 6% in lightness at the same hue and
  * saturation.
@@ -45,8 +53,15 @@ export const DESIGN_COLOR = "#916D5D";
 /** Defined centres take SKYLIGHT, a primary brand colour. */
 export const CENTER_DEFINED_FILL = PALETTE.skylight;
 export const CENTER_DEFINED_STROKE = "#A0CAC8";
-/** Undefined centres take LINEN, the page's own ground. */
-export const CENTER_UNDEFINED_FILL = PALETTE.linen;
+/**
+ * Undefined centres take WHITE.
+ *
+ * LINEN was here, which is the page's own ground and so made an undefined
+ * centre invisible as a shape. The reference chart fills them white, a shade
+ * lighter than everything around them, so the outline is not doing all the
+ * work.
+ */
+export const CENTER_UNDEFINED_FILL = PALETTE.white;
 export const CENTER_STROKE = "#DBD2CC";
 
 /**
@@ -65,8 +80,15 @@ export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
 /** Gate numerals on a defined (skylight) centre — ESPRESSO, 8.1:1. */
 export const ON_DEFINED_TEXT = PALETTE.espresso;
-/** Gate numerals on the linen ground of an undefined centre — DUSK, 5.9:1. */
-export const ON_UNDEFINED_TEXT = PALETTE.dusk;
+/**
+ * Gate numerals on the white ground of an undefined centre — ESPRESSO, 11.2:1.
+ *
+ * The same colour as on a defined centre, so an inactive numeral reads the
+ * same everywhere. It also has to differ from PERSONALITY_COLOR now that the
+ * imprint is DUSK, or a plain numeral and an activated marker would be the
+ * same ink and only the disc behind it would say which is which.
+ */
+export const ON_UNDEFINED_TEXT = PALETTE.espresso;
 /** Numerals inside an activated gate marker. */
 export const GATE_MARKER_TEXT = PALETTE.white;
 

@@ -26,7 +26,7 @@ export interface PlanetColumnProps {
  */
 export function PlanetColumn({ activations, side }: PlanetColumnProps) {
   const isDesign = side === "design";
-  const chip = isDesign ? "bg-ochre-deep" : "bg-espresso";
+  const chip = isDesign ? "bg-ochre-deep" : "bg-dusk";
 
   return (
     <section

@@ -28,6 +28,22 @@ drops lightness; none is a new colour.
 | `skylight-edge` | `#A0CAC8` | An outline for defined centres; Skylight has no edge against itself. |
 | `pebble-edge` | `#DBD2CC` | The same, for undefined centres and channel tracks. |
 
+**Personality and Design.** The two imprints are **Dusk** (`#6A5960`) and
+`ochre-deep` — the guide's cool primary against a shade of its warm one, which
+is how the client's reference chart separates them. Espresso carried
+Personality until that reference arrived; it reads as black at the width of a
+channel. White on Dusk measures 6.49:1, so the gate markers and the planetary
+chips still clear AA. Because the separation is now hue rather than light-dark,
+`brand.test.ts` checks both imprints stay clear of the white channel track and
+of the ink used for inactive numerals.
+
+**Undefined centres are White, not Linen.** Linen is the page's own ground, so
+filling an undefined centre with it left the outline doing all the work. White
+puts them a shade lighter than everything around them, as the reference does.
+Inactive gate numerals are Espresso on both centre fills — 11.2:1 on white,
+8.1:1 on Skylight — which also keeps a plain numeral from being the same ink as
+an activated Personality marker.
+
 **Colours that cannot carry body text.** Ochre reaches only 3.31:1 on Linen and
 Rose Clay 1.70:1. Both are real brand colours and both are used — as fills,
 strokes and accents, never as small text. `brand.test.ts` asserts this so
