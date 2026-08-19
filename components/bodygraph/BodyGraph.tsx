@@ -5,7 +5,6 @@ import { CENTER_LABELS, type CenterId } from "@/lib/human-design/types/center";
 
 import { VARIABLE_POSITIONS, type VariableArrow } from "@/lib/human-design/derive/variable";
 
-import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
   CENTERS,
   VARIABLE_SLOTS,
@@ -19,7 +18,6 @@ import {
   variableArrowPath,
 } from "./geometry";
 import {
-  BODY_SILHOUETTE_FILL,
   CENTER_DEFINED_FILL,
   CENTER_DEFINED_STROKE,
   CENTER_STROKE,
@@ -112,10 +110,10 @@ function VariableArrowGlyph({ arrow, color }: { arrow: VariableArrow; color: str
         d={variableArrowPath(slot.arrow, arrow.direction)}
         fill="none"
         stroke={color}
-        strokeWidth={3}
+        strokeWidth={4}
         strokeLinecap="round"
         strokeLinejoin="round"
-        {...(arrow.nearToneBoundary ? { strokeDasharray: "5 4" } : {})}
+        {...(arrow.nearToneBoundary ? { strokeDasharray: "7 6" } : {})}
         aria-hidden="true"
       />
 
@@ -127,10 +125,10 @@ function VariableArrowGlyph({ arrow, color }: { arrow: VariableArrow; color: str
         fill={color}
         aria-hidden="true"
       >
-        <tspan fontSize={22} fontWeight={400}>
+        <tspan fontSize={29} fontWeight={400}>
           {arrow.color}
         </tspan>
-        <tspan fontSize={14} fontWeight={400} dy={7}>
+        <tspan fontSize={19} fontWeight={400} dy={9}>
           {arrow.tone}
         </tspan>
       </text>
@@ -182,16 +180,6 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
     >
       <title id="bodygraph-title">{accessibleTitle}</title>
       <desc id="bodygraph-desc">{description}</desc>
-
-      {/*
-        Decorative body silhouette — supplied artwork, used verbatim and placed
-        by transform. Its holes (the hair slivers and the two arm gaps) are cut
-        by winding direction, so it takes the DEFAULT nonzero fill rule; evenodd
-        inverts them.
-      */}
-      <g transform={figureTransformAttr()} aria-hidden="true">
-        <path d={FIGURE_ARTWORK_PATH} fill={BODY_SILHOUETTE_FILL} />
-      </g>
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">
@@ -298,7 +286,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
               fill={defined ? CENTER_DEFINED_FILL : CENTER_UNDEFINED_FILL}
               stroke={defined ? CENTER_DEFINED_STROKE : CENTER_STROKE}
               strokeWidth={STROKE_WIDTH.centre}
-              data-center={centre.id}
+              data-center-shape={centre.id}
               data-defined={defined ? "true" : "false"}
             >
               <title>
@@ -319,7 +307,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const active = style !== "none";
 
           return (
-            <g key={gate} data-gate={gate} data-activation={style}>
+            <g key={gate} data-gate={gate} data-activation={style} data-center={center}>
               <title>
                 {`Gate ${gate} — ${name}, ${CENTER_LABELS[center]} centre, ${describeActivation(style)}`}
               </title>

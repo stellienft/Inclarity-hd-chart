@@ -90,45 +90,50 @@ clears 4.5:1, and that no source file references a retired token or declares a
 second theme.
 
 
-## The figure behind the BodyGraph
+## The BodyGraph drawing
 
-`components/bodygraph/figure.ts` holds the seated silhouette the project owner
-supplied as an Illustrator SVG export. The path is used **verbatim** — no
-points moved, nothing simplified — and everything about placing it lives in a
-transform beside it, so the artwork can be swapped by replacing one string.
+The layout comes from the reference BodyGraph the project owner supplied as an
+Illustrator SVG export (813 × 1370.3, one path of 74 subpaths). Its nine centre
+shapes were measured off the file and are reproduced in
+`components/bodygraph/geometry.ts`: bounding boxes, vertices, and the ~30-unit
+corner rounding, symmetrised about the vertical axis because the drawing wobbles
+a unit or two either side of centre and the Spleen and Solar Plexus have to
+mirror each other exactly. The three vertical columns the gates sit on — the
+axis and 42.3 either side — are the centre-lines of the artwork's own bars.
 
-It is nine subpaths: the outer contour, six slivers between locks of hair, and
-the two gaps between the arms and the body. The holes are cut by winding
-direction, so it must be filled with the **default nonzero rule**; forcing
-`evenodd` inverts the hair slivers.
+### Why the artwork's channels are not used as channels
 
-### The scale is not uniform
+The reference is a *stylised* BodyGraph, not a machine-readable one. It draws
+five bars between the Head and the Ajna where Human Design has three channels,
+and similar decorative bundles elsewhere; its bars cannot be mapped one-to-one
+onto the 36 channels. Colouring them would light up lines that do not exist, so
+channels are routed here instead, from the gate anchors, and only the layout is
+taken from the drawing.
 
-The artwork's aspect is 0.820 wide-to-tall and the space it fills is 0.735.
-Scaling uniformly leaves two options, both worse:
+Two things were changed deliberately:
 
-- fit the **width** and the figure is 747 tall — too short to reach from the
-  Head centre past the Root, leaving the bottom of the Root off the lap;
-- fit the **height** and it is 682 wide, clipping about 31 units of hand off
-  each side.
+- **The Heart is enlarged**, from the artwork's 104 × 90 to 130 × 114. Four
+  markers of radius 14 will not sit inside a triangle that small once its
+  corners are rounded. It keeps its left vertex where the drawing puts it.
+- **Corner rounding is 26, not 30.** Rounding removes area exactly where the
+  gates cluster, and 30 left markers overhanging the curves.
 
-Widening the BodyGraph viewBox to 682 instead would shrink every centre and
-numeral by 9% at the same container width, which costs legibility on a phone.
-So the figure is stretched about 10% vertically. On a flat decorative
-silhouette that reads as a slightly taller person.
+There is no longer a figure behind the graph. The supplied reference is a
+complete design with nothing behind it, and the previous seated silhouette has
+an aspect of 0.82 against this drawing's 0.59 — fitting one inside the other
+means either a 38% vertical stretch or leaving a third of the graph unbacked.
+The silhouette is in git history if it is wanted back.
 
 ### How it is tested
 
-Nothing about a supplied drawing's *shape* is worth asserting — only where it
-lands, and what it ends up backing.
-
-- `figure.test.ts` checks the placement arithmetic: nine subpaths present and
-  the path unedited, the bounding box landing exactly at 4,4–616,836, and the
-  distortion staying under 15%.
-- `e2e/chart.spec.ts` asks the **browser** what is actually painted, using
-  `SVGGeometryElement.isPointInFill()`, which understands the fill rule and the
-  holes as no flattened approximation would. Every gate of the six centres down
-  the middle must sit on the figure; the Heart, Spleen and Solar Plexus must
-  each keep at least one gate on it and at least one past it; and the gates
-  that fall past it on the left must mirror those on the right, which catches
-  both a drifting wing layout and artwork that is no longer square.
+- `bodygraph.test.tsx` checks every marker sits a full radius inside its
+  centre's polygon and a full diameter from its neighbours, that the Spleen and
+  Solar Plexus mirror exactly, and that the rendered curves cross in exactly the
+  two places the layout forces.
+- `e2e/chart.spec.ts` asks the **browser** the questions a polygon cannot
+  answer. `SVGGeometryElement.isPointInFill()` understands the rounded paths, so
+  it samples 48 points around each marker's circumference and requires the whole
+  disc inside its centre — a centre-point check passed gate 43 while a fifth of
+  its disc hung over the Ajna's rounded apex. It also compares the rendered
+  Spleen and Solar Plexus bounding boxes, which catches a drawing that has
+  drifted off the axis as well as geometry that has.

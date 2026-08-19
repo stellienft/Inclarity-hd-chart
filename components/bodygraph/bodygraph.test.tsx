@@ -196,18 +196,25 @@ describe("BodyGraph geometry", () => {
    * the straight chords — the bow is what makes a set of arcs nest or tangle,
    * and the chord test above cannot see it.
    *
-   * Exactly one crossing is expected, and it is forced by the geometry rather
-   * than by the routing: the 20-34 channel has to swing left of the G's left
-   * vertex to get past it, which encloses gate 10 sitting on that vertex,
-   * while gate 57 is out in the Spleen beyond the arc. Any path from 10 to 57
-   * therefore crosses it. Clearing that would need the arc to swing 160 units
-   * — straight across the Spleen — instead of the 12 it needs now.
+   * Two crossings are expected, and both are forced by the layout rather than
+   * by the routing.
    *
-   * Everything else must stay clear. Five pairs crossed before the bow was
-   * widened, all of them because the ceiling flattened the longest arcs onto
-   * the medium ones.
+   * 10-57 x 20-34: the 20-34 channel has to swing left of the G's left vertex
+   * to get past it, which encloses gate 10 sitting on that vertex, while gate
+   * 57 is out in the Spleen beyond the arc. Any path from 10 to 57 crosses it.
+   *
+   * 26-44 x 29-46: gate 26 sits on the Heart, to the right of the column that
+   * 29-46 runs down, and gate 44 sits on the Spleen, far to the left of it and
+   * below. Any continuous path between them crosses that column somewhere, and
+   * the only heights at which it would miss 29-46 are above the G's lower edge
+   * or below the Sacral's upper one — neither reachable from the Heart. The
+   * reference artwork draws this crossing too: it leaves two small counters in
+   * the line work where 26-44 passes over the G-to-Sacral bars.
+   *
+   * Nothing else may cross. The parameter sweep behind BOW_FACTOR found six
+   * crossings at low bow values, all of them arcs flattened onto one another.
    */
-  it("crosses exactly one pair of channels, the one the layout forces", () => {
+  it("crosses exactly the two pairs the layout forces", () => {
     type Segmented = { id: string; gates: readonly [number, number]; points: Point[] };
 
     const sample = (path: string): Point[] => {
@@ -266,7 +273,7 @@ describe("BodyGraph geometry", () => {
       }
     }
 
-    expect(crossing).toEqual(["10-57 x 20-34"]);
+    expect(crossing).toEqual(["10-57 x 20-34", "26-44 x 29-46"]);
   });
 
   /**
@@ -332,7 +339,7 @@ describe("BodyGraph rendering", () => {
     const chart = await chartFor("1990-03-01", "14:32");
     const markup = renderToStaticMarkup(<BodyGraph chart={chart} />);
 
-    expect(countMatches(markup, /data-center="/g)).toBe(9);
+    expect(countMatches(markup, /data-center-shape="/g)).toBe(9);
     expect(countMatches(markup, /data-gate="/g)).toBe(64);
     expect(countMatches(markup, /data-channel="/g)).toBe(36);
   });

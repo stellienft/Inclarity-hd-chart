@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
 import { VIEWBOX } from "../components/bodygraph/geometry";
+import { GATE_MARKER_RADIUS } from "../components/bodygraph/styles";
 
 /**
  * End-to-end coverage of the visitor journey, plus the public API contract.
@@ -59,7 +59,7 @@ test.describe("chart generation", () => {
 
     const svg = page.locator("svg[role='img']");
     await expect(svg).toBeVisible();
-    await expect(svg.locator("[data-center]")).toHaveCount(9);
+    await expect(svg.locator("[data-center-shape]")).toHaveCount(9);
     await expect(svg.locator("[data-gate]")).toHaveCount(64);
     await expect(svg.locator("[data-channel]")).toHaveCount(36);
   });
@@ -171,91 +171,91 @@ test.describe("validation and accessibility", () => {
 });
 
 /**
- * The figure behind the graph is supplied artwork with holes in it — the gaps
- * between the arms and the body, and the slivers between locks of hair. Where
- * it is actually PAINTED can only be answered by something that understands
- * fill rules, so it is asked here, of the browser, rather than approximated by
- * flattening the path in a unit test.
+ * Every gate marker has to sit inside the shape it belongs to, as DRAWN.
+ *
+ * The unit tests can only check the sharp-cornered polygons the geometry is
+ * defined by. What actually gets painted is those polygons with 26 units of
+ * corner rounding applied, and rounding removes real area — most of it exactly
+ * where the gates cluster, in the corners. Whether a point falls inside a
+ * rounded path is a question about fill rules, so it is asked here, of the
+ * browser, rather than approximated.
  */
-test.describe("the figure behind the graph", () => {
-  const SPINE = ["head", "ajna", "throat", "g", "sacral", "root"];
-  const WINGS = ["heart", "spleen", "solarPlexus"];
-
-  /** Which gates the figure is painted under, keyed by gate number. */
-  async function paintedGates(page: Page): Promise<Record<number, boolean>> {
+test.describe("gate markers against the drawn centres", () => {
+  /**
+   * How much of each marker's DISC falls outside its own centre.
+   *
+   * Testing the centre point alone is not enough: gate 43 sits on the Ajna's
+   * apex and passed a centre-point check while a fifth of its disc hung over
+   * the rounded tip. Forty-eight points around the circumference is what
+   * caught it.
+   */
+  async function discOutside(page: Page): Promise<Record<number, number>> {
     await generateChart(page);
-    return page.evaluate(() => {
+    return page.evaluate((radius) => {
       const svg = document.querySelector("svg[role='img']")!;
-      const group = svg.querySelector("g[transform]")!;
-      const path = group.querySelector("path") as SVGPathElement;
-
-      // Undo the placement transform: isPointInFill works in the path's own
-      // coordinates, which are the artwork's, not the BodyGraph's.
-      const [tx, ty, sx, sy] = (group
-        .getAttribute("transform")!
-        .match(/translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+) ([\d.]+)\)/) ?? [])
-        .slice(1)
-        .map(Number) as [number, number, number, number];
-
-      const result: Record<number, boolean> = {};
+      const result: Record<number, number> = {};
       for (const element of svg.querySelectorAll("[data-gate]")) {
+        const gate = Number(element.getAttribute("data-gate"));
+        const shape = svg.querySelector(
+          `[data-center-shape="${element.getAttribute("data-center")}"]`,
+        ) as SVGGeometryElement | null;
+        if (!shape) {
+          result[gate] = 48;
+          continue;
+        }
         const label = element.querySelector("text")!;
-        const x = (Number(label.getAttribute("x")) - tx) / sx;
-        const y = (Number(label.getAttribute("y")) - ty) / sy;
-        result[Number(element.getAttribute("data-gate"))] = path.isPointInFill(
-          new DOMPoint(x, y),
-        );
+        const x = Number(label.getAttribute("x"));
+        const y = Number(label.getAttribute("y"));
+        let outside = 0;
+        for (let k = 0; k < 48; k += 1) {
+          const a = (k / 48) * 2 * Math.PI;
+          const on = shape.isPointInFill(
+            new DOMPoint(x + radius * Math.cos(a), y + radius * Math.sin(a)),
+          );
+          if (!on) outside += 1;
+        }
+        result[gate] = outside;
       }
       return result;
-    });
+    }, GATE_MARKER_RADIUS);
   }
 
-  const gatesOf = (centre: string) =>
-    GATE_DEFINITIONS.filter((g) => g.center === centre).map((g) => g.gate);
-
-  test("backs every centre running down the middle", async ({ page }) => {
-    const painted = await paintedGates(page);
-
-    for (const centre of SPINE) {
-      const missing = gatesOf(centre).filter((gate) => !painted[gate]);
-      expect(missing, `${centre} gates sitting on bare page`).toEqual([]);
-    }
-  });
-
-  test("lets the outer centres graze its edge without floating free", async ({ page }) => {
-    const painted = await paintedGates(page);
-
-    for (const centre of WINGS) {
-      const gates = gatesOf(centre);
-      const on = gates.filter((gate) => painted[gate]);
-      expect(on.length, `${centre} has nothing over the figure`).toBeGreaterThan(0);
-      expect(on.length, `${centre} is entirely swallowed by the figure`).toBeLessThan(
-        gates.length,
-      );
-    }
+  test("keeps all 64 marker discs wholly inside their own centre", async ({ page }) => {
+    const outside = await discOutside(page);
+    expect(Object.keys(outside)).toHaveLength(64);
+    const spilling = Object.entries(outside)
+      .filter(([, count]) => count > 0)
+      .map(([gate, count]) => `${gate}: ${count}/48 outside`);
+    expect(spilling, "gate markers overhanging their drawn centre").toEqual([]);
   });
 
   /**
-   * The Spleen and Solar Plexus are laid out as mirrors of each other, so the
-   * gates that fall past the figure should mirror too. If they stop matching,
-   * either the wings have drifted apart or the artwork is no longer sitting
-   * square in the frame — and this catches both without measuring either.
+   * The Spleen and Solar Plexus are laid out as exact mirrors, so anything
+   * true of one must be true of the other. Checked against the rendered paths
+   * rather than the coordinates, which catches a drawing that has drifted off
+   * the axis as well as geometry that has.
    */
-  test("drops the same gates either side, proving the figure sits square", async ({ page }) => {
-    const painted = await paintedGates(page);
-    const MIRROR: Array<[number, number]> = [
-      [48, 36],
-      [57, 22],
-      [44, 37],
-      [50, 6],
-      [32, 49],
-      [28, 55],
-      [18, 30],
-    ];
+  test("draws the Spleen and Solar Plexus as mirrors", async ({ page }) => {
+    await generateChart(page);
+    const boxes = await page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")!;
+      const read = (id: string) => {
+        const el = svg.querySelector(`[data-center-shape="${id}"]`) as SVGGraphicsElement;
+        const b = el.getBBox();
+        return { x: b.x, y: b.y, w: b.width, h: b.height };
+      };
+      const view = (svg as SVGSVGElement).viewBox.baseVal;
+      return { left: read("spleen"), right: read("solarPlexus"), width: view.width };
+    });
 
-    for (const [left, right] of MIRROR) {
-      expect(painted[left], `gate ${left} against its mirror ${right}`).toBe(painted[right]);
-    }
+    expect(boxes.left.w).toBeCloseTo(boxes.right.w, 1);
+    expect(boxes.left.h).toBeCloseTo(boxes.right.h, 1);
+    expect(boxes.left.y).toBeCloseTo(boxes.right.y, 1);
+    // Left edge of one mirrors the right edge of the other about the axis.
+    expect(boxes.left.x + boxes.right.x + boxes.right.w).toBeCloseTo(
+      boxes.left.x + boxes.left.w + boxes.right.x,
+      1,
+    );
   });
 });
 

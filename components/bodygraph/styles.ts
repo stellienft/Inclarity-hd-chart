@@ -63,8 +63,6 @@ export const CHANNEL_TRACK_FILL = PALETTE.white;
 export const CHANNEL_TRACK_EDGE = PALETTE.dusk;
 export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
-export const BODY_SILHOUETTE_FILL = PALETTE.pebble;
-
 /** Gate numerals on a defined (skylight) centre — ESPRESSO, 8.1:1. */
 export const ON_DEFINED_TEXT = PALETTE.espresso;
 /** Gate numerals on the linen ground of an undefined centre — DUSK, 5.9:1. */
@@ -75,40 +73,42 @@ export const GATE_MARKER_TEXT = PALETTE.white;
 /**
  * Weights for the numerals drawn inside the chart.
  *
- * The brand sets body copy in Extra Light, but these are 10px labels reversed
- * out of a 19px disc: at 200 the strokes disappear. 500 is the legibility
- * floor for reversed micro-type and is used only here, never in running text.
+ * The brand sets body copy in Extra Light, but these are 17px numerals
+ * reversed out of a 28px disc: at 200 the strokes disappear. 500 is the
+ * legibility floor for reversed type and is used only here, never in running
+ * text.
  */
 export const GATE_NUMERAL_WEIGHT = { active: 500, inactive: 400 } as const;
 
 export const STROKE_WIDTH = {
-  centre: 1.25,
+  centre: 2,
   /*
-   * Channels are drawn as thin outlined tracks rather than fat white tubes:
-   * a wider stroke in the edge colour with a narrower white one on top, so
-   * what reads is the outline. The long arcs run in nested families and need
-   * visible gaps between them to be followed by eye.
+   * Channels are drawn as outlined tracks rather than fat white tubes: a wider
+   * stroke in the edge colour with a narrower white one on top, so what reads
+   * is the outline. 14 is the track width measured off the reference artwork,
+   * and the 3.5 of edge either side matches the line weight it draws them in.
    */
-  channelTrack: 5.6,
-  channelTrackEdge: 7.2,
-  channelActive: 5.6,
+  channelTrack: 14,
+  channelTrackEdge: 17.5,
+  channelActive: 14,
 } as const;
 
 /** Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS. */
-export const GATE_NUMERAL_SIZE = 12;
+export const GATE_NUMERAL_SIZE = 17;
 
 /**
  * Marker radius, and the reason it is not larger.
  *
- * 9.5 against a 120-wide Throat is the same ratio the reference chart uses.
- * At 10 the three triangles stop working: the solved layout leaves 26 and 51
- * in the Heart 19.2 apart, which two 20-wide markers overlap. The numerals
- * grew instead — see GATE_NUMERAL_SIZE.
+ * The binding constraint is the Root's left edge, where 54, 38 and 58 sit 39
+ * apart: two markers of radius 14 leave 11 units of daylight between them, and
+ * at 16 they touch. It is also just wider than the 14-unit channel tracks the
+ * reference artwork draws, so a marker reads as a stop on the line rather than
+ * a bulge in it.
  */
-export const GATE_MARKER_RADIUS = 9.5;
+export const GATE_MARKER_RADIUS = 14;
 /** A white ring separates a marker from whatever centre fill sits behind it. */
 export const GATE_MARKER_RING = "#FFFFFF";
-export const GATE_MARKER_RING_WIDTH = 1.5;
+export const GATE_MARKER_RING_WIDTH = 2;
 
 export type ActivationStyle = "none" | "personality" | "design" | "both";
 

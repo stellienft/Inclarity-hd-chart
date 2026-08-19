@@ -13,7 +13,6 @@ import {
   ON_UNDEFINED_TEXT,
   PALETTE,
   PERSONALITY_COLOR,
-  BODY_SILHOUETTE_FILL,
   GATE_MARKER_TEXT,
 } from "./styles";
 
@@ -121,7 +120,6 @@ describe("brand palette", () => {
     expect(CENTER_UNDEFINED_FILL).toBe(GUIDE.primary.LINEN);
     expect(CHANNEL_TRACK_FILL).toBe(GUIDE.accent.WHITE);
     expect(CHANNEL_TRACK_EDGE).toBe(GUIDE.primary.DUSK);
-    expect(BODY_SILHOUETTE_FILL).toBe(GUIDE.primary.PEBBLE);
   });
 
   /**
