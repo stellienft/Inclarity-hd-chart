@@ -34,8 +34,22 @@ is how the client's reference chart separates them. Espresso carried
 Personality until that reference arrived; it reads as black at the width of a
 channel. White on Dusk measures 6.49:1, so the gate markers and the planetary
 chips still clear AA. Because the separation is now hue rather than light-dark,
-`brand.test.ts` checks both imprints stay clear of the white channel track and
-of the ink used for inactive numerals.
+`brand.test.ts` checks both imprints stay clear of every ground they can be read
+against and of the ink used for inactive numerals.
+
+**An inactive channel is not filled.** White was tried and it cost the drawing
+twice. The gaps the artwork leaves *between* neighbouring tracks are unfilled,
+so they show Pebble — and white on Pebble is 1.14:1. A reader could not tell a
+track from the space beside it, only that the whole area was pale and fenced in
+by outlines, and the figure the client asked to keep was invisible underneath
+it. It also left an activated channel as one plum bar among thirty-four white
+ones, so a chart with two defined channels read as a chart with none. Unfilled,
+the graph is line work over the figure — which is what the client's file draws —
+and the only filled channels are the defined ones. The imprints are then read
+against Pebble, Linen or White rather than against a track; the binding measure
+is `ochre-deep` on Pebble at 3.76:1, which clears WCAG 1.4.11's 3:1 for
+non-text. The 4.5:1 that governs the numerals reversed out of those colours is
+unchanged and asserted separately.
 
 **Undefined centres are White, not Linen.** Linen is the page's own ground, so
 filling an undefined centre with it left the outline doing all the work. White
@@ -132,6 +146,15 @@ than one region: where a channel crosses another, the drawing splits the track
 it crosses into fragments, and the channel is all of them — which is why an
 activated track is **filled** rather than stroked. 37-40 is a single fragment
 out by the Solar Plexus that an approximate arc misses entirely.
+
+Taking a gap by mistake is the failure mode this invites, and it is caught by
+measurement rather than by eye. A track is a ribbon of constant width and a gap
+is a wedge, so modelling each region as a rectangle of the same area and
+perimeter recovers the width: solving `2(w + l) = P` and `wl = A` gives
+`w = (P − √(P² − 16A)) / 4`. Every real track in the file measures **12.6 to 16**
+units across. A wedge on the Spleen's upper edge, mapped as a second region of
+34-57, measured **20.8** and drew as a stray shape floating above the centre;
+the e2e suite now asserts the width of every region.
 
 The four it does not map are the integration group — 10-20, 10-34, 10-57 and
 20-34. The drawing merges them into one web at the G's left vertex, where a

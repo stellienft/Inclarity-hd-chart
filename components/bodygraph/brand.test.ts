@@ -119,7 +119,9 @@ describe("brand palette", () => {
     expect(DESIGN_COLOR).toBe(DERIVED["ochre-deep"]);
     expect(CENTER_DEFINED_FILL).toBe(GUIDE.primary.SKYLIGHT);
     expect(CENTER_UNDEFINED_FILL).toBe(GUIDE.accent.WHITE);
-    expect(CHANNEL_TRACK_FILL).toBe(GUIDE.accent.WHITE);
+    // Not a colour at all: an inactive channel is unfilled so the figure reads
+    // through it. Anything else here means the graph has gone opaque again.
+    expect(CHANNEL_TRACK_FILL).toBe("none");
     expect(CHANNEL_TRACK_EDGE).toBe(GUIDE.primary.DUSK);
     expect(BODY_SILHOUETTE_FILL).toBe(GUIDE.primary.PEBBLE);
   });
@@ -162,13 +164,22 @@ describe("brand palette", () => {
    * They are no longer a dark and a light — both are mid-tone primaries — so
    * the separation is hue, and this is the check that it stays wide enough to
    * survive. Measured between them the ratio is small by design; what matters
-   * is that neither collapses into the other or into the white track between
-   * them.
+   * is that neither collapses into the other or into what sits behind them.
+   *
+   * An inactive channel is unfilled now, so the ground an activated one is read
+   * against is whatever the drawing sits on: the figure where it covers the
+   * graph, the page everywhere else. The threshold there is 3:1, WCAG 1.4.11
+   * for non-text contrast — a channel bar is a graphical object, not type. The
+   * 4.5:1 that DOES apply to the numerals reversed out of these two colours is
+   * asserted above, against the colours themselves. Worst case here is
+   * ochre-deep on PEBBLE at 3.76:1.
    */
-  it("keeps Personality and Design distinct from each other and from the track", () => {
+  it("keeps Personality and Design distinct from each other and from the ground", () => {
     expect(PERSONALITY_COLOR).not.toBe(DESIGN_COLOR);
-    expect(contrast(PERSONALITY_COLOR, CHANNEL_TRACK_FILL)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(DESIGN_COLOR, CHANNEL_TRACK_FILL)).toBeGreaterThanOrEqual(4.5);
+    for (const ground of [BODY_SILHOUETTE_FILL, GUIDE.primary.LINEN, GUIDE.accent.WHITE]) {
+      expect(contrast(PERSONALITY_COLOR, ground)).toBeGreaterThanOrEqual(3);
+      expect(contrast(DESIGN_COLOR, ground)).toBeGreaterThanOrEqual(3);
+    }
     // An inactive numeral must not be the same ink as an activated marker.
     expect(ON_UNDEFINED_TEXT).not.toBe(PERSONALITY_COLOR);
     expect(ON_DEFINED_TEXT).not.toBe(PERSONALITY_COLOR);

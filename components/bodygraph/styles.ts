@@ -65,8 +65,19 @@ export const CENTER_UNDEFINED_FILL = PALETTE.white;
 export const CENTER_STROKE = "#DBD2CC";
 
 /**
- * Inactive channels are drawn as WHITE "tracks" with a thin outline, so they
- * read both against the pale figure and against the page behind it.
+ * Inactive channels are NOT filled. Their outline is the artwork's own line
+ * work, and the figure behind shows straight through them.
+ *
+ * WHITE was here, and it cost the drawing twice over. The gaps the artwork
+ * leaves between neighbouring tracks are unfilled, so they show PEBBLE — and
+ * white against Pebble is a 1.14:1 whisper. A viewer could not tell a track
+ * from the space beside it, only that the whole area was pale and boxed in by
+ * outlines; the figure the client asked to keep was invisible under it. It also
+ * left an activated channel as one plum bar among thirty-four white ones, which
+ * is why a chart with two defined channels read as a chart with none.
+ *
+ * Unfilled, the graph is line work over the figure — which is what the client's
+ * file draws — and the only filled channels are the defined ones.
  *
  * The outline is DUSK held back to about half strength rather than a lighter
  * hex, which keeps it on the palette while giving the line enough definition
@@ -74,7 +85,7 @@ export const CENTER_STROKE = "#DBD2CC";
  * arcs run in nested families of four or five and simply disappeared into one
  * another.
  */
-export const CHANNEL_TRACK_FILL = PALETTE.white;
+export const CHANNEL_TRACK_FILL = "none";
 /**
  * The line work of the reference drawing — STROKED, not filled.
  *

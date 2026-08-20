@@ -258,6 +258,62 @@ test.describe("gate markers against the drawn centres", () => {
       Math.abs(boxes.left.x + (boxes.right.x + boxes.right.w) - boxes.width),
     ).toBeLessThanOrEqual(WOBBLE);
   });
+
+  /**
+   * Every region assigned to a channel must be a TRACK, not one of the gaps
+   * between them.
+   *
+   * The drawing leaves 2n-1 white regions where n channels run side by side:
+   * n track interiors alternating with n-1 gaps. Picking a gap by mistake fills
+   * a shape that belongs to no channel — which is what put a stray wedge above
+   * the Spleen, mapped as a second region of 34-57.
+   *
+   * A track is a ribbon of constant width; a gap is a wedge. Modelling each
+   * region as a rectangle of the same area and perimeter recovers that width
+   * exactly: solving 2(w + l) = P and wl = A gives w = (P - sqrt(P^2 - 16A))/4.
+   * Every real track in the file measures 12.6 to 16 units across. The wedge
+   * measured 20.8.
+   */
+  test("gives every channel a track of the drawing's own width, never a gap", async ({
+    page,
+  }) => {
+    await generateChart(page);
+    const widths = await page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")!;
+      const out: Array<{ id: string; index: number; width: number }> = [];
+      for (const group of svg.querySelectorAll("[data-channel]")) {
+        const id = group.getAttribute("data-channel")!;
+        const regions = [...group.querySelectorAll("path")].filter(
+          (p) => p.getAttribute("fill") !== null,
+        );
+        regions.forEach((path, index) => {
+          const geometry = path as unknown as SVGGeometryElement;
+          const perimeter = geometry.getTotalLength();
+          const SAMPLES = 400;
+          let twiceArea = 0;
+          for (let k = 0; k < SAMPLES; k += 1) {
+            const a = geometry.getPointAtLength((k * perimeter) / SAMPLES);
+            const b = geometry.getPointAtLength((((k + 1) % SAMPLES) * perimeter) / SAMPLES);
+            twiceArea += a.x * b.y - b.x * a.y;
+          }
+          const area = Math.abs(twiceArea) / 2;
+          const discriminant = perimeter * perimeter - 16 * area;
+          out.push({
+            id,
+            index,
+            width: discriminant > 0 ? (perimeter - Math.sqrt(discriminant)) / 4 : Number.NaN,
+          });
+        });
+      }
+      return out;
+    });
+
+    expect(widths.length).toBeGreaterThan(30);
+    const wrong = widths
+      .filter(({ width }) => !(width >= 12 && width <= 17))
+      .map(({ id, index, width }) => `${id}[${index}] is ${width.toFixed(1)} across`);
+    expect(wrong, "a gap between tracks has been mapped as a channel").toEqual([]);
+  });
 });
 
 /**
