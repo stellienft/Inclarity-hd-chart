@@ -178,200 +178,207 @@ export const CENTERS: readonly CenterGeometry[] = [
  */
 export const GATE_POINTS: Readonly<Record<number, Point>> = {
   /*
-   * Three columns run the length of the graph, at AXIS_X and 42.3 either side.
-   * They are the artwork's own: the drawing's vertical bars between the Head
-   * and the Ajna, the Ajna and the Throat, the Throat and the G, the G and the
-   * Sacral, and the Sacral and the Root all sit on these centre-lines, so
-   * every stacked channel is a straight vertical the way the reference draws
-   * it. Only gates whose channel leaves the column sit anywhere else.
+   * Every anchor is a JUNCTION READ OFF THE ARTWORK: the point where that
+   * gate's channel track actually meets its centre in the client's file, not a
+   * position chosen along the edge. That is what makes a numeral line up with
+   * the line running into it.
+   *
+   * Gates carrying more than one channel take the mean of their junctions —
+   * 57, where 20-57 and 34-57 both arrive, is the clearest case.
+   *
+   * The four gates of the integration group have no mapped junction, because
+   * the drawing merges their channels at the G's left vertex; they keep the
+   * positions the geometry gives them. They are marked below.
+   *
+   * SYMMETRISED. The file is hand-drawn and its two halves do not match: gate
+   * 48's junction sits at x = 29.2 where 36's mirrors to 16.7, twelve units
+   * apart. Each mirror pair is averaged and each on-axis gate snapped to
+   * AXIS_X, so the Spleen and Solar Plexus stay exact reflections of one
+   * another — which the mirror test requires and a reader notices.
    */
 
-  // Head — bottom edge, facing the Ajna.
-  64: { x: 363.2, y: 155.4 },
-  61: { x: 405.5, y: 155.4 },
-  63: { x: 447.8, y: 155.4 },
+  // Head — where the three channels to the Ajna meet it.
+  64: { x: 365.1, y: 155.2 },
+  61: { x: 405.5, y: 155.2 },
+  63: { x: 445.9, y: 155.2 },
 
-  // Ajna — top edge faces the Head; the lower slopes face the Throat. 17 and
-  // 11 sit where the outer columns cross those slopes, 43 on the apex.
-  47: { x: 363.2, y: 215.4 },
+  // Ajna — top edge to the Head, lower slopes to the Throat.
+  47: { x: 359.6, y: 215.4 },
   24: { x: 405.5, y: 215.4 },
-  4: { x: 447.8, y: 215.4 },
-  17: { x: 363.2, y: 288.6 },
-  43: { x: 405.5, y: 360.4 },
-  11: { x: 447.8, y: 288.6 },
+  4: { x: 451.4, y: 215.4 },
+  17: { x: 366.4, y: 311.4 },
+  43: { x: 405.5, y: 359.8 },
+  11: { x: 444.6, y: 311.4 },
 
   // Throat — top to the Ajna, bottom to the G, sides outward.
-  62: { x: 363.2, y: 453 },
-  23: { x: 405.5, y: 453 },
-  56: { x: 447.8, y: 453 },
-  // The side gates pair off across the centre: 16 opposite 35, 20 opposite 12.
-  // 45 hangs below them with nothing facing it, which is how a conventional
-  // chart draws the Throat, and it is where the artwork starts its long sweep
-  // out to the right and down into the Heart.
-  16: { x: 323.8, y: 496 },
-  20: { x: 323.8, y: 530 },
-  35: { x: 487.2, y: 496 },
-  12: { x: 487.2, y: 530 },
-  45: { x: 487.2, y: 564 },
-  31: { x: 363.2, y: 608.4 },
-  8: { x: 405.5, y: 608.4 },
-  33: { x: 447.8, y: 608.4 },
+  62: { x: 360.4, y: 453.2 },
+  23: { x: 405.5, y: 453.2 },
+  56: { x: 450.6, y: 453.2 },
+  16: { x: 323.8, y: 501.3 },
+  20: { x: 323.9, y: 538.2 },
+  35: { x: 487.2, y: 501.3 },
+  12: { x: 487.1, y: 538.2 },
+  45: { x: 486.4, y: 587.5 },
+  31: { x: 355.1, y: 608.3 },
+  8: { x: 405.5, y: 608.3 },
+  33: { x: 455.9, y: 608.3 },
 
-  // G — diamond; 7/13 and 15/46 sit where the outer columns cross its edges,
-  // 10 and 25 on the side vertices, 1 and 2 on the top and bottom.
-  1: { x: 405.5, y: 652.1 },
-  7: { x: 363.2, y: 693.3 },
-  13: { x: 447.8, y: 693.3 },
-  10: { x: 301.5, y: 753.5 },
-  25: { x: 509.5, y: 753.5 },
-  15: { x: 363.2, y: 813.7 },
-  46: { x: 447.8, y: 813.7 },
-  2: { x: 405.5, y: 855 },
+  // G — 10 and 25 on the side vertices, 1 and 2 top and bottom.
+  1: { x: 405.5, y: 652.5 },
+  7: { x: 372.3, y: 673.6 },
+  13: { x: 438.7, y: 673.6 },
+  10: { x: 303.8, y: 760.1 },   // merged in the drawing; not a junction
+  25: { x: 507.2, y: 760.1 },
+  15: { x: 373.4, y: 834.0 },
+  46: { x: 437.6, y: 834.0 },
+  2: { x: 405.5, y: 854.9 },
 
-  /*
-   * Heart / Ego — read around the triangle the way the reference template
-   * draws it: 21 at the top vertex, 51 partway down the upper-left edge, then
-   * 26 and 40 on the two lower edges.
-   *
-   * That order is what keeps the four channels untangled. 21 meets the Throat
-   * at 45 and 51 the G at 25 — both up and to the left, but 45 sits a hundred
-   * and eighty units higher, so the gate reaching it has to start higher too
-   * or the two arcs swap sides. Below them 26 leaves for the Spleen's 44, far
-   * out to the left, and 40 for the Solar Plexus's 37, out to the right, so
-   * they part company at once.
-   *
-   * 26 is the one gate that cannot take the template's position. The template
-   * puts it on the left vertex; from there its channel to 44 has to cross the
-   * column at x = 447.8, where 29-46 runs as a straight vertical, and it has
-   * only the width of the Heart in which to drop clear. It sits instead at the
-   * first position down the lower edge that the crossing test passes, as far
-   * toward the vertex as the drawing allows.
-   */
-  21: { x: 608, y: 797 },
-  51: { x: 575, y: 818 },
-  26: { x: 521.5, y: 882 },
-  40: { x: 659, y: 912 },
+  // Heart / Ego — 21 at the top, 51 and 26 down the left, 40 bottom-right.
+  21: { x: 608.0, y: 797.0 },
+  51: { x: 562.5, y: 823.1 },
+  26: { x: 459.7, y: 863.9 },
+  40: { x: 659.0, y: 912.0 },
 
-  /*
-   * Spleen — the exact mirror of the Solar Plexus, and it has to be.
-   *
-   * These are the artwork's own junctions: where each channel track actually
-   * meets the triangle, not four points spaced evenly along its edge. Even
-   * spacing put 48 a third of the way down when its channel arrives at the top
-   * corner, and left 57 and 44 off the tracks running into them.
-   *
-   * Read around the perimeter from the top corner: 48, 57, 44 down the upper
-   * edge, 50 at the apex, then 32, 28, 18 back along the lower edge. That order
-   * is forced by the channels, not chosen. Going up: 48 meets the Throat at 16,
-   * 57 the Throat at 20, 44 the Heart at 26 — targets that get progressively
-   * lower, so the gates must too or their channels cross. Going down: 32 meets
-   * the Root at 54, 28 at 38, 18 at 58, which sit in that order down the Root's
-   * left edge.
-   *
-   * 57 sits between two junctions rather than on one, because two channels
-   * arrive there — 20-57 at (70.6, 966.8) and 34-57 at (86.6, 976).
-   */
-  48: { x: 29.2, y: 943.6 },
-  57: { x: 78.6, y: 971.4 },
-  44: { x: 124.2, y: 997.7 },
-  50: { x: 170.9, y: 1034.1 },
-  32: { x: 94.2, y: 1088.2 },
-  28: { x: 68.1, y: 1103 },
-  18: { x: 35.2, y: 1121.7 },
+  // Spleen — 48, 57, 44 down the upper edge, 50 at the apex, 32, 28, 18 back along the lower.
+  48: { x: 23.0, y: 943.9 },
+  57: { x: 74.4, y: 969.5 },
+  44: { x: 108.7, y: 989.2 },
+  50: { x: 168.2, y: 1040.9 },
+  32: { x: 102.2, y: 1083.5 },
+  28: { x: 75.0, y: 1098.8 },
+  18: { x: 34.7, y: 1121.6 },
 
-  // Solar Plexus — the exact mirror about AXIS_X.
-  36: { x: 781.8, y: 943.6 },
-  22: { x: 732.4, y: 971.4 },
-  37: { x: 686.8, y: 997.7 },
-  6: { x: 640.1, y: 1034.1 },
-  49: { x: 716.8, y: 1088.2 },
-  55: { x: 742.9, y: 1103 },
-  30: { x: 775.8, y: 1121.7 },
+  // Solar Plexus — the mirror of the Spleen.
+  36: { x: 788.0, y: 943.9 },
+  22: { x: 736.6, y: 969.5 },
+  37: { x: 702.3, y: 989.2 },
+  6: { x: 642.8, y: 1040.9 },
+  49: { x: 708.8, y: 1083.5 },
+  55: { x: 736.0, y: 1098.8 },
+  30: { x: 776.3, y: 1121.6 },
 
-  /*
-   * Sacral — 34 belongs on the LEFT edge, not in the top row: all three of its
-   * channels (57, 10, 20) run up and to the left.
-   *
-   * The bottom row reads 42, 3, 9 left to right so that it lines up with the
-   * Root's 53, 60, 52 and the three channels drop straight down the columns.
-   * Reversed, they cross in an X below the centre.
-   */
-  5: { x: 363.2, y: 968.3 },
-  14: { x: 405.5, y: 968.3 },
-  29: { x: 447.8, y: 968.3 },
-  34: { x: 323.8, y: 1016.4 },
-  27: { x: 323.8, y: 1082.1 },
-  59: { x: 487.2, y: 1082.1 },
-  42: { x: 363.2, y: 1126.9 },
-  3: { x: 405.5, y: 1126.9 },
-  9: { x: 447.8, y: 1126.9 },
+  // Sacral — 34 and 27 on the left edge, 59 on the right.
+  5: { x: 363.2, y: 968.5 },
+  14: { x: 405.5, y: 968.4 },
+  29: { x: 447.8, y: 968.5 },
+  34: { x: 323.7, y: 1016.4 },
+  27: { x: 323.8, y: 1091.4 },
+  59: { x: 487.2, y: 1091.4 },
+  42: { x: 362.7, y: 1126.8 },
+  3: { x: 405.5, y: 1126.8 },
+  9: { x: 448.3, y: 1126.8 },
 
-  /*
-   * Root — the left edge runs 54, 38, 58 downward to meet the Spleen's 32, 28,
-   * 18, mirroring 19, 39, 41 against the Solar Plexus's 49, 55, 30. Swapping
-   * 54 and 58, as an earlier layout did, crosses all three channels.
-   */
-  53: { x: 363.2, y: 1195 },
-  60: { x: 405.5, y: 1195 },
-  52: { x: 447.8, y: 1195 },
-  54: { x: 323.9, y: 1240 },
-  38: { x: 323.9, y: 1280 },
-  58: { x: 323.9, y: 1319 },
-  19: { x: 487.1, y: 1240 },
-  39: { x: 487.1, y: 1280 },
-  41: { x: 487.1, y: 1319 },
+  // Root — 54, 38, 58 down the left, 19, 39, 41 down the right.
+  53: { x: 360.2, y: 1195.0 },
+  60: { x: 405.5, y: 1195.0 },
+  52: { x: 450.8, y: 1195.0 },
+  54: { x: 323.9, y: 1248.0 },
+  38: { x: 323.9, y: 1289.4 },
+  58: { x: 323.9, y: 1330.3 },
+  19: { x: 487.1, y: 1248.0 },
+  39: { x: 487.1, y: 1289.4 },
+  41: { x: 487.1, y: 1330.3 },
 };
 
+
 /**
- * Marker positions that are set outright rather than derived.
+ * Where every gate's marker is drawn — solved, not derived.
  *
- * The three triangles cannot use the nudge-toward-the-midpoint rule: their
- * gates start close together and every edge aims at the same spot, so any
- * inset deep enough to clear the boundary drives neighbours into each other.
- * These eighteen were solved instead — pushed inward until each cleared its
- * edges by a marker radius, then relaxed apart until no two overlapped — and
- * the result is written down so the drawing is stable and reviewable rather
- * than recomputed on every render.
+ * The anchors above are junctions read off the artwork, so they are wherever
+ * the drawing put them: unevenly spaced, some on vertices, some a few units
+ * off a corner. No single rule places a marker inside every centre from those.
+ * All sixty-four were relaxed instead — pushed in until each cleared its own
+ * edges by a marker radius, then apart until no two in a centre overlapped,
+ * with the mirror pairs averaged and the on-axis gates snapped to AXIS_X on
+ * every iteration so the drawing stays symmetric.
  *
- * The Spleen's and Solar Plexus's values are exact mirrors, which the mirror
- * test checks.
+ * The relaxation runs against the *rendered* centre paths — `isPointInFill` on
+ * the artwork's own subpaths in a browser — not against `centerPolygon`. The
+ * polygons approximate: they take a centre's straight edges and ignore how
+ * heavily the drawing fillets its corners, which overstates the Heart's and the
+ * Throat's corners by enough to push 21, 26, 40 and 45 outside the shape they
+ * are supposed to sit in. Solving against the fill removes the approximation
+ * from the placement; `centerPolygon` is still what the unit tests measure
+ * against, which is why the Heart stays exempt there.
+ *
+ * `gateLabelPoint` still carries the rule that produced the starting points
+ * (perpendicular to the edge, angle bisector on a vertex), because the solver
+ * needs it and because it documents the intent.
  */
 const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
-  // Spleen — radius 12 here, not 14; see GATE_MARKER_RADIUS_BY_CENTRE.
+  // head
+  61: { x: 405.5, y: 139.7 },
+  63: { x: 445.8, y: 139.7 },
+  64: { x: 365.2, y: 139.7 },
+  // ajna
+  4: { x: 451.4, y: 229.9 },
+  11: { x: 424.5, y: 299.6 },
+  17: { x: 386.5, y: 299.6 },
+  24: { x: 405.5, y: 229.9 },
+  43: { x: 405.5, y: 331.8 },
+  47: { x: 359.6, y: 229.9 },
+  // throat
+  8: { x: 405.5, y: 592.7 },
+  12: { x: 472.1, y: 538.2 },
+  16: { x: 338.9, y: 501.3 },
+  20: { x: 338.9, y: 538.2 },
+  23: { x: 405.5, y: 468.7 },
+  31: { x: 364.0, y: 592.8 },
+  33: { x: 447.0, y: 592.8 },
+  35: { x: 472.1, y: 501.3 },
+  45: { x: 472.0, y: 579.2 },
+  56: { x: 450.7, y: 468.7 },
+  62: { x: 360.3, y: 468.7 },
+  // g
+  1: { x: 405.5, y: 672.4 },
+  2: { x: 405.5, y: 834.7 },
+  7: { x: 384.5, y: 692.9 },
+  10: { x: 322.3, y: 753.5 },
+  13: { x: 426.5, y: 692.9 },
+  15: { x: 384.5, y: 814.2 },
+  25: { x: 488.7, y: 753.5 },
+  46: { x: 426.5, y: 814.2 },
+  // heart
+  21: { x: 611.2, y: 812.6 },
+  26: { x: 539.5, y: 868.9 },
+  40: { x: 647.8, y: 903.1 },
+  51: { x: 574.8, y: 836.7 },
+  // spleen
+  18: { x: 23.5, y: 1101.3 },
+  28: { x: 64.0, y: 1078.9 },
+  32: { x: 91.3, y: 1063.8 },
+  44: { x: 98.2, y: 1008.1 },
   48: { x: 18.9, y: 964.3 },
-  57: { x: 67.6, y: 991.3 },
-  44: { x: 113.7, y: 1016.7 },
   50: { x: 145.1, y: 1034.1 },
-  32: { x: 83.2, y: 1068.3 },
-  28: { x: 56.9, y: 1082.8 },
-  18: { x: 23.8, y: 1101.1 },
-  // Solar Plexus — the exact mirror of the Spleen about AXIS_X.
-  36: { x: 792.1, y: 964.3 },
-  22: { x: 743.4, y: 991.3 },
-  37: { x: 697.3, y: 1016.7 },
+  57: { x: 63.6, y: 989.0 },
+  // solarPlexus
   6: { x: 665.9, y: 1034.1 },
-  49: { x: 727.8, y: 1068.3 },
-  55: { x: 754.1, y: 1082.8 },
-  30: { x: 787.2, y: 1101.1 },
-  /*
-   * Heart — solved against the DRAWN region, not the polygon.
-   *
-   * The artwork rounds this triangle's corners hard, so solving against the
-   * sharp polygon puts markers out on corners the drawing does not have. These
-   * four were relaxed inside the rendered path instead, and clear it by 22.5
-   * at worst.
-   */
-  21: { x: 604.9, y: 837.5 },
-  51: { x: 576.9, y: 849.5 },
-  26: { x: 572.9, y: 873.5 },
-  40: { x: 624.9, y: 879.5 },
-  /*
-   * The Ajna's apex, and only the apex. A vertex needs its marker on the angle
-   * bisector, and the Ajna's is sharp enough that the inset the rest of the
-   * centre can afford leaves 43 straddling its edges. It also has to clear the
-   * ROUNDED apex, not the sharp one — the e2e disc check is what measures it.
-   */
-  43: { x: 405.5, y: 320 },
+  22: { x: 747.4, y: 989.0 },
+  30: { x: 787.5, y: 1101.3 },
+  36: { x: 792.1, y: 964.3 },
+  37: { x: 712.8, y: 1008.1 },
+  49: { x: 719.7, y: 1063.8 },
+  55: { x: 747.0, y: 1078.9 },
+  // sacral
+  3: { x: 405.5, y: 1111.2 },
+  5: { x: 363.2, y: 984.0 },
+  9: { x: 448.3, y: 1111.2 },
+  14: { x: 405.5, y: 984.0 },
+  27: { x: 338.9, y: 1091.4 },
+  29: { x: 447.8, y: 984.0 },
+  34: { x: 338.3, y: 1016.4 },
+  42: { x: 362.7, y: 1111.2 },
+  59: { x: 472.1, y: 1091.4 },
+  // root
+  19: { x: 472.0, y: 1248.0 },
+  38: { x: 339.0, y: 1289.4 },
+  39: { x: 472.0, y: 1289.4 },
+  41: { x: 472.0, y: 1330.3 },
+  52: { x: 450.8, y: 1209.5 },
+  53: { x: 360.2, y: 1209.5 },
+  54: { x: 339.0, y: 1248.0 },
+  58: { x: 339.0, y: 1330.3 },
+  60: { x: 405.5, y: 1209.5 },
 };
 
 
@@ -449,8 +456,12 @@ export function gateLabelPoint(gate: number, center: CenterId, distance?: number
    * along the boundary instead of entering the shape. The G's 1, 2, 10 and 25
    * sit on its four points and cleared 0.7 that way. They take the angle
    * bisector, which is the only direction that leaves both edges at once.
+   *
+   * The tolerance is 7 rather than a hair, because these anchors are junctions
+   * read off the artwork: a channel meets a vertex a few units off the exact
+   * corner, and a tight test missed them.
    */
-  const VERTEX_TOLERANCE = 2;
+  const VERTEX_TOLERANCE = 7;
   for (let i = 0; i < polygon.length; i += 1) {
     const v = polygon[i]!;
     if (Math.hypot(anchor.x - v.x, anchor.y - v.y) > VERTEX_TOLERANCE) continue;

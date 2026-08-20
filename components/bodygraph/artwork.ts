@@ -89,5 +89,26 @@ export const CHANNEL_REGION: Readonly<Record<string, readonly string[]>> = {
   "37-40": ["M699.3,983.8l11.6-6.7c-11.8-24.3-25.6-46.5-44.5-66.3-2.8,3-5.5,6.1-9.8,8.5l21.3,25.7c8.5,12.4,15,25.5,21.5,38.7Z"],
 };
 
-/** The four the drawing merges, which have to be stroked over it instead. */
+/** The four the drawing merges, which cannot have a track of their own. */
 export const INTEGRATION_GROUP: readonly string[] = ["10-20", "10-34", "10-57", "20-34"];
+
+/**
+ * Two of the four DO run along a drawn track — they just share it.
+ *
+ * The drawing takes one band from the Throat's left edge, past the G's left
+ * vertex, out and down to the Spleen. That band is 20-57 end to end; 10-20 is
+ * the part of it above gate 10 and 10-57 the part below. Splitting it at gate
+ * 10's height and filling the relevant half puts each of them exactly on the
+ * line the drawing draws, instead of a chord cutting straight across the arcs
+ * beneath — which is what a circular arc between those two points does, and no
+ * radius fixes it: the drawing routes the channel out to the left and back,
+ * and the best arc lies 18% inside the track.
+ *
+ * 10-34 and 20-34 have no such band and stay stroked.
+ */
+export const MERGED_CORRIDOR: Readonly<
+  Record<string, { region: string; from: number; to: number }>
+> = {
+  "10-20": { region: "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z", from: 536.9, to: 760.1 },
+  "10-57": { region: "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z", from: 760.1, to: 961.8 },
+};
