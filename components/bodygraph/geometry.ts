@@ -34,7 +34,42 @@ import type { CenterId } from "@/lib/human-design/types/center";
  * CHANNEL_ARC_RADIUS.
  */
 
-export const VIEWBOX = { width: 813, height: 1370.3 } as const;
+/**
+ * The graph's OWN coordinate space — the reference artwork's, unchanged. Every
+ * centre, gate and channel in this module is expressed in it.
+ */
+export const GRAPH_BOX = { width: 813, height: 1370.3 } as const;
+
+/**
+ * The frame the whole drawing is composed in.
+ *
+ * Shorter than the graph's own space, because the graph is scaled down inside
+ * it: the figure is what sets the height, and leaving the graph's full 1370
+ * left a fifth of the picture empty below the Root.
+ */
+export const VIEWBOX = { width: 813, height: 1010 } as const;
+
+/**
+ * How the graph sits inside the viewBox, against the figure.
+ *
+ * The graph is drawn at full size in its own coordinates and then scaled down
+ * as a group, so every number in this module stays in the artwork's own space
+ * and only one value governs the composition. At 1.0 the graph filled the
+ * frame and dwarfed the silhouette. At 0.68 it is 932 tall against the
+ * figure's 992, so the head and shoulders stand clear above and around it and
+ * the Root sits just inside the base — which is how a conventional chart is
+ * laid out.
+ */
+export const GRAPH_SCALE = 0.68;
+export const GRAPH_ORIGIN = {
+  x: (VIEWBOX.width - GRAPH_BOX.width * GRAPH_SCALE) / 2,
+  y: 40,
+} as const;
+
+/** The transform that places the graph group inside the viewBox. */
+export function graphTransformAttr(): string {
+  return `translate(${GRAPH_ORIGIN.x.toFixed(2)} ${GRAPH_ORIGIN.y}) scale(${GRAPH_SCALE})`;
+}
 
 /** Vertical axis of the graph. Long channels bow away from it. */
 export const AXIS_X = 405.5;
@@ -88,15 +123,19 @@ const G = {
   left: { x: 301.5, y: 753.5 },
 };
 /*
- * The Heart, at the size the artwork draws it. It was enlarged for a while, to
- * 130 x 114, so that four markers of radius 14 would fit; now that the drawing
- * IS the artwork, the shape has to be the artwork's and the markers have to
- * give way instead — see GATE_MARKER_RADIUS_BY_CENTRE.
+ * The Heart, as the artwork actually draws it: a TILTED triangle, well right
+ * of and below where this had it.
+ *
+ * The vertices are the intersections of the three straight edges, recovered
+ * from where each corner fillet begins and ends, because the drawing rounds
+ * them and a bounding box therefore does not give the corners. For a long
+ * while this was the wrong shape entirely — subpath 32 was taken for the
+ * Heart, and it is the background wedge beside it.
  */
 const HEART = {
-  left: { x: 459.7, y: 820 },
-  topRight: { x: 564, y: 775.1 },
-  bottomRight: { x: 564, y: 865 },
+  top: { x: 613.4, y: 786.4 },
+  left: { x: 501.2, y: 887.5 },
+  bottomRight: { x: 675.2, y: 921.4 },
 };
 const SPLEEN = {
   top: { x: 6.4, y: 943.1 },
@@ -118,7 +157,7 @@ export const CENTERS: readonly CenterGeometry[] = [
   { id: "g", shape: { kind: "polygon", points: [G.top, G.right, G.bottom, G.left] } },
   {
     id: "heart",
-    shape: { kind: "polygon", points: [HEART.left, HEART.topRight, HEART.bottomRight] },
+    shape: { kind: "polygon", points: [HEART.top, HEART.bottomRight, HEART.left] },
   },
   { id: "spleen", shape: { kind: "polygon", points: [SPLEEN.top, SPLEEN.apex, SPLEEN.bottom] } },
   {
@@ -170,10 +209,10 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   // chart draws the Throat, and it is where the artwork starts its long sweep
   // out to the right and down into the Heart.
   16: { x: 323.8, y: 496 },
-  20: { x: 323.8, y: 543 },
+  20: { x: 323.8, y: 530 },
   35: { x: 487.2, y: 496 },
-  12: { x: 487.2, y: 543 },
-  45: { x: 487.2, y: 582 },
+  12: { x: 487.2, y: 530 },
+  45: { x: 487.2, y: 564 },
   31: { x: 363.2, y: 608.4 },
   8: { x: 405.5, y: 608.4 },
   33: { x: 447.8, y: 608.4 },
@@ -208,10 +247,10 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
    * first position down the lower edge that the crossing test passes, as far
    * toward the vertex as the drawing allows.
    */
-  21: { x: 564, y: 775.1 },
-  51: { x: 496.2, y: 804.3 },
-  26: { x: 488.9, y: 832.6 },
-  40: { x: 564, y: 865 },
+  21: { x: 608, y: 797 },
+  51: { x: 575, y: 818 },
+  26: { x: 521.5, y: 882 },
+  40: { x: 659, y: 912 },
 
   /*
    * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
@@ -253,9 +292,9 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   5: { x: 363.2, y: 968.3 },
   14: { x: 405.5, y: 968.3 },
   29: { x: 447.8, y: 968.3 },
-  34: { x: 323.8, y: 1010 },
-  27: { x: 323.8, y: 1080 },
-  59: { x: 487.2, y: 1080 },
+  34: { x: 323.8, y: 1016.4 },
+  27: { x: 323.8, y: 1082.1 },
+  59: { x: 487.2, y: 1082.1 },
   42: { x: 363.2, y: 1126.9 },
   3: { x: 405.5, y: 1126.9 },
   9: { x: 447.8, y: 1126.9 },
@@ -268,12 +307,12 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   53: { x: 363.2, y: 1195 },
   60: { x: 405.5, y: 1195 },
   52: { x: 447.8, y: 1195 },
-  54: { x: 323.9, y: 1236 },
-  38: { x: 323.9, y: 1279 },
-  58: { x: 323.9, y: 1322 },
-  19: { x: 487.1, y: 1236 },
-  39: { x: 487.1, y: 1279 },
-  41: { x: 487.1, y: 1322 },
+  54: { x: 323.9, y: 1240 },
+  38: { x: 323.9, y: 1280 },
+  58: { x: 323.9, y: 1319 },
+  19: { x: 487.1, y: 1240 },
+  39: { x: 487.1, y: 1280 },
+  41: { x: 487.1, y: 1319 },
 };
 
 /**
@@ -310,17 +349,15 @@ const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
   /*
    * Heart — solved against the DRAWN region, not the polygon.
    *
-   * The artwork rounds this triangle's corners hard: chords of about 60 units,
-   * which is a fillet of radius 43 on a shape only 104 x 90. Solving against
-   * the sharp polygon put 21 and 40 out on corners the drawing does not have,
-   * and the browser found both markers entirely outside the painted shape.
-   * These four were relaxed inside the rendered path instead, and clear it by
-   * 18.5 at worst.
+   * The artwork rounds this triangle's corners hard, so solving against the
+   * sharp polygon puts markers out on corners the drawing does not have. These
+   * four were relaxed inside the rendered path instead, and clear it by 22.5
+   * at worst.
    */
-  21: { x: 516.7, y: 804.6 },
-  51: { x: 493.7, y: 813.4 },
-  26: { x: 493.7, y: 835.8 },
-  40: { x: 518.7, y: 836.6 },
+  21: { x: 604.9, y: 837.5 },
+  51: { x: 576.9, y: 849.5 },
+  26: { x: 572.9, y: 873.5 },
+  40: { x: 624.9, y: 879.5 },
   /*
    * The Ajna's apex, and only the apex. A vertex needs its marker on the angle
    * bisector, and the Ajna's is sharp enough that the inset the rest of the
@@ -330,17 +367,6 @@ const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
   43: { x: 405.5, y: 320 },
 };
 
-const CENTER_MIDPOINTS: Record<CenterId, Point> = {
-  head: { x: 405.5, y: 105.9 },
-  ajna: { x: 405.5, y: 263.7 },
-  throat: { x: 405.5, y: 530.7 },
-  g: { x: 405.5, y: 753.5 },
-  heart: { x: 529.2, y: 820 },
-  spleen: { x: 61.2, y: 1034.1 },
-  solarPlexus: { x: 749.8, y: 1034.1 },
-  sacral: { x: 405.5, y: 1047.6 },
-  root: { x: 405.5, y: 1279.4 },
-};
 
 /**
  * How far each gate marker is pushed inside its own centre.
@@ -356,33 +382,45 @@ const CENTER_MIDPOINTS: Record<CenterId, Point> = {
  * is what says so, and it has caught this twice.
  */
 const GATE_INSET: Record<CenterId, number> = {
-  head: 22,
+  head: 20,
   ajna: 20,
   throat: 20,
-  g: 28,
+  g: 24,
   heart: 14,
   spleen: 14,
   solarPlexus: 14,
-  sacral: 28,
-  root: 28,
+  sacral: 22,
+  root: 22,
 };
 
+/** A centre's boundary as a polygon, for the gate maths. */
+export function centerPolygon(center: CenterId): Point[] {
+  const shape = CENTERS.find((c) => c.id === center)?.shape;
+  if (!shape) throw new Error(`No shape for ${center}`);
+  if (shape.kind === "polygon") return [...shape.points];
+  const { x, y, width, height } = shape;
+  return [
+    { x, y },
+    { x: x + width, y },
+    { x: x + width, y: y + height },
+    { x, y: y + height },
+  ];
+}
+
 /**
- * Where a gate's marker is drawn: just INSIDE its own centre, nudged from the
- * anchor toward that centre's midpoint.
+ * Where a gate's marker is drawn: straight in from the edge it sits on,
+ * PERPENDICULAR to that edge.
  *
- * Inward placement is what conventional BodyGraphs do, and it is the only
- * arrangement that avoids collisions. Pushing markers outward sends the two
- * gates of a short channel — 1 and 8, 43 and 23, 25 and 51, 59 and 6 — directly
- * into one another, because "away from my centre" means "toward yours".
+ * This used to nudge each marker toward its centre's midpoint, and that is
+ * what knocked the numerals off their channels. A gate on the Throat's top
+ * edge belongs directly above its channel; aiming it at the midpoint moves it
+ * sideways as well as down, so 62, 23 and 56 drifted together and stopped
+ * lining up with the three tracks running to the Ajna. Perpendicular keeps a
+ * gate on its own column, which is how the reference charts read.
  *
- * Toward the midpoint, NOT perpendicular to the edge. Perpendicular is the
- * tempting alternative — it would keep gates sharing an edge exactly as far
- * apart however deep the inset — but it drives gates on ADJACENT edges
- * together instead, and every centre has corners: measured, it put the
- * Throat's 33 and 45 eight units apart, and the Spleen's 32 and 44 the same.
- * Aiming everything at the midpoint converges gates gently and uniformly, so
- * one number per centre controls it.
+ * The cost is that gates on ADJACENT edges converge at a corner rather than
+ * staying parallel — which is why the three triangles, where every gate is
+ * near a corner, are solved outright in GATE_MARKER_OVERRIDES instead.
  */
 export function gateLabelPoint(gate: number, center: CenterId, distance?: number): Point {
   const anchor = GATE_POINTS[gate];
@@ -391,17 +429,67 @@ export function gateLabelPoint(gate: number, center: CenterId, distance?: number
   const solved = GATE_MARKER_OVERRIDES[gate];
   if (solved && distance === undefined) return solved;
 
-  const mid = CENTER_MIDPOINTS[center];
   const inset = distance ?? GATE_INSET[center];
+  const polygon = centerPolygon(center);
+  const centroid = polygon.reduce(
+    (acc, p) => ({ x: acc.x + p.x / polygon.length, y: acc.y + p.y / polygon.length }),
+    { x: 0, y: 0 },
+  );
 
-  const dx = mid.x - anchor.x;
-  const dy = mid.y - anchor.y;
-  const length = Math.hypot(dx, dy) || 1;
+  /*
+   * A gate ON A VERTEX has no single edge to come in from: the perpendicular
+   * of either edge runs almost parallel to the other, so the marker slides
+   * along the boundary instead of entering the shape. The G's 1, 2, 10 and 25
+   * sit on its four points and cleared 0.7 that way. They take the angle
+   * bisector, which is the only direction that leaves both edges at once.
+   */
+  const VERTEX_TOLERANCE = 2;
+  for (let i = 0; i < polygon.length; i += 1) {
+    const v = polygon[i]!;
+    if (Math.hypot(anchor.x - v.x, anchor.y - v.y) > VERTEX_TOLERANCE) continue;
+    const before = polygon[(i - 1 + polygon.length) % polygon.length]!;
+    const after = polygon[(i + 1) % polygon.length]!;
+    const toBefore = { x: before.x - v.x, y: before.y - v.y };
+    const toAfter = { x: after.x - v.x, y: after.y - v.y };
+    const lb = Math.hypot(toBefore.x, toBefore.y) || 1;
+    const la = Math.hypot(toAfter.x, toAfter.y) || 1;
+    let bx = toBefore.x / lb + toAfter.x / la;
+    let by = toBefore.y / lb + toAfter.y / la;
+    const lbi = Math.hypot(bx, by) || 1;
+    bx /= lbi;
+    by /= lbi;
+    // Half-angle between the bisector and either edge sets how far along the
+    // bisector the marker has to travel to clear both edges by `inset`.
+    const sinHalf = Math.abs((toAfter.x / la) * by - (toAfter.y / la) * bx) || 1;
+    return { x: v.x + (bx * inset) / sinHalf, y: v.y + (by * inset) / sinHalf };
+  }
 
-  return {
-    x: anchor.x + (dx / length) * inset,
-    y: anchor.y + (dy / length) * inset,
-  };
+  // Otherwise: straight in from the edge this gate sits on.
+  let nearest = { distance: Infinity, nx: 0, ny: 0 };
+  for (let i = 0; i < polygon.length; i += 1) {
+    const a = polygon[i]!;
+    const b = polygon[(i + 1) % polygon.length]!;
+    const vx = b.x - a.x;
+    const vy = b.y - a.y;
+    const lengthSquared = vx * vx + vy * vy || 1;
+    const t = Math.max(0, Math.min(1, ((anchor.x - a.x) * vx + (anchor.y - a.y) * vy) / lengthSquared));
+    const d = Math.hypot(anchor.x - (a.x + t * vx), anchor.y - (a.y + t * vy));
+    if (d < nearest.distance) {
+      let nx = -vy;
+      let ny = vx;
+      const length = Math.hypot(nx, ny) || 1;
+      nx /= length;
+      ny /= length;
+      // Point it into the centre.
+      if ((centroid.x - a.x) * nx + (centroid.y - a.y) * ny < 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      nearest = { distance: d, nx, ny };
+    }
+  }
+
+  return { x: anchor.x + nearest.nx * inset, y: anchor.y + nearest.ny * inset };
 }
 
 export function getGatePoint(gate: number): Point {
@@ -518,8 +606,14 @@ const CHANNEL_ARC_RADIUS: Readonly<Record<string, number>> = {
   // The two that skirt the Sacral.
   "27-50": 116,
   "6-59": 116,
-  // Throat down and round into the Heart.
-  "21-45": 123,
+  /*
+   * 21-45 has no entry. Its radius was solved when the Heart was thought to be
+   * a different shape 100 units to the left; against the real one the chord is
+   * longer than that circle can span, so it clamped to a half-circle and swung
+   * across 12-22. The artwork draws this one almost straight — its track
+   * reaches x = 606.6 and gate 21 already sits at 608 — which is what the
+   * fallback gives.
+   */
 };
 
 /**

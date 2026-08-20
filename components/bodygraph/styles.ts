@@ -76,16 +76,17 @@ export const CENTER_STROKE = "#DBD2CC";
  */
 export const CHANNEL_TRACK_FILL = PALETTE.white;
 /**
- * The line work of the reference drawing itself — DUSK at 55%.
+ * The line work of the reference drawing — STROKED, not filled.
  *
- * The artwork is one path filled with the nonzero rule, so this single colour
- * is every outline in the chart: centres, channel tracks, the lot. Full-
- * strength Dusk makes it heavier than the reference reads at, and it has to
- * stay lighter than an activated channel or the empty tracks compete with the
- * defined ones.
+ * Filling the artwork made every line as thick as the gap the drawing leaves
+ * between its two edges, and that weight is baked into the file: there is no
+ * way to lighten it. Stroking the same subpaths draws just their outlines, at
+ * a width chosen here, and leaves the space between them clear so the figure
+ * shows through — which is how a conventional chart reads.
  */
 export const ARTWORK_INK_COLOR = PALETTE.dusk;
-export const ARTWORK_INK_OPACITY = 0.55;
+export const ARTWORK_INK_OPACITY = 0.75;
+export const ARTWORK_INK_WIDTH = 1.6;
 
 /**
  * Stroke width used to flood an activated channel's track through a clip.

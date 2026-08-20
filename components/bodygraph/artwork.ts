@@ -11,7 +11,10 @@
  * facts make it usable as a live chart:
  *
  *  - The nine centre interiors are single regions, so a centre can be filled to
- *    show it defined.
+ *    show it defined. The Heart is subpath 33; subpath 32, which sits beside
+ *    it and has a similar bounding box, is the background wedge between the G,
+ *    the Heart and the Sacral. Filling that one instead put the Heart's colour
+ *    and its four numbers outside the shape.
  *  - A bundle of n channels leaves 2n-1 regions, n track interiors alternating
  *    with n-1 gaps, so the tracks can be picked out and filled to show a
  *    channel defined. Every region touching every centre was ordered around
@@ -36,7 +39,7 @@ export const CENTRE_REGION = {
   ajna: "M422.9,349.4l68.5-111.6c3-5,1.8-10.7-1.3-15.4s-7-7-12.5-7h-139.7c-5.6,0-10.3,3.7-12.6,7.1s-4.4,9.7-1.9,14l22.6,38.5,44.9,74.9c3.9,6.4,8.9,10.7,16.4,10.5,7.1-.2,11.5-4.3,15.6-11Z",
   throat: "M458.4,608.4c14.1,0,28.2-9.7,28.3-24.3l.5-107.9c-2.9-14.7-15.4-24.3-30.3-22.8l-102-.4c-17,0-31.2,10.4-31.2,28.2v101.8c.2,13.6,11.4,23,24.3,25.2l110.4.2Z",
   g: "M421.6,849.3l77.8-75.5c10.3-10,14-26.5,2.9-37.5l-74.6-74c-11.8-11.7-28.6-14.5-41.2-2.2l-78.4,76.3c-8.5,8.3-9.8,24.2-1.2,32.6l80.8,79c9.4,9.2,23,8.9,33.8,1.3Z",
-  heart: "M521.1,860.8l42.9-39c-14.4-21.6-33.4-35.5-57.2-46.7l-47.1,45.9v43.8s55.1.2,55.1.2c3.5,0,4-2.1,6.3-4.2Z",
+  heart: "M640.8,914.7c6.9,1.3,12.6.2,17.1-4.2s7.5-10.5,4.9-16.2l-37.6-82.2c-3.1-6.7-7.2-11.8-13.1-13.2s-13.8,1.2-19.4,6.2l-64.6,58.2c-5.8,5.2-8.8,11.7-6.4,19.2s8,10.6,15.2,12l103.9,20.2Z",
   spleen: "M161.2,1050.2c5.9-3.4,8.5-9,8.9-14.8s-1.6-12.1-6.7-15.1l-129.9-74.9c-6-3.5-12.5-2.8-18.3.6-4,2.3-9,8-9,14.3v147.7c0,6.6,5.4,12.4,9.6,14.7s11.9,3.2,17.6,0l127.7-72.4Z",
   solarPlexus: "M776.7,1121.5c6.8,3.8,13,5.2,19.5,1.7s10.2-8.1,10.2-15.1v-148.8c0-6.6-6-12.1-10.1-14.2-6.4-3.3-12.3-2-18.3,1.4l-126.7,71.9c-6.1,3.5-10,8.8-10.2,15.3s2.7,12.9,8.9,16.4l126.7,71.4Z",
   sacral: "M486.9,1100.8v-106.7c0-13.3-11.7-25.4-25.1-25.5l-110-.3c-14.6,0-27.9,10.8-28,25.9l-.3,104.9c0,14.7,9.7,25.7,24.4,27.8l112.8-.2c13.8,0,26.2-11.6,26.2-25.9Z",

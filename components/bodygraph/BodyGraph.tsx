@@ -13,6 +13,7 @@ import {
   channelMidpoint,
   gateLabelPoint,
   getGatePoint,
+  graphTransformAttr,
   variableArrowPath,
 } from "./geometry";
 import { ARTWORK_INK, CENTRE_REGION, CHANNEL_REGION } from "./artwork";
@@ -23,6 +24,7 @@ import {
   CENTER_UNDEFINED_FILL,
   ARTWORK_INK_COLOR,
   ARTWORK_INK_OPACITY,
+  ARTWORK_INK_WIDTH,
   FLOOD_WIDTH,
   CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
@@ -191,6 +193,9 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       <g data-figure="silhouette" transform={figureTransformAttr()} aria-hidden="true">
         <path d={FIGURE_ARTWORK_PATH} fill={BODY_SILHOUETTE_FILL} />
       </g>
+
+      {/* ---- The graph, scaled down inside the frame so the figure reads ---- */}
+      <g transform={graphTransformAttr()}>
 
       {/* ---- Variable: the four arrows either side of the head ---- */}
       <g data-testid="variable-arrows">
@@ -365,8 +370,11 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
 
       <path
         d={ARTWORK_INK}
-        fill={ARTWORK_INK_COLOR}
-        fillOpacity={ARTWORK_INK_OPACITY}
+        fill="none"
+        stroke={ARTWORK_INK_COLOR}
+        strokeOpacity={ARTWORK_INK_OPACITY}
+        strokeWidth={ARTWORK_INK_WIDTH}
+        strokeLinejoin="round"
         aria-hidden="true"
       />
 
@@ -439,6 +447,7 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
         labelled centre list rendered beside the chart — all available to
         screen readers and sighted readers alike.
       */}
+      </g>
     </svg>
   );
 }

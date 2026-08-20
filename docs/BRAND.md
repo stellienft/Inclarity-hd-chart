@@ -138,14 +138,47 @@ The four it does not map are the integration group — 10-20, 10-34, 10-57 and
 single track junction exists rather than three, so no region belongs to any one
 of them alone. Those four are stroked over the artwork instead.
 
+### Composition
+
+The graph is drawn at full size in its own coordinates (`GRAPH_BOX`, the
+artwork's 813 × 1370.3) and then scaled down as a group inside a shorter frame
+(`VIEWBOX`, 813 × 1010). One value, `GRAPH_SCALE`, governs the whole
+composition. At 1.0 the graph filled the frame and dwarfed the silhouette; at
+0.68 it is 932 tall against the figure's 992, so the head and shoulders stand
+clear above and around it and the Root sits just inside the base.
+
+The artwork's line work is **stroked, not filled**. Filling it made every line
+as thick as the gap the file leaves between its two edges, and that weight is
+baked in — there is no way to lighten it. Stroking the same subpaths draws just
+their outlines, at a width set here, and leaves the space between them clear so
+the figure shows through.
+
+### Gate numerals sit square on their channels
+
+Markers come in **perpendicular to the edge** a gate sits on, not toward the
+centre's midpoint. The midpoint rule moved a marker sideways as well as inward,
+so the Throat's 62, 23 and 56 drifted together and stopped lining up with the
+three tracks running to the Ajna. Perpendicular keeps each gate on its own
+column.
+
+The cost is that gates on *adjacent* edges converge at a corner, so the Throat's
+and Root's side gates were respaced to stay a full marker-diameter from the rows
+above and below them, and a gate sitting exactly ON a vertex takes the angle
+bisector instead — the perpendicular of either edge runs almost parallel to the
+other, and the G's 1, 2, 10 and 25 cleared 0.7 that way.
+
 ### What the artwork costs
 
-- **The Heart's markers shrank to radius 11.** A centre cannot be resized to
-  suit its numbers any more; the numbers give way. The artwork fillets the
-  Heart's corners so hard that its bbox corners are not its vertices, so the
-  polygon the geometry uses is *smaller* than the drawn shape — its four
-  markers are solved against the rendered path instead, and the unit clearance
-  test exempts it.
+- **The Heart is subpath 33, not 32.** Subpath 32 sits beside it with a similar
+  bounding box and is the background wedge between the G, the Heart and the
+  Sacral. Filling that one put the Heart's colour and all four of its numbers
+  outside the shape. The real Heart is a *tilted* triangle, well right of and
+  below where this had it; its vertices are the intersections of the three
+  straight edges, recovered from where each corner fillet begins and ends,
+  because the drawing rounds them and a bounding box does not give the corners.
+- **The Heart's markers shrank to radius 11** and are solved against the
+  rendered path, since the polygon and the drawn shape disagree at the rounded
+  corners. The unit clearance test exempts it; the e2e disc check holds it.
 - **The Spleen and Solar Plexus are no longer exact mirrors.** The drawing is
   hand-made and wobbles: 163.9 wide against 165.3, outer edges 1.6 apart about
   the axis. The e2e mirror test allows two units of that and no more.

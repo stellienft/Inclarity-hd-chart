@@ -4,7 +4,7 @@ import { CHANNEL_DEFINITIONS } from "@/lib/human-design/constants/channels";
 import { CENTER_IDS } from "@/lib/human-design/types/center";
 
 import { ARTWORK_INK, ARTWORK_VIEWBOX, CENTRE_REGION, CHANNEL_REGION, INTEGRATION_GROUP } from "./artwork";
-import { VIEWBOX } from "./geometry";
+import { GRAPH_BOX } from "./geometry";
 
 describe("the reference artwork", () => {
   it("is the whole drawing, unedited", () => {
@@ -15,8 +15,10 @@ describe("the reference artwork", () => {
   });
 
   it("is drawn in the same space as the geometry", () => {
-    expect(ARTWORK_VIEWBOX.width).toBe(VIEWBOX.width);
-    expect(ARTWORK_VIEWBOX.height).toBe(VIEWBOX.height);
+    // The graph's own coordinates, not the frame — the graph is scaled down
+    // inside the frame, and every number in geometry.ts stays in this space.
+    expect(ARTWORK_VIEWBOX.width).toBe(GRAPH_BOX.width);
+    expect(ARTWORK_VIEWBOX.height).toBe(GRAPH_BOX.height);
   });
 
   it("has a region for all nine centres", () => {

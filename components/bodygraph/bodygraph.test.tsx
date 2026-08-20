@@ -12,6 +12,7 @@ import {
   AXIS_X,
   CENTERS,
   GATE_POINTS,
+  GRAPH_BOX,
   VIEWBOX,
   channelPath,
   gateLabelPoint,
@@ -56,12 +57,12 @@ describe("BodyGraph geometry", () => {
     }
   });
 
-  it("keeps every gate point inside the viewBox", () => {
+  it("keeps every gate point inside the graph's own box", () => {
     for (const [gate, point] of Object.entries(GATE_POINTS)) {
       expect(point.x, `gate ${gate} x`).toBeGreaterThanOrEqual(0);
-      expect(point.x, `gate ${gate} x`).toBeLessThanOrEqual(VIEWBOX.width);
+      expect(point.x, `gate ${gate} x`).toBeLessThanOrEqual(GRAPH_BOX.width);
       expect(point.y, `gate ${gate} y`).toBeGreaterThanOrEqual(0);
-      expect(point.y, `gate ${gate} y`).toBeLessThanOrEqual(VIEWBOX.height);
+      expect(point.y, `gate ${gate} y`).toBeLessThanOrEqual(GRAPH_BOX.height);
     }
   });
 
@@ -107,9 +108,9 @@ describe("BodyGraph geometry", () => {
     for (const { gate, center } of GATE_DEFINITIONS) {
       const p = gateLabelPoint(gate, center);
       expect(p.x).toBeGreaterThanOrEqual(markerRadius(center));
-      expect(p.x).toBeLessThanOrEqual(VIEWBOX.width - markerRadius(center));
+      expect(p.x).toBeLessThanOrEqual(GRAPH_BOX.width - markerRadius(center));
       expect(p.y).toBeGreaterThanOrEqual(markerRadius(center));
-      expect(p.y).toBeLessThanOrEqual(VIEWBOX.height - markerRadius(center));
+      expect(p.y).toBeLessThanOrEqual(GRAPH_BOX.height - markerRadius(center));
     }
   });
 
