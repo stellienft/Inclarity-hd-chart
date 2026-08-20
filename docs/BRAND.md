@@ -37,6 +37,22 @@ chips still clear AA. Because the separation is now hue rather than light-dark,
 `brand.test.ts` checks both imprints stay clear of every ground they can be read
 against and of the ink used for inactive numerals.
 
+**A hanging gate colours its own half.** A gate can be activated while its
+partner is not, and every published chart paints that gate's half of the channel
+anyway. Only when BOTH ends are activated is the channel *defined* — which is
+what `data-active`, the centre states and the text summary report — so the
+drawing and the definition deliberately disagree. Painting only defined channels
+made a chart with two of them look like a chart with none, and hid activations
+the planetary columns were listing.
+
+Each end is painted by clipping the channel's own regions to a **half-plane**,
+perpendicular to the chord through the arc's midpoint (`channelHalfPlane`).
+Stroking the half *arc* was tried and cannot be relied on: several corridors in
+this file are fragmented or routed too far off a circle for an approximate arc
+to land on them. Clipping the real regions cannot miss. Four gates — 10, 20, 34
+and 57 — belong to three channels each, so activation is read from the gate, not
+from the channel.
+
 **An inactive channel is not filled.** White was tried and it cost the drawing
 twice. The gaps the artwork leaves *between* neighbouring tracks are unfilled,
 so they show Pebble — and white on Pebble is 1.14:1. A reader could not tell a

@@ -423,6 +423,57 @@ describe("BodyGraph rendering", () => {
       expect(markup).toContain(`data-channel="${definition.id}"`);
     }
   });
+
+  /**
+   * A hanging gate — activated, partner not — colours its own half.
+   *
+   * This is the convention every published chart follows, and leaving it out
+   * made a chart look empty: for 5 June 1989 only two of the thirty-six
+   * channels are defined, so eighteen activated gates were drawing as markers
+   * with nothing running out of them. The channel is still NOT defined, which
+   * is what data-active and the centre states report, so the two must be able
+   * to disagree.
+   */
+  it("paints a hanging gate's half of an undefined channel", async () => {
+    const chart = await chartFor("1989-06-05", "18:00");
+    const markup = renderToStaticMarkup(<BodyGraph chart={chart} />);
+
+    const active = new Set(chart.activeGates.map((gate) => gate.gate));
+    const halfLit = CHANNEL_DEFINITIONS.filter((definition) => {
+      const [a, b] = definition.gates;
+      return active.has(a) !== active.has(b);
+    });
+    expect(halfLit.length, "no hanging gates in this chart to check").toBeGreaterThan(0);
+
+    /** Everything drawn for one channel, whichever of the three ways it is drawn. */
+    const drawnFor = (id: string): string => {
+      const parts: string[] = [];
+      for (const opener of [`data-channel="${id}"`, `data-corridor="${id}"`]) {
+        const from = markup.indexOf(opener);
+        if (from === -1) continue;
+        const next = markup.slice(from + opener.length).search(/data-(channel|corridor)="/);
+        parts.push(next === -1 ? markup.slice(from) : markup.slice(from, from + opener.length + next));
+      }
+      return parts.join("");
+    };
+
+    for (const definition of halfLit) {
+      const [a, b] = definition.gates;
+      const lit = active.has(a) ? a : b;
+      const dark = active.has(a) ? b : a;
+      const drawn = drawnFor(definition.id);
+
+      // Undefined, and yet drawn: the activated end's half is painted...
+      expect(markup).toContain(`data-channel="${definition.id}" data-active="false"`);
+      expect(drawn, `${definition.id}: gate ${lit} is activated but draws no half`).toContain(
+        `data-half="${lit}"`,
+      );
+      // ...and the other end is left alone.
+      expect(drawn, `${definition.id}: gate ${dark} is not activated but draws a half`).not.toContain(
+        `data-half="${dark}"`,
+      );
+    }
+  });
 });
 
 describe("BodyGraph activation styling", () => {

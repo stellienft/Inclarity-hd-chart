@@ -10,6 +10,7 @@ import {
   VARIABLE_SLOTS,
   VIEWBOX,
   channelHalfPath,
+  channelHalfPlane,
   channelMidpoint,
   gateLabelPoint,
   GRAPH_BOX,
@@ -162,6 +163,19 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
   const activeChannelById = new Map(chart.channels.map((channel) => [channel.id, channel]));
   const definedCenters = new Set<CenterId>(chart.centers.defined);
 
+  /**
+   * How one gate is activated, whichever channel is asking.
+   *
+   * Read from the gate rather than from the channel, because a gate is
+   * activated on its own account: four of the sixty-four (10, 20, 34 and 57)
+   * belong to three channels each, and any gate at all can be activated while
+   * its partner is not.
+   */
+  const gateStyle = (gate: number): ActivationStyle => {
+    const state = gateState.get(gate);
+    return styleFor(state?.personality ?? false, state?.design ?? false);
+  };
+
   const accessibleTitle = title ?? "Human Design BodyGraph";
   const description =
     `${chart.type}, ${chart.authority} authority, profile ${chart.profile}, ` +
@@ -242,31 +256,40 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       {/*
         ---- Channels, in two passes ----
 
-        Everything with a track of its own goes down first, because an inactive
-        track is filled WHITE and would otherwise paint over the channels that
-        SHARE it: 10-20 and 10-57 both run along 20-57's band, and 20-57 sorts
-        after them.
+        Everything with a track of its own goes down first, so it cannot paint
+        over the channels that SHARE its band: 10-20 and 10-57 both run along
+        20-57's, and 20-57 sorts after them.
+
+        Each END of a channel is painted separately, from its own gate's
+        activation. A gate can be activated while its partner is not — a hanging
+        gate — and every published chart colours that gate's half of the channel
+        anyway; only when BOTH ends are activated is the channel defined, which
+        is what `data-active` and the centre states report. Painting only
+        defined channels left a chart with two of them looking like a chart with
+        none, and hid activations the planetary columns were listing.
       */}
       <g strokeLinecap="butt" fill="none">
         {CHANNEL_DEFINITIONS.map((definition) => {
           const [gateA, gateB] = definition.gates;
           const a = getGatePoint(gateA);
           const b = getGatePoint(gateB);
-          const active = activeChannelById.get(definition.id);
+          const defined = activeChannelById.get(definition.id);
           const regions = CHANNEL_REGION[definition.id];
           const corridor = MERGED_CORRIDOR[definition.id];
 
-          const sidesA = active?.activation[gateA] ?? { personality: false, design: false };
-          const sidesB = active?.activation[gateB] ?? { personality: false, design: false };
-          const styleA = styleFor(sidesA.personality, sidesA.design);
-          const styleB = styleFor(sidesB.personality, sidesB.design);
+          const styleA = gateStyle(gateA);
+          const styleB = gateStyle(gateB);
 
           const label = (
             <title>
               {`Channel ${definition.id} — ${definition.name}. `}
-              {active
-                ? `Gate ${gateA}: ${describeActivation(styleA)}. Gate ${gateB}: ${describeActivation(styleB)}.`
-                : "Not defined."}
+              {defined
+                ? `Defined. Gate ${gateA}: ${describeActivation(styleA)}. Gate ${gateB}: ${describeActivation(styleB)}.`
+                : styleA !== "none" || styleB !== "none"
+                  ? `Not defined — gate ${styleA !== "none" ? gateA : gateB} is activated ` +
+                    `(${describeActivation(styleA !== "none" ? styleA : styleB)}) but ` +
+                    `gate ${styleA !== "none" ? gateB : gateA} is not.`
+                  : "Not defined."}
             </title>
           );
 
@@ -277,39 +300,53 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
            * 37-40 is a single fragment out by the Solar Plexus that an
            * approximate arc misses entirely.
            *
-           * The clipped strokes on top only place the seam where the two gates
-           * meet, for a channel whose halves are activated differently. If the
-           * arc misses, the base fill still shows it as defined.
+           * The regions go down once unfilled, whatever the state, so the
+           * drawing keeps one path per region for anything measuring it.
            */
           if (regions) {
-            const clipId = `track-${definition.id}`;
-            const base = active
-              ? activationColor(styleA === "none" ? styleB : styleA)
-              : CHANNEL_TRACK_FILL;
             const mid = channelMidpoint(a, b, definition.id);
-            const half = (from: typeof a, style: ActivationStyle, gate: number) => {
-              const d = channelHalfPath(from, from === a ? b : a, mid, definition.id);
-              const key = `${definition.id}-${gate}`;
-              if (style === "both") {
-                return (
-                  <g key={key}>
-                    <path d={d} stroke={DESIGN_COLOR} strokeWidth={FLOOD_WIDTH} />
-                    <path
-                      d={d}
-                      stroke={PERSONALITY_COLOR}
-                      strokeWidth={FLOOD_WIDTH}
-                      strokeDasharray="7 7"
-                    />
-                  </g>
-                );
-              }
+            const bothSame = styleA === styleB && styleA !== "none";
+
+            /* One end's share of the track: its own regions, clipped to its
+               half of the drawing. A gate carrying both imprints takes the
+               Design fill with the Personality dashed over it, the same
+               two-tone language the split gate markers use. */
+            const end = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) => {
+              if (style === "none") return null;
+              const planeId = `half-${definition.id}-${gate}`;
+              const trackId = `track-${definition.id}-${gate}`;
               return (
-                <path
-                  key={key}
-                  d={d}
-                  stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
-                  strokeWidth={FLOOD_WIDTH}
-                />
+                <g key={gate} data-half={gate}>
+                  <clipPath id={planeId}>
+                    <rect {...channelHalfPlane(from, to, mid)} />
+                  </clipPath>
+                  <g clipPath={`url(#${planeId})`}>
+                    {regions.map((d, index) => (
+                      <path
+                        key={index}
+                        d={d}
+                        fill={style === "both" ? DESIGN_COLOR : activationColor(style)}
+                      />
+                    ))}
+                    {style === "both" ? (
+                      <>
+                        <clipPath id={trackId}>
+                          {regions.map((d, index) => (
+                            <path key={index} d={d} />
+                          ))}
+                        </clipPath>
+                        <g clipPath={`url(#${trackId})`}>
+                          <path
+                            d={channelHalfPath(from, to, mid, definition.id)}
+                            stroke={PERSONALITY_COLOR}
+                            strokeWidth={FLOOD_WIDTH}
+                            strokeDasharray="7 7"
+                          />
+                        </g>
+                      </>
+                    ) : null}
+                  </g>
+                </g>
               );
             };
 
@@ -317,36 +354,36 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
               <g
                 key={definition.id}
                 data-channel={definition.id}
-                data-active={active ? "true" : "false"}
+                data-active={defined ? "true" : "false"}
               >
                 {label}
                 {regions.map((d, index) => (
-                  <path key={index} d={d} fill={base} />
+                  <path key={index} d={d} fill={CHANNEL_TRACK_FILL} />
                 ))}
-                {active && styleA !== styleB ? (
-                  <>
-                    <clipPath id={clipId}>
-                      {regions.map((d, index) => (
-                        <path key={index} d={d} />
-                      ))}
-                    </clipPath>
-                    <g clipPath={`url(#${clipId})`}>
-                      {half(a, styleA, gateA)}
-                      {half(b, styleB, gateB)}
-                    </g>
-                  </>
-                ) : null}
+                {/* Both ends the same needs no seam, and an unclipped fill
+                    cannot be thrown off by a fragment sitting across the
+                    dividing line. */}
+                {bothSame
+                  ? regions.map((d, index) => (
+                      <path
+                        key={`on-${index}`}
+                        d={d}
+                        data-half="both"
+                        fill={activationColor(styleA)}
+                      />
+                    ))
+                  : [end(a, b, styleA, gateA), end(b, a, styleB, gateB)]}
               </g>
             );
           }
 
-          if (corridor || !active) {
+          if (corridor || (styleA === "none" && styleB === "none")) {
             // Drawn in the second pass, or not drawn at all.
             return (
               <g
                 key={definition.id}
                 data-channel={definition.id}
-                data-active={active ? "true" : "false"}
+                data-active={defined ? "true" : "false"}
               >
                 {corridor ? null : label}
               </g>
@@ -359,19 +396,25 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
            * were swept until they cross nothing.
            */
           const mid = channelMidpoint(a, b, definition.id);
-          const stroke = (from: typeof a, style: ActivationStyle, gate: number) => (
-            <path
-              key={`${definition.id}-${gate}`}
-              d={channelHalfPath(from, from === a ? b : a, mid, definition.id)}
-              stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
-              strokeWidth={STROKE_WIDTH.channelActive}
-            />
-          );
+          const stroke = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) =>
+            style === "none" ? null : (
+              <path
+                key={`${definition.id}-${gate}`}
+                data-half={gate}
+                d={channelHalfPath(from, to, mid, definition.id)}
+                stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
+                strokeWidth={STROKE_WIDTH.channelActive}
+              />
+            );
           return (
-            <g key={definition.id} data-channel={definition.id} data-active="true">
+            <g
+              key={definition.id}
+              data-channel={definition.id}
+              data-active={defined ? "true" : "false"}
+            >
               {label}
-              {stroke(a, styleA, gateA)}
-              {stroke(b, styleB, gateB)}
+              {stroke(a, b, styleA, gateA)}
+              {stroke(b, a, styleB, gateB)}
             </g>
           );
         })}
@@ -386,20 +429,19 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
       */}
       <g>
         {CHANNEL_DEFINITIONS.filter((d) => MERGED_CORRIDOR[d.id]).map((definition) => {
-          const active = activeChannelById.get(definition.id);
           const [gateA, gateB] = definition.gates;
           const corridor = MERGED_CORRIDOR[definition.id]!;
-          const sidesA = active?.activation[gateA] ?? { personality: false, design: false };
-          const sidesB = active?.activation[gateB] ?? { personality: false, design: false };
-          const styleA = styleFor(sidesA.personality, sidesA.design);
-          const styleB = styleFor(sidesB.personality, sidesB.design);
+          const styleA = gateStyle(gateA);
+          const styleB = gateStyle(gateB);
 
-          if (!active) return null;
+          if (styleA === "none" && styleB === "none") return null;
 
           const clipId = `corridor-${definition.id}`;
           const seam = (corridor.from + corridor.to) / 2;
           // The upper half belongs to whichever gate sits higher.
           const aIsUpper = getGatePoint(gateA).y < getGatePoint(gateB).y;
+          const upper = aIsUpper ? styleA : styleB;
+          const lower = aIsUpper ? styleB : styleA;
 
           return (
             <g key={definition.id} data-corridor={definition.id}>
@@ -412,20 +454,26 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                 <path d={corridor.region} />
               </clipPath>
               <g clipPath={`url(#${clipId})`}>
-                <rect
-                  x={0}
-                  y={corridor.from}
-                  width={GRAPH_BOX.width}
-                  height={seam - corridor.from}
-                  fill={activationColor(aIsUpper ? styleA : styleB)}
-                />
-                <rect
-                  x={0}
-                  y={seam}
-                  width={GRAPH_BOX.width}
-                  height={corridor.to - seam}
-                  fill={activationColor(aIsUpper ? styleB : styleA)}
-                />
+                {upper === "none" ? null : (
+                  <rect
+                    data-half={aIsUpper ? gateA : gateB}
+                    x={0}
+                    y={corridor.from}
+                    width={GRAPH_BOX.width}
+                    height={seam - corridor.from}
+                    fill={activationColor(upper)}
+                  />
+                )}
+                {lower === "none" ? null : (
+                  <rect
+                    data-half={aIsUpper ? gateB : gateA}
+                    x={0}
+                    y={seam}
+                    width={GRAPH_BOX.width}
+                    height={corridor.to - seam}
+                    fill={activationColor(lower)}
+                  />
+                )}
               </g>
             </g>
           );

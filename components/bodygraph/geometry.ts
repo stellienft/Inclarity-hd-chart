@@ -745,6 +745,42 @@ export function channelHalfPath(from: Point, to: Point, mid: Point, id?: string)
   return `M ${from.x} ${from.y} A ${r} ${r} 0 0 ${sweep} ${mid.x.toFixed(2)} ${mid.y.toFixed(2)}`;
 }
 
+/** Big enough to cover the whole graph from any point inside it. */
+const HALF_PLANE_REACH = 4000;
+
+/**
+ * The half of the drawing that belongs to one end of a channel, as a rect to
+ * clip a fill with.
+ *
+ * A gate can be activated without its partner — a hanging gate — and the
+ * convention every published chart follows is to colour that gate's half of the
+ * channel. Clipping the channel's own regions to a half-plane is what paints
+ * it, and it is used for a fully defined channel too whenever the two ends
+ * differ, because it cannot miss: stroking the half ARC only lands where the
+ * arc approximates the drawn corridor closely enough, and several corridors in
+ * this file are fragmented or routed too far off a circle for that.
+ *
+ * The plane is perpendicular to the chord, through the arc's own midpoint. For
+ * an arc shorter than a semicircle — every channel here — that line meets the
+ * curve exactly once, so the split lands where the two colours should meet.
+ * The rect is the local half x < 0, and the transform puts local +x along
+ * `from` -> `to`, so the rect covers `from`'s side.
+ */
+export function channelHalfPlane(
+  from: Point,
+  to: Point,
+  mid: Point,
+): { x: number; y: number; width: number; height: number; transform: string } {
+  const angle = (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI;
+  return {
+    x: -HALF_PLANE_REACH,
+    y: -HALF_PLANE_REACH,
+    width: HALF_PLANE_REACH,
+    height: 2 * HALF_PLANE_REACH,
+    transform: `translate(${mid.x.toFixed(2)} ${mid.y.toFixed(2)}) rotate(${angle.toFixed(3)})`,
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Variable arrows                                                            */
 /* -------------------------------------------------------------------------- */
