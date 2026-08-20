@@ -167,10 +167,33 @@ Taking a gap by mistake is the failure mode this invites, and it is caught by
 measurement rather than by eye. A track is a ribbon of constant width and a gap
 is a wedge, so modelling each region as a rectangle of the same area and
 perimeter recovers the width: solving `2(w + l) = P` and `wl = A` gives
-`w = (P − √(P² − 16A)) / 4`. Every real track in the file measures **12.6 to 16**
-units across. A wedge on the Spleen's upper edge, mapped as a second region of
-34-57, measured **20.8** and drew as a stray shape floating above the centre;
-the e2e suite now asserts the width of every region.
+`w = (P − √(P² − 16A)) / 4`. Every plain track in the file measures **12.6 to 16**
+units across. The one exception is named: 34-57's mouth on the Spleen, which the
+drawing merges with 20-57's, so one opening carries two channels and measures
+20.8.
+
+Leaving a real fragment OUT is the same problem from the other side, and needs a
+different measure, because a missing piece leaves a hole rather than a wrong
+shape. Two checks cover it. Every channel's regions must **reach both of its
+gates** — 34-57's merged mouth is 75 units out from gate 57's junction, so
+dropping it left the channel starting in mid-air — and no fragment may sit more
+than 30 from the rest of its own channel. 26-44 crosses the three tracks running
+from the G to the Sacral and the drawing shows it between them as two small
+squares (13.8 × 12.9 and 16.8 × 13); without them the channel drew with two
+holes punched in it. Both checks are in the e2e suite, along with the widths.
+
+### Only the outlines that mean something
+
+The line work is **derived** from the two maps rather than kept as a separate
+copy of the file's path: what is outlined is exactly what can be filled.
+
+Outlining all 73 regions drew the gaps too, and a gap here is the same width as
+a track — between the Head and the Ajna the tracks measure 14.9, 15.7 and 15.1
+and the gaps 17.3 and 14.3 — so three channels drew as five identical bars, five
+times over down the spine and again in every arc bundle. It also put a second
+line beside every first one, because each ink stroke in the file is about 5.5
+wide and both of its edges were being drawn; that read as a double stroke
+everywhere, gate stubs included.
 
 The four it does not map are the integration group — 10-20, 10-34, 10-57 and
 20-34. The drawing merges them into one web at the G's left vertex, where a

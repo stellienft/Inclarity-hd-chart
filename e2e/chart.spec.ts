@@ -271,8 +271,13 @@ test.describe("gate markers against the drawn centres", () => {
    * A track is a ribbon of constant width; a gap is a wedge. Modelling each
    * region as a rectangle of the same area and perimeter recovers that width
    * exactly: solving 2(w + l) = P and wl = A gives w = (P - sqrt(P^2 - 16A))/4.
-   * Every real track in the file measures 12.6 to 16 units across. The wedge
-   * measured 20.8.
+   * Every plain track in the file measures 12.6 to 16 units across.
+   *
+   * The one exception is 34-57's mouth on the Spleen, which the drawing MERGES
+   * with 20-57's — one opening carrying two channels, so it measures 20.8. It is
+   * named here rather than widening the band, because the band is what catches
+   * a gap: this same 20.8 is what wrongly identified that mouth as one, and
+   * walking the corridor out of gate 57's junction is what settled it.
    */
   test("gives every channel a track of the drawing's own width, never a gap", async ({
     page,
@@ -301,7 +306,11 @@ test.describe("gate markers against the drawn centres", () => {
           out.push({
             id,
             index,
-            width: discriminant > 0 ? (perimeter - Math.sqrt(discriminant)) / 4 : Number.NaN,
+            // A square is the extremal case, where the discriminant is zero;
+            // the two small fragments of 26-44 are 13.8 x 12.9 and 16.8 x 13,
+            // close enough that rounded corners tip it just negative. There the
+            // answer is the square's own side, P / 4.
+            width: discriminant > 0 ? (perimeter - Math.sqrt(discriminant)) / 4 : perimeter / 4,
           });
         });
       }
@@ -309,10 +318,95 @@ test.describe("gate markers against the drawn centres", () => {
     });
 
     expect(widths.length).toBeGreaterThan(30);
+    /** The Spleen mouth 34-57 shares with 20-57 — one opening, two channels. */
+    const MERGED_MOUTH = (id: string, width: number) => id === "34-57" && width < 22;
     const wrong = widths
-      .filter(({ width }) => !(width >= 12 && width <= 17))
+      .filter(({ id, width }) => !(width >= 12 && width <= 17) && !MERGED_MOUTH(id, width))
       .map(({ id, index, width }) => `${id}[${index}] is ${width.toFixed(1)} across`);
     expect(wrong, "a gap between tracks has been mapped as a channel").toEqual([]);
+  });
+
+  /**
+   * Every channel runs unbroken from one of its gates to the other.
+   *
+   * The width check above catches a gap wrongly taken for a track. This is the
+   * other half of the same problem — a real fragment of a track left OUT — and
+   * it needs a different measure, because a missing piece leaves a hole rather
+   * than a wrong shape. Two ways it shows up:
+   *
+   *  - the regions never reach a gate. 34-57's mouth on the Spleen is 75 units
+   *    out from gate 57's junction, so dropping it left the channel starting in
+   *    mid-air.
+   *  - a fragment sits too far from the rest of its own channel. 26-44 crosses
+   *    the three tracks running from the G to the Sacral, and the drawing shows
+   *    it between them as two small squares; without them the channel drew with
+   *    two holes punched in it.
+   *
+   * The thresholds are the drawing's own dimensions: an ink line is about 5.5
+   * across, so a region that reaches its gate stops within about 8 of the
+   * junction, and a fragment separated by ONE crossing track sits about 15 + 11
+   * away. Anything beyond is a piece that is not there.
+   */
+  test("runs every channel unbroken from one gate to the other", async ({ page }) => {
+    await generateChart(page);
+    const breaks = await page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")!;
+      const dist = (a: DOMPoint, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
+      const out: Array<{ id: string; what: string; value: number }> = [];
+
+      for (const group of svg.querySelectorAll("[data-channel]")) {
+        const id = group.getAttribute("data-channel")!;
+        const regions = [...group.querySelectorAll("path")].filter(
+          (p) => p.getAttribute("fill") !== null,
+        );
+        // De-duplicate: an activated end re-draws its regions inside a clip.
+        const seen = new Set<string>();
+        const outlines: DOMPoint[][] = [];
+        for (const path of regions) {
+          const d = path.getAttribute("d")!;
+          if (seen.has(d)) continue;
+          seen.add(d);
+          const geometry = path as unknown as SVGGeometryElement;
+          const L = geometry.getTotalLength();
+          const pts: DOMPoint[] = [];
+          for (let k = 0; k < 300; k += 1) pts.push(geometry.getPointAtLength((k * L) / 300));
+          outlines.push(pts);
+        }
+        if (!outlines.length) continue; // stroked over the artwork, no track of its own
+
+        for (const gate of id.split("-").map(Number)) {
+          const marker = svg.querySelector(`[data-gate="${gate}"] text`)!;
+          const at = {
+            x: Number(marker.getAttribute("x")),
+            y: Number(marker.getAttribute("y")),
+          };
+          // Measure to the CENTRE, not the junction: the marker is inset, so
+          // this is a generous bound that still catches a channel that never
+          // arrives. A track that reaches its gate lands within ~35.
+          const near = Math.min(...outlines.flat().map((q) => dist(q, at)));
+          if (near > 40) out.push({ id, what: `never reaches gate ${gate}`, value: near });
+        }
+
+        for (let i = 0; i < outlines.length; i += 1) {
+          let closest = Infinity;
+          for (let j = 0; j < outlines.length; j += 1) {
+            if (i === j) continue;
+            for (const a of outlines[i]!) {
+              for (const b of outlines[j]!) closest = Math.min(closest, dist(a, b));
+            }
+          }
+          if (outlines.length > 1 && closest > 30) {
+            out.push({ id, what: `fragment ${i} is adrift`, value: closest });
+          }
+        }
+      }
+      return out;
+    });
+
+    expect(
+      breaks.map((b) => `${b.id}: ${b.what} (${b.value.toFixed(1)})`),
+      "a channel has a piece of its track missing",
+    ).toEqual([]);
   });
 });
 
