@@ -253,33 +253,40 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
   40: { x: 659, y: 912 },
 
   /*
-   * Spleen — the exact mirror of the Solar Plexus, and it has to be. Read
-   * around the perimeter from the top corner: 48, 57, 44 down the upper edge
-   * at quarter, half and three-quarters, 50 at the apex, then 32, 28, 18 back
-   * along the lower edge at the same fractions.
+   * Spleen — the exact mirror of the Solar Plexus, and it has to be.
    *
-   * That order is forced by the channels, not chosen. Going up: 48 meets the
-   * Throat at 16, 57 the Throat at 20, 44 the Heart at 26 — targets that get
-   * progressively lower, so the gates must too or their channels cross. Going
-   * down: 32 meets the Root at 54, 28 at 38, 18 at 58, which sit in that order
-   * down the Root's left edge.
+   * These are the artwork's own junctions: where each channel track actually
+   * meets the triangle, not four points spaced evenly along its edge. Even
+   * spacing put 48 a third of the way down when its channel arrives at the top
+   * corner, and left 57 and 44 off the tracks running into them.
+   *
+   * Read around the perimeter from the top corner: 48, 57, 44 down the upper
+   * edge, 50 at the apex, then 32, 28, 18 back along the lower edge. That order
+   * is forced by the channels, not chosen. Going up: 48 meets the Throat at 16,
+   * 57 the Throat at 20, 44 the Heart at 26 — targets that get progressively
+   * lower, so the gates must too or their channels cross. Going down: 32 meets
+   * the Root at 54, 28 at 38, 18 at 58, which sit in that order down the Root's
+   * left edge.
+   *
+   * 57 sits between two junctions rather than on one, because two channels
+   * arrive there — 20-57 at (70.6, 966.8) and 34-57 at (86.6, 976).
    */
-  48: { x: 47.5, y: 965.9 },
-  57: { x: 88.7, y: 988.6 },
-  44: { x: 129.8, y: 1011.4 },
+  48: { x: 29.2, y: 943.6 },
+  57: { x: 78.6, y: 971.4 },
+  44: { x: 124.2, y: 997.7 },
   50: { x: 170.9, y: 1034.1 },
-  32: { x: 129.8, y: 1056.8 },
-  28: { x: 88.7, y: 1079.6 },
-  18: { x: 47.5, y: 1102.3 },
+  32: { x: 94.2, y: 1088.2 },
+  28: { x: 68.1, y: 1103 },
+  18: { x: 35.2, y: 1121.7 },
 
-  // Solar Plexus — upper edge to Throat/Heart, lower edge to the Root.
-  36: { x: 763.5, y: 965.9 },
-  22: { x: 722.3, y: 988.6 },
-  37: { x: 681.2, y: 1011.4 },
+  // Solar Plexus — the exact mirror about AXIS_X.
+  36: { x: 781.8, y: 943.6 },
+  22: { x: 732.4, y: 971.4 },
+  37: { x: 686.8, y: 997.7 },
   6: { x: 640.1, y: 1034.1 },
-  49: { x: 681.2, y: 1056.8 },
-  55: { x: 722.3, y: 1079.6 },
-  30: { x: 763.5, y: 1102.3 },
+  49: { x: 716.8, y: 1088.2 },
+  55: { x: 742.9, y: 1103 },
+  30: { x: 775.8, y: 1121.7 },
 
   /*
    * Sacral — 34 belongs on the LEFT edge, not in the top row: all three of its
@@ -331,21 +338,21 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
  */
 const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
   // Spleen — radius 12 here, not 14; see GATE_MARKER_RADIUS_BY_CENTRE.
-  48: { x: 48.3, y: 980.5 },
-  57: { x: 82.2, y: 999.3 },
-  44: { x: 116.6, y: 1018.4 },
+  48: { x: 18.9, y: 964.3 },
+  57: { x: 67.6, y: 991.3 },
+  44: { x: 113.7, y: 1016.7 },
   50: { x: 145.1, y: 1034.1 },
-  32: { x: 116.6, y: 1049.8 },
-  28: { x: 82.2, y: 1068.8 },
-  18: { x: 48.2, y: 1087.6 },
+  32: { x: 83.2, y: 1068.3 },
+  28: { x: 56.9, y: 1082.8 },
+  18: { x: 23.8, y: 1101.1 },
   // Solar Plexus — the exact mirror of the Spleen about AXIS_X.
-  36: { x: 762.7, y: 980.5 },
-  22: { x: 728.8, y: 999.3 },
-  37: { x: 694.4, y: 1018.4 },
+  36: { x: 792.1, y: 964.3 },
+  22: { x: 743.4, y: 991.3 },
+  37: { x: 697.3, y: 1016.7 },
   6: { x: 665.9, y: 1034.1 },
-  49: { x: 694.4, y: 1049.8 },
-  55: { x: 728.8, y: 1068.8 },
-  30: { x: 762.8, y: 1087.6 },
+  49: { x: 727.8, y: 1068.3 },
+  55: { x: 754.1, y: 1082.8 },
+  30: { x: 787.2, y: 1101.1 },
   /*
    * Heart — solved against the DRAWN region, not the polygon.
    *

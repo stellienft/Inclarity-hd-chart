@@ -136,7 +136,12 @@ out by the Solar Plexus that an approximate arc misses entirely.
 The four it does not map are the integration group — 10-20, 10-34, 10-57 and
 20-34. The drawing merges them into one web at the G's left vertex, where a
 single track junction exists rather than three, so no region belongs to any one
-of them alone. Those four are stroked over the artwork instead.
+of them alone. Those four are stroked over the artwork instead, and their radii
+were found by sweeping each in turn against the crossing count for the whole
+set until no arrangement improved. They now cross nothing. (Clipping them to
+the artwork's corridors was tried first and abandoned: the best circular arc
+between 10 and 20 lies only 18% inside the track it should follow, because the
+drawing routes it out to the left and back.)
 
 ### Composition
 
@@ -147,11 +152,22 @@ composition. At 1.0 the graph filled the frame and dwarfed the silhouette; at
 0.68 it is 932 tall against the figure's 992, so the head and shoulders stand
 clear above and around it and the Root sits just inside the base.
 
-The artwork's line work is **stroked, not filled**. Filling it made every line
+The artwork's line work is **stroked, not filled**, and its **outer contour is
+dropped** — stroking subpath 0 drew a ring right round the chart that no
+conventional BodyGraph has. What is left is every interior boundary, which is
+all the line work the drawing needs. Filling it made every line
 as thick as the gap the file leaves between its two edges, and that weight is
 baked in — there is no way to lighten it. Stroking the same subpaths draws just
 their outlines, at a width set here, and leaves the space between them clear so
 the figure shows through.
+
+### Gates sit on the artwork's own junctions
+
+The Spleen's and Solar Plexus's seven gates were spaced evenly along their
+edges, which put 48 a third of the way down when its channel arrives at the top
+corner, and left 57 and 44 off the tracks running into them. They now sit where
+each channel track actually meets the triangle. 57 is the one exception: two
+channels arrive there — 20-57 and 34-57 — so it takes the point between them.
 
 ### Gate numerals sit square on their channels
 

@@ -85,8 +85,8 @@ export const CHANNEL_TRACK_FILL = PALETTE.white;
  * shows through — which is how a conventional chart reads.
  */
 export const ARTWORK_INK_COLOR = PALETTE.dusk;
-export const ARTWORK_INK_OPACITY = 0.75;
-export const ARTWORK_INK_WIDTH = 1.6;
+export const ARTWORK_INK_OPACITY = 0.5;
+export const ARTWORK_INK_WIDTH = 1.1;
 
 /**
  * Stroke width used to flood an activated channel's track through a clip.

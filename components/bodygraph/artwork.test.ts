@@ -7,11 +7,12 @@ import { ARTWORK_INK, ARTWORK_VIEWBOX, CENTRE_REGION, CHANNEL_REGION, INTEGRATIO
 import { GRAPH_BOX } from "./geometry";
 
 describe("the reference artwork", () => {
-  it("is the whole drawing, unedited", () => {
-    // 74 subpaths: the outer contour, nine centre interiors, and 64 regions
-    // between the strokes.
-    expect(ARTWORK_INK.match(/M/g) ?? []).toHaveLength(74);
-    expect(ARTWORK_INK.startsWith("M462.3,1369.7")).toBe(true);
+  it("is the drawing's interior line work, unedited", () => {
+    // 73 subpaths: the nine centre interiors and 64 regions between the
+    // strokes. The file's 74th is its outer contour, dropped — stroking it drew
+    // a ring right round the chart that no conventional BodyGraph has.
+    expect(ARTWORK_INK.match(/M/g) ?? []).toHaveLength(73);
+    expect(ARTWORK_INK.startsWith("M337.6,155.4")).toBe(true);
   });
 
   it("is drawn in the same space as the geometry", () => {
