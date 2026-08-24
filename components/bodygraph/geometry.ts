@@ -105,22 +105,32 @@ export interface CenterGeometry {
  * nature — it is an off-axis centre, sitting in the pocket between the G's
  * lower-right edge and the Solar Plexus.
  */
+/*
+ * These are the SHARP vertices, recovered by fitting a line to each straight
+ * run of the drawn outline and intersecting adjacent pairs — the same method
+ * the Heart needed. Bounding-box corners were here, and for a shape the drawing
+ * fillets by 26 units they are not the corners: the Spleen's box put its top
+ * edge 13 units below where the drawing actually draws it, so a numeral sitting
+ * a comfortable 12 units inside the shape measured 1.3 from this polygon and
+ * the clearance test called it wrong. The head's apex lands above y = 0 for the
+ * same reason; the drawing rounds it off long before it gets there.
+ */
 const HEAD = {
-  apex: { x: 405.5, y: 6.8 },
-  left: { x: 320.4, y: 155.4 },
-  right: { x: 490.6, y: 155.4 },
+  apex: { x: 405.5, y: -9.1 },
+  left: { x: 308.7, y: 155.2 },
+  right: { x: 502.3, y: 155.2 },
 };
 const AJNA = {
-  left: { x: 320.1, y: 215.4 },
-  right: { x: 490.9, y: 215.4 },
-  apex: { x: 405.5, y: 360.4 },
+  left: { x: 308.3, y: 215.4 },
+  right: { x: 502.7, y: 215.4 },
+  apex: { x: 405.5, y: 376.2 },
 };
 const THROAT = { x: 323.75, y: 453, width: 163.5, height: 155.4 };
 const G = {
-  top: { x: 405.5, y: 652.1 },
-  right: { x: 509.5, y: 753.5 },
-  bottom: { x: 405.5, y: 855 },
-  left: { x: 301.5, y: 753.5 },
+  top: { x: 405.5, y: 641 },
+  right: { x: 520.1, y: 753.5 },
+  bottom: { x: 405.5, y: 865.2 },
+  left: { x: 290.9, y: 753.5 },
 };
 /*
  * The Heart, as the artwork actually draws it: a TILTED triangle, well right
@@ -138,14 +148,14 @@ const HEART = {
   bottomRight: { x: 675.2, y: 921.4 },
 };
 const SPLEEN = {
-  top: { x: 6.4, y: 943.1 },
-  apex: { x: 170.9, y: 1034.1 },
-  bottom: { x: 6.4, y: 1125 },
+  top: { x: 6.2, y: 930.1 },
+  apex: { x: 188.5, y: 1034.8 },
+  bottom: { x: 6.2, y: 1138.2 },
 };
 const SOLAR = {
-  top: { x: 804.6, y: 943.1 },
-  apex: { x: 640.1, y: 1034.1 },
-  bottom: { x: 804.6, y: 1125 },
+  top: { x: 804.8, y: 930.1 },
+  apex: { x: 622.5, y: 1034.8 },
+  bottom: { x: 804.8, y: 1138.2 },
 };
 const SACRAL = { x: 323.8, y: 968.3, width: 163.4, height: 158.6 };
 const ROOT = { x: 323.9, y: 1195, width: 163.2, height: 168.8 };
@@ -308,77 +318,77 @@ export const GATE_POINTS: Readonly<Record<number, Point>> = {
 const GATE_MARKER_OVERRIDES: Readonly<Record<number, Point>> = {
   // head
   61: { x: 405.5, y: 139.7 },
-  63: { x: 445.8, y: 139.7 },
-  64: { x: 365.2, y: 139.7 },
+  63: { x: 440.7, y: 139.7 },
+  64: { x: 370.3, y: 139.7 },
   // ajna
-  4: { x: 451.4, y: 229.9 },
-  11: { x: 424.5, y: 299.6 },
-  17: { x: 386.5, y: 299.6 },
-  24: { x: 405.5, y: 229.9 },
-  43: { x: 405.5, y: 331.8 },
-  47: { x: 359.6, y: 229.9 },
+  4: { x: 441.3, y: 230.4 },
+  11: { x: 423.9, y: 300.6 },
+  17: { x: 387.1, y: 300.6 },
+  24: { x: 405.5, y: 230.4 },
+  43: { x: 405.5, y: 344.9 },
+  47: { x: 369.7, y: 230.4 },
   // throat
   8: { x: 405.5, y: 592.7 },
-  12: { x: 472.1, y: 538.2 },
-  16: { x: 338.9, y: 501.3 },
-  20: { x: 338.9, y: 538.2 },
+  12: { x: 472.1, y: 537.5 },
+  16: { x: 338.9, y: 506.5 },
+  20: { x: 338.9, y: 537.5 },
   23: { x: 405.5, y: 468.7 },
-  31: { x: 364.0, y: 592.8 },
-  33: { x: 447.0, y: 592.8 },
-  35: { x: 472.1, y: 501.3 },
-  45: { x: 472.0, y: 579.2 },
-  56: { x: 450.7, y: 468.7 },
-  62: { x: 360.3, y: 468.7 },
+  31: { x: 369.9, y: 592.8 },
+  33: { x: 441.1, y: 592.8 },
+  35: { x: 472.1, y: 506.5 },
+  45: { x: 471.7, y: 577.7 },
+  56: { x: 441.1, y: 468.7 },
+  62: { x: 369.9, y: 468.7 },
   // g
-  1: { x: 405.5, y: 672.4 },
-  2: { x: 405.5, y: 834.7 },
-  7: { x: 384.5, y: 692.9 },
-  10: { x: 322.3, y: 753.5 },
-  13: { x: 426.5, y: 692.9 },
-  15: { x: 384.5, y: 814.2 },
-  25: { x: 488.7, y: 753.5 },
-  46: { x: 426.5, y: 814.2 },
+  1: { x: 405.5, y: 672.6 },
+  2: { x: 405.5, y: 833.9 },
+  7: { x: 376.5, y: 700.7 },
+  10: { x: 318.6, y: 747.5 },
+  13: { x: 434.5, y: 700.7 },
+  15: { x: 376.5, y: 806.4 },
+  25: { x: 492.4, y: 747.5 },
+  46: { x: 434.5, y: 806.4 },
   // heart
-  21: { x: 611.2, y: 812.6 },
-  26: { x: 539.5, y: 868.9 },
-  40: { x: 647.8, y: 903.1 },
-  51: { x: 574.8, y: 836.7 },
+  21: { x: 604.9, y: 811.5 },
+  26: { x: 536.1, y: 872.4 },
+  40: { x: 645.8, y: 903.2 },
+  51: { x: 580.7, y: 832.0 },
   // spleen
-  18: { x: 23.5, y: 1101.3 },
-  28: { x: 64.0, y: 1078.9 },
-  32: { x: 91.3, y: 1063.8 },
-  44: { x: 98.2, y: 1008.1 },
-  48: { x: 18.9, y: 964.3 },
-  50: { x: 145.1, y: 1034.1 },
-  57: { x: 63.6, y: 989.0 },
+  18: { x: 35.9, y: 1105.8 },
+  28: { x: 65.9, y: 1077.8 },
+  32: { x: 98.5, y: 1059.7 },
+  44: { x: 101.4, y: 1009.7 },
+  48: { x: 23.5, y: 956.5 },
+  50: { x: 156.9, y: 1035.2 },
+  57: { x: 77.7, y: 997.4 },
   // solarPlexus
-  6: { x: 665.9, y: 1034.1 },
-  22: { x: 747.4, y: 989.0 },
-  30: { x: 787.5, y: 1101.3 },
-  36: { x: 792.1, y: 964.3 },
-  37: { x: 712.8, y: 1008.1 },
-  49: { x: 719.7, y: 1063.8 },
-  55: { x: 747.0, y: 1078.9 },
+  6: { x: 654.1, y: 1035.2 },
+  22: { x: 733.3, y: 997.4 },
+  30: { x: 775.1, y: 1105.8 },
+  36: { x: 787.5, y: 956.5 },
+  37: { x: 709.6, y: 1009.7 },
+  49: { x: 712.5, y: 1059.7 },
+  55: { x: 745.1, y: 1077.8 },
   // sacral
   3: { x: 405.5, y: 1111.2 },
-  5: { x: 363.2, y: 984.0 },
-  9: { x: 448.3, y: 1111.2 },
+  5: { x: 370.7, y: 984.0 },
+  9: { x: 440.8, y: 1111.2 },
   14: { x: 405.5, y: 984.0 },
-  27: { x: 338.9, y: 1091.4 },
-  29: { x: 447.8, y: 984.0 },
-  34: { x: 338.3, y: 1016.4 },
-  42: { x: 362.7, y: 1111.2 },
-  59: { x: 472.1, y: 1091.4 },
+  27: { x: 338.9, y: 1086.9 },
+  29: { x: 440.3, y: 984.0 },
+  34: { x: 338.5, y: 1028.4 },
+  42: { x: 370.2, y: 1111.2 },
+  59: { x: 472.1, y: 1086.9 },
   // root
-  19: { x: 472.0, y: 1248.0 },
-  38: { x: 339.0, y: 1289.4 },
-  39: { x: 472.0, y: 1289.4 },
-  41: { x: 472.0, y: 1330.3 },
-  52: { x: 450.8, y: 1209.5 },
-  53: { x: 360.2, y: 1209.5 },
-  54: { x: 339.0, y: 1248.0 },
-  58: { x: 339.0, y: 1330.3 },
-  60: { x: 405.5, y: 1209.5 },
+  19: { x: 472.0, y: 1258.3 },
+  38: { x: 339.0, y: 1288.3 },
+  39: { x: 472.0, y: 1288.3 },
+  41: { x: 472.0, y: 1321.0 },
+  52: { x: 440.0, y: 1210.0 },
+  53: { x: 371.0, y: 1210.0 },
+  54: { x: 339.0, y: 1258.3 },
+  58: { x: 339.0, y: 1321.0 },
+  60: { x: 405.5, y: 1210.0 },
 };
 
 
@@ -721,28 +731,6 @@ export function channelMidpoint(a: Point, b: Point, id?: string): Point {
   const g = channelGeometry(a, b, id);
   if (g.straight) return g.chordMid;
   return { x: g.chordMid.x + g.nx * g.sagitta, y: g.chordMid.y + g.ny * g.sagitta };
-}
-
-/**
- * Half of a channel, from one gate to the midpoint, following the same curve.
- *
- * Both halves are arcs of the SAME circle, so each is drawn with the parent's
- * radius; only the sweep flag has to be worked out again, because the two
- * halves run in opposite directions around it.
- */
-export function channelHalfPath(from: Point, to: Point, mid: Point, id?: string): string {
-  const g = channelGeometry(from, to, id);
-  if (g.straight) return `M ${from.x} ${from.y} L ${mid.x} ${mid.y}`;
-
-  const r = g.radius.toFixed(2);
-  // Centre of the parent circle, then the sweep for this half around it.
-  const cx = g.chordMid.x - g.nx * (g.radius - g.sagitta);
-  const cy = g.chordMid.y - g.ny * (g.radius - g.sagitta);
-  const cross =
-    (from.x - cx) * (mid.y - cy) - (from.y - cy) * (mid.x - cx);
-  const sweep = cross > 0 ? 1 : 0;
-
-  return `M ${from.x} ${from.y} A ${r} ${r} 0 0 ${sweep} ${mid.x.toFixed(2)} ${mid.y.toFixed(2)}`;
 }
 
 /** Big enough to cover the whole graph from any point inside it. */

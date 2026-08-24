@@ -9,7 +9,6 @@ import {
   CENTERS,
   VARIABLE_SLOTS,
   VIEWBOX,
-  channelHalfPath,
   channelHalfPlane,
   channelMidpoint,
   gateLabelPoint,
@@ -18,7 +17,7 @@ import {
   graphTransformAttr,
   variableArrowPath,
 } from "./geometry";
-import { ARTWORK_INK, CENTRE_REGION, CHANNEL_REGION, MERGED_CORRIDOR } from "./artwork";
+import { ARTWORK_INK, CENTRE_REGION, CHANNEL_REGION, MERGED_ROUTE } from "./artwork";
 import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
   CENTER_DEFINED_FILL,
@@ -27,7 +26,6 @@ import {
   ARTWORK_INK_COLOR,
   ARTWORK_INK_OPACITY,
   ARTWORK_INK_WIDTH,
-  FLOOD_WIDTH,
   CHANNEL_TRACK_FILL,
   DESIGN_COLOR,
   markerRadius,
@@ -39,7 +37,6 @@ import {
   ON_DEFINED_TEXT,
   ON_UNDEFINED_TEXT,
   PERSONALITY_COLOR,
-  STROKE_WIDTH,
   activationColor,
   describeActivation,
   type ActivationStyle,
@@ -275,7 +272,6 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
           const b = getGatePoint(gateB);
           const defined = activeChannelById.get(definition.id);
           const regions = CHANNEL_REGION[definition.id];
-          const corridor = MERGED_CORRIDOR[definition.id];
 
           const styleA = gateStyle(gateA);
           const styleB = gateStyle(gateB);
@@ -293,63 +289,10 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
             </title>
           );
 
-          /*
-           * A channel the artwork draws as its own track is FILLED in place.
-           * Filling is what makes a fragmented channel work: where another
-           * channel crosses one, the drawing splits its track into pieces, and
-           * 37-40 is a single fragment out by the Solar Plexus that an
-           * approximate arc misses entirely.
-           *
-           * The regions go down once unfilled, whatever the state, so the
-           * drawing keeps one path per region for anything measuring it.
-           */
-          if (regions) {
-            const mid = channelMidpoint(a, b, definition.id);
-            const bothSame = styleA === styleB && styleA !== "none";
-
-            /* One end's share of the track: its own regions, clipped to its
-               half of the drawing. A gate carrying both imprints takes the
-               Design fill with the Personality dashed over it, the same
-               two-tone language the split gate markers use. */
-            const end = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) => {
-              if (style === "none") return null;
-              const planeId = `half-${definition.id}-${gate}`;
-              const trackId = `track-${definition.id}-${gate}`;
-              return (
-                <g key={gate} data-half={gate}>
-                  <clipPath id={planeId}>
-                    <rect {...channelHalfPlane(from, to, mid)} />
-                  </clipPath>
-                  <g clipPath={`url(#${planeId})`}>
-                    {regions.map((d, index) => (
-                      <path
-                        key={index}
-                        d={d}
-                        fill={style === "both" ? DESIGN_COLOR : activationColor(style)}
-                      />
-                    ))}
-                    {style === "both" ? (
-                      <>
-                        <clipPath id={trackId}>
-                          {regions.map((d, index) => (
-                            <path key={index} d={d} />
-                          ))}
-                        </clipPath>
-                        <g clipPath={`url(#${trackId})`}>
-                          <path
-                            d={channelHalfPath(from, to, mid, definition.id)}
-                            stroke={PERSONALITY_COLOR}
-                            strokeWidth={FLOOD_WIDTH}
-                            strokeDasharray="7 7"
-                          />
-                        </g>
-                      </>
-                    ) : null}
-                  </g>
-                </g>
-              );
-            };
-
+          if (!regions) {
+            // One of the integration four: painted by its route, in the pass
+            // below. The title stays here, so every channel carries its state
+            // in words whether or not anything is drawn for it.
             return (
               <g
                 key={definition.id}
@@ -357,55 +300,58 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                 data-active={defined ? "true" : "false"}
               >
                 {label}
-                {regions.map((d, index) => (
-                  <path key={index} d={d} fill={CHANNEL_TRACK_FILL} />
-                ))}
-                {/* Both ends the same needs no seam, and an unclipped fill
-                    cannot be thrown off by a fragment sitting across the
-                    dividing line. */}
-                {bothSame
-                  ? regions.map((d, index) => (
-                      <path
-                        key={`on-${index}`}
-                        d={d}
-                        data-half="both"
-                        fill={activationColor(styleA)}
-                      />
-                    ))
-                  : [end(a, b, styleA, gateA), end(b, a, styleB, gateB)]}
               </g>
             );
           }
 
-          if (corridor || (styleA === "none" && styleB === "none")) {
-            // Drawn in the second pass, or not drawn at all.
-            return (
-              <g
-                key={definition.id}
-                data-channel={definition.id}
-                data-active={defined ? "true" : "false"}
-              >
-                {corridor ? null : label}
-              </g>
-            );
-          }
+          const mid = channelMidpoint(a, b, definition.id);
+          const bothSame = styleA === styleB && styleA !== "none";
 
           /*
-           * 10-34 and 20-34: merged into the web at the G's left vertex with no
-           * band of their own, so they are stroked over the artwork. Their radii
-           * were swept until they cross nothing.
+           * One end's share of the track: its own regions, clipped to its half
+           * of the drawing.
+           *
+           * A gate carrying BOTH imprints splits its half again, into two solid
+           * blocks — Personality out at the gate, Design in toward the middle.
+           * A dashed Personality stroke used to be laid over a Design fill
+           * instead, and at channel width that reads as a barber's pole: the
+           * repeating stripe is a texture, not a colour, and on the long arcs it
+           * looked like a third thing rather than the two imprints. Two solid
+           * blocks keep the whole drawing to exactly two colours.
            */
-          const mid = channelMidpoint(a, b, definition.id);
-          const stroke = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) =>
-            style === "none" ? null : (
-              <path
-                key={`${definition.id}-${gate}`}
-                data-half={gate}
-                d={channelHalfPath(from, to, mid, definition.id)}
-                stroke={style === "design" ? DESIGN_COLOR : PERSONALITY_COLOR}
-                strokeWidth={STROKE_WIDTH.channelActive}
-              />
+          const end = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) => {
+            if (style === "none") return null;
+            const planeId = `half-${definition.id}-${gate}`;
+            const fill = (colour: string, key: string) =>
+              regions.map((d, index) => <path key={`${key}-${index}`} d={d} fill={colour} />);
+            const quarter = { x: (from.x + mid.x) / 2, y: (from.y + mid.y) / 2 };
+            const outerId = `outer-${definition.id}-${gate}`;
+            const innerId = `inner-${definition.id}-${gate}`;
+            return (
+              <g key={gate} data-half={gate}>
+                <clipPath id={planeId}>
+                  <rect {...channelHalfPlane(from, to, mid)} />
+                </clipPath>
+                <g clipPath={`url(#${planeId})`}>
+                  {style === "both" ? (
+                    <>
+                      <clipPath id={outerId}>
+                        <rect {...channelHalfPlane(from, mid, quarter)} />
+                      </clipPath>
+                      <clipPath id={innerId}>
+                        <rect {...channelHalfPlane(mid, from, quarter)} />
+                      </clipPath>
+                      <g clipPath={`url(#${outerId})`}>{fill(PERSONALITY_COLOR, "p")}</g>
+                      <g clipPath={`url(#${innerId})`}>{fill(DESIGN_COLOR, "d")}</g>
+                    </>
+                  ) : (
+                    fill(activationColor(style), "s")
+                  )}
+                </g>
+              </g>
             );
+          };
+
           return (
             <g
               key={definition.id}
@@ -413,73 +359,112 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
               data-active={defined ? "true" : "false"}
             >
               {label}
-              {stroke(a, b, styleA, gateA)}
-              {stroke(b, a, styleB, gateB)}
+              {regions.map((d, index) => (
+                <path key={index} d={d} fill={CHANNEL_TRACK_FILL} />
+              ))}
+              {/* Both ends the same needs no seam, and an unclipped fill cannot
+                  be thrown off by a fragment sitting across the dividing line.
+                  "both" still needs the split, so it is not counted as same. */}
+              {bothSame && styleA !== "both"
+                ? regions.map((d, index) => (
+                    <path
+                      key={`on-${index}`}
+                      d={d}
+                      data-half="both"
+                      fill={activationColor(styleA)}
+                    />
+                  ))
+                : [end(a, b, styleA, gateA), end(b, a, styleB, gateB)]}
             </g>
           );
         })}
       </g>
 
       {/*
-        Second pass: the two channels that share 20-57's band. 10-20 is the part
-        of it above gate 10, 10-57 the part below, so each is the band clipped
-        to a half-plane at gate 10's height. That puts them exactly on the line
-        the drawing draws, rather than on a chord cutting across the arcs
-        beneath — which is what an arc between those points does, at any radius.
+        Second pass: the integration group, which the drawing merges into one
+        web and gives no track of its own.
+
+        Each of the four takes a ROUTE through the regions it shares — spans of
+        20-57's band, of the mouth it shares with 34-57 on the Spleen's upper
+        edge, and of 34-57's track in from the Sacral. Every span names the gate
+        whose half it is and the y range of the region to take. Two of them used
+        to be stroked as circular arcs between their gates instead, and those
+        arcs belong to no track in the drawing: gate 10 or gate 20 activated on
+        its own put a stray line down the middle of the chart.
+
+        They paint after the tracks because they share them.
       */}
       <g>
-        {CHANNEL_DEFINITIONS.filter((d) => MERGED_CORRIDOR[d.id]).map((definition) => {
+        {CHANNEL_DEFINITIONS.filter((d) => MERGED_ROUTE[d.id]).map((definition) => {
           const [gateA, gateB] = definition.gates;
-          const corridor = MERGED_CORRIDOR[definition.id]!;
+          const spans = MERGED_ROUTE[definition.id]!;
           const styleA = gateStyle(gateA);
           const styleB = gateStyle(gateB);
+          const styleOf = (gate: number) => (gate === gateA ? styleA : styleB);
 
           if (styleA === "none" && styleB === "none") return null;
 
-          const clipId = `corridor-${definition.id}`;
-          const seam = (corridor.from + corridor.to) / 2;
-          // The upper half belongs to whichever gate sits higher.
-          const aIsUpper = getGatePoint(gateA).y < getGatePoint(gateB).y;
-          const upper = aIsUpper ? styleA : styleB;
-          const lower = aIsUpper ? styleB : styleA;
+          const band = (
+            span: (typeof spans)[number],
+            index: number,
+            from: number,
+            to: number,
+            colour: string,
+          ) => (
+            <rect
+              key={`${index}-${from}`}
+              data-half={span.gate}
+              x={0}
+              y={from}
+              width={GRAPH_BOX.width}
+              height={to - from}
+              fill={colour}
+            />
+          );
 
           return (
-            <g key={definition.id} data-corridor={definition.id}>
-              <title>
-                {`Channel ${definition.id} — ${definition.name}. `}
-                {`Gate ${gateA}: ${describeActivation(styleA)}. `}
-                {`Gate ${gateB}: ${describeActivation(styleB)}.`}
-              </title>
-              <clipPath id={clipId}>
-                <path d={corridor.region} />
-              </clipPath>
-              <g clipPath={`url(#${clipId})`}>
-                {upper === "none" ? null : (
-                  <rect
-                    data-half={aIsUpper ? gateA : gateB}
-                    x={0}
-                    y={corridor.from}
-                    width={GRAPH_BOX.width}
-                    height={seam - corridor.from}
-                    fill={activationColor(upper)}
-                  />
-                )}
-                {lower === "none" ? null : (
-                  <rect
-                    data-half={aIsUpper ? gateB : gateA}
-                    x={0}
-                    y={seam}
-                    width={GRAPH_BOX.width}
-                    height={corridor.to - seam}
-                    fill={activationColor(lower)}
-                  />
-                )}
-              </g>
+            <g key={definition.id} data-corridor={definition.id} aria-hidden="true">
+              {spans.map((span, index) => {
+                const style = styleOf(span.gate);
+                if (style === "none") return null;
+                const clipId = `route-${definition.id}-${index}`;
+                /* A gate carrying both imprints splits its span into two solid
+                   blocks rather than being striped, so the drawing stays to two
+                   colours. Personality goes on the half nearer that gate. */
+                const seam = (span.from + span.to) / 2;
+                const gateIsAbove = getGatePoint(span.gate).y <= seam;
+                return (
+                  <g key={clipId}>
+                    <clipPath id={clipId}>
+                      <path d={span.region} />
+                    </clipPath>
+                    <g clipPath={`url(#${clipId})`}>
+                      {style === "both"
+                        ? [
+                            band(
+                              span,
+                              index,
+                              span.from,
+                              seam,
+                              gateIsAbove ? PERSONALITY_COLOR : DESIGN_COLOR,
+                            ),
+                            band(
+                              span,
+                              index,
+                              seam,
+                              span.to,
+                              gateIsAbove ? DESIGN_COLOR : PERSONALITY_COLOR,
+                            ),
+                          ]
+                        : band(span, index, span.from, span.to, activationColor(style))}
+                    </g>
+                  </g>
+                );
+              })}
             </g>
           );
         })}
       </g>
-
 
       {/*
         The artwork's own line work, over the fills. Stroked rather than filled:

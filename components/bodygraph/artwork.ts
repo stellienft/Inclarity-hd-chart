@@ -24,8 +24,10 @@
  * The four it does not map are the integration group — 10-20, 10-34, 10-57 and
  * 20-34. The drawing merges them into one web at the G's left vertex, where
  * only a single track junction exists rather than three, so there is no region
- * that belongs to any one of them alone. Those four are drawn as strokes over
- * the artwork instead; INTEGRATION_GROUP names them.
+ * that belongs to any one of them alone. Those four take a ROUTE through the
+ * regions they share instead; INTEGRATION_GROUP names them and MERGED_ROUTE
+ * says which spans of which regions each one runs along. Nothing in the chart
+ * is drawn free-hand over the artwork.
  */
 
 export const ARTWORK_VIEWBOX = { width: 813, height: 1370.3 } as const;
@@ -135,23 +137,68 @@ export const ARTWORK_INK: string = [
 
 export const INTEGRATION_GROUP: readonly string[] = ["10-20", "10-34", "10-57", "20-34"];
 
+/** 20-57's band, which the whole integration web runs along. */
+const CORRIDOR = "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z";
+/** The mouth on the Spleen's upper edge that 34-57 shares with 20-57. */
+const SPLEEN_MOUTH = "M107.3,980.2l16.7-19.1c-15.9-11.2-29-23.6-39.7-40.7l-2.9,44.9,25.9,14.9Z";
+/** 34-57's track, in from the Sacral. */
+const SACRAL_REACH = "M316.7,1015.7l-68.9-16.8c-31-9.6-60.3-21.3-88.6-36.9l-10,9.3c53.1,30.8,108.3,46.2,167.7,58.5.4-5.1.7-9.1-.2-14Z";
+
 /**
- * Two of the four DO run along a drawn track — they just share it.
+ * All four of the integration channels run along drawn track — they share it.
  *
- * The drawing takes one band from the Throat's left edge, past the G's left
+ * The drawing takes ONE band from the Throat's left edge, past the G's left
  * vertex, out and down to the Spleen. That band is 20-57 end to end; 10-20 is
- * the part of it above gate 10 and 10-57 the part below. Splitting it at gate
- * 10's height and filling the relevant half puts each of them exactly on the
- * line the drawing draws, instead of a chord cutting straight across the arcs
- * beneath — which is what a circular arc between those two points does, and no
- * radius fixes it: the drawing routes the channel out to the left and back,
- * and the best arc lies 18% inside the track.
+ * the part of it above gate 10 and 10-57 the part below. Gate 34 joins the same
+ * web from the other side: 34-57's track runs in from the Sacral to a mouth on
+ * the Spleen's upper edge that it shares with 20-57's, so 10-34 and 20-34 are
+ * the corridor down to that mouth and then out along 34-57's track.
  *
- * 10-34 and 20-34 have no such band and stay stroked.
+ * Nothing is drawn free-hand over the artwork any more. 10-34 and 20-34 WERE
+ * stroked as circular arcs between their gates, and those arcs belong to no
+ * track: gate 10 or gate 20 activated on its own put a stray line straight down
+ * the middle of the drawing, cutting across everything in its way. A chord is
+ * not a fix either — the drawing routes this channel out to the left and back,
+ * and the best circular arc between 10 and 20 lies 18% inside the band it
+ * should follow, at any radius.
+ *
+ * Each span names the gate whose half it is, and the y range of the region it
+ * covers. Splitting on y works because every span is a run of the corridor with
+ * a single crossing at each height.
  */
-export const MERGED_CORRIDOR: Readonly<
-  Record<string, { region: string; from: number; to: number }>
-> = {
-  "10-20": { region: "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z", from: 536.9, to: 760.1 },
-  "10-57": { region: "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z", from: 760.1, to: 961.8 },
+export interface RouteSpan {
+  /** One of the regions in CHANNEL_REGION, shared with the channel that owns it. */
+  region: string;
+  /** The gate whose half of the channel this span is. */
+  gate: number;
+  /** The y range of the region to take, in the artwork's own coordinates. */
+  from: number;
+  to: number;
+}
+
+export const MERGED_ROUTE: Readonly<Record<string, readonly RouteSpan[]>> = {
+  // Gate 20 at y 536.9, gate 10's junction at 760.1, gate 57's at 961.8.
+  "10-20": [
+    { region: CORRIDOR, gate: 20, from: 536.9, to: 648.5 },
+    { region: CORRIDOR, gate: 10, from: 648.5, to: 760.1 },
+  ],
+  "10-57": [
+    { region: CORRIDOR, gate: 10, from: 760.1, to: 860.9 },
+    { region: CORRIDOR, gate: 57, from: 860.9, to: 961.8 },
+  ],
+  // Down the corridor, through the shared mouth, out along 34-57's track. The
+  // seam sits at y 869, halfway along the run measured end to end.
+  "20-34": [
+    { region: CORRIDOR, gate: 20, from: 536.9, to: 869 },
+    { region: CORRIDOR, gate: 34, from: 869, to: 961.8 },
+    { region: SPLEEN_MOUTH, gate: 34, from: 918, to: 982 },
+    { region: SACRAL_REACH, gate: 34, from: 958, to: 1032 },
+  ],
+  // Half of this one falls inside the shared mouth, so the corridor is all
+  // gate 10's and everything past the Spleen is gate 34's.
+  "10-34": [
+    { region: CORRIDOR, gate: 10, from: 760.1, to: 961.8 },
+    { region: SPLEEN_MOUTH, gate: 34, from: 918, to: 982 },
+    { region: SACRAL_REACH, gate: 34, from: 958, to: 1032 },
+  ],
 };

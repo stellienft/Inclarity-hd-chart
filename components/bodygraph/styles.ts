@@ -99,14 +99,6 @@ export const ARTWORK_INK_COLOR = PALETTE.dusk;
 export const ARTWORK_INK_OPACITY = 0.5;
 export const ARTWORK_INK_WIDTH = 1.1;
 
-/**
- * Stroke width used to flood an activated channel's track through a clip.
- *
- * It only has to exceed the widest track in the drawing (14) by enough that a
- * stroke centred on an approximate arc still covers the whole region; the clip
- * is what gives the paint its shape.
- */
-export const FLOOD_WIDTH = 46;
 export const CHANNEL_TRACK_EDGE = PALETTE.dusk;
 export const CHANNEL_TRACK_EDGE_OPACITY = 0.5;
 
@@ -145,15 +137,8 @@ export const GATE_NUMERAL_WEIGHT = { active: 500, inactive: 400 } as const;
 
 export const STROKE_WIDTH = {
   centre: 2,
-  /*
-   * Channels are drawn as outlined tracks rather than fat white tubes: a wider
-   * stroke in the edge colour with a narrower white one on top, so what reads
-   * is the outline. 14 is the track width measured off the reference artwork,
-   * and the 3.5 of edge either side matches the line weight it draws them in.
-   */
+  /* The track width measured off the reference artwork. */
   channelTrack: 14,
-  channelTrackEdge: 17.5,
-  channelActive: 14,
 } as const;
 
 /** Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS. */

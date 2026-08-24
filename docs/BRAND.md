@@ -48,10 +48,24 @@ the planetary columns were listing.
 Each end is painted by clipping the channel's own regions to a **half-plane**,
 perpendicular to the chord through the arc's midpoint (`channelHalfPlane`).
 Stroking the half *arc* was tried and cannot be relied on: several corridors in
-this file are fragmented or routed too far off a circle for an approximate arc
-to land on them. Clipping the real regions cannot miss. Four gates — 10, 20, 34
-and 57 — belong to three channels each, so activation is read from the gate, not
-from the channel.
+this file are fragmented or routed too far off a circle for that. Clipping the
+real regions cannot miss. Four gates — 10, 20, 34 and 57 — belong to three
+channels each, so activation is read from the gate, not from the channel.
+
+**Two colours, in solid blocks.** A gate carrying BOTH imprints splits its half
+again, into Personality out at the gate and Design in toward the middle. A
+dashed Personality stroke was laid over a Design fill before, and at channel
+width a repeating stripe reads as a texture rather than as a colour — a
+barber's pole, and on the long arcs it looked like a third thing rather than the
+two imprints. Nothing in the drawing is now made of more than the two.
+
+**Nothing is drawn free-hand over the artwork.** All four integration channels
+take a ROUTE through the regions they share (`MERGED_ROUTE`): spans of 20-57's
+band, of the mouth it shares with 34-57 on the Spleen's upper edge, and of
+34-57's track in from the Sacral. 10-34 and 20-34 used to be stroked as circular
+arcs between their gates, and those arcs belong to no track — gate 10 or gate 20
+activated on its own put a stray line straight down the middle of the drawing,
+cutting across everything in its way.
 
 **An inactive channel is not filled.** White was tried and it cost the drawing
 twice. The gaps the artwork leaves *between* neighbouring tracks are unfilled,
