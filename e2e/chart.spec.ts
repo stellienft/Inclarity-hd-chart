@@ -271,13 +271,9 @@ test.describe("gate markers against the drawn centres", () => {
    * A track is a ribbon of constant width; a gap is a wedge. Modelling each
    * region as a rectangle of the same area and perimeter recovers that width
    * exactly: solving 2(w + l) = P and wl = A gives w = (P - sqrt(P^2 - 16A))/4.
-   * Every plain track in the file measures 12.6 to 16 units across.
-   *
-   * The one exception is 34-57's mouth on the Spleen, which the drawing MERGES
-   * with 20-57's — one opening carrying two channels, so it measures 20.8. It is
-   * named here rather than widening the band, because the band is what catches
-   * a gap: this same 20.8 is what wrongly identified that mouth as one, and
-   * walking the corridor out of gate 57's junction is what settled it.
+   * Every track in the file measures 12.6 to 16 units across. The one region
+   * that did not — 34-57's 20.8-unit mouth on the Spleen, which the drawing
+   * merges with 20-57's — is no longer drawn; see the note in artwork.ts.
    */
   test("gives every channel a track of the drawing's own width, never a gap", async ({
     page,
@@ -318,10 +314,8 @@ test.describe("gate markers against the drawn centres", () => {
     });
 
     expect(widths.length).toBeGreaterThan(30);
-    /** The Spleen mouth 34-57 shares with 20-57 — one opening, two channels. */
-    const MERGED_MOUTH = (id: string, width: number) => id === "34-57" && width < 22;
     const wrong = widths
-      .filter(({ id, width }) => !(width >= 12 && width <= 17) && !MERGED_MOUTH(id, width))
+      .filter(({ width }) => !(width >= 12 && width <= 17))
       .map(({ id, index, width }) => `${id}[${index}] is ${width.toFixed(1)} across`);
     expect(wrong, "a gap between tracks has been mapped as a channel").toEqual([]);
   });
@@ -334,9 +328,12 @@ test.describe("gate markers against the drawn centres", () => {
    * it needs a different measure, because a missing piece leaves a hole rather
    * than a wrong shape. Two ways it shows up:
    *
-   *  - the regions never reach a gate. 34-57's mouth on the Spleen is 75 units
-   *    out from gate 57's junction, so dropping it left the channel starting in
-   *    mid-air.
+   *  - the regions never reach a gate. The ONE known break is 34-57 at gate 57,
+   *    and it is deliberate: the drawing's mouth there is 20.8 units wide
+   *    because it is shared with 20-57, and filled it read as a blob on the
+   *    Spleen rather than a channel leaving it, so the client asked for it to
+   *    go. Nothing narrower sits behind it, so the corridor stops 75 units
+   *    short. Anything else reaching this list is a piece that was missed.
    *  - a fragment sits too far from the rest of its own channel. 26-44 crosses
    *    the three tracks running from the G to the Sacral, and the drawing shows
    *    it between them as two small squares; without them the channel drew with
@@ -384,7 +381,10 @@ test.describe("gate markers against the drawn centres", () => {
           // this is a generous bound that still catches a channel that never
           // arrives. A track that reaches its gate lands within ~35.
           const near = Math.min(...outlines.flat().map((q) => dist(q, at)));
-          if (near > 40) out.push({ id, what: `never reaches gate ${gate}`, value: near });
+          const KNOWN_BREAK = id === "34-57" && gate === 57;
+          if (near > 40 && !KNOWN_BREAK) {
+            out.push({ id, what: `never reaches gate ${gate}`, value: near });
+          }
         }
 
         for (let i = 0; i < outlines.length; i += 1) {

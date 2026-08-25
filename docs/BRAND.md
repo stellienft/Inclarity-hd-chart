@@ -61,11 +61,11 @@ two imprints. Nothing in the drawing is now made of more than the two.
 
 **Nothing is drawn free-hand over the artwork.** All four integration channels
 take a ROUTE through the regions they share (`MERGED_ROUTE`): spans of 20-57's
-band, of the mouth it shares with 34-57 on the Spleen's upper edge, and of
-34-57's track in from the Sacral. 10-34 and 20-34 used to be stroked as circular
-arcs between their gates, and those arcs belong to no track — gate 10 or gate 20
-activated on its own put a stray line straight down the middle of the drawing,
-cutting across everything in its way.
+band and of 34-57's track in from the Sacral. 10-34 and 20-34 used to be stroked
+as circular arcs between their gates, and those arcs belong to no track — gate 10
+or gate 20 activated on its own put a stray line straight down the middle of the
+drawing, cutting across everything in its way. Those two carry the same break at
+the Spleen that 34-57 does, for the same reason.
 
 **An inactive channel is not filled.** White was tried and it cost the drawing
 twice. The gaps the artwork leaves *between* neighbouring tracks are unfilled,
@@ -181,17 +181,21 @@ Taking a gap by mistake is the failure mode this invites, and it is caught by
 measurement rather than by eye. A track is a ribbon of constant width and a gap
 is a wedge, so modelling each region as a rectangle of the same area and
 perimeter recovers the width: solving `2(w + l) = P` and `wl = A` gives
-`w = (P − √(P² − 16A)) / 4`. Every plain track in the file measures **12.6 to 16**
-units across. The one exception is named: 34-57's mouth on the Spleen, which the
+`w = (P − √(P² − 16A)) / 4`. Every track that is drawn measures **12.6 to 16** units
+across. One region in the file does not — 34-57's mouth on the Spleen, which the
 drawing merges with 20-57's, so one opening carries two channels and measures
-20.8.
+20.8 — and it is no longer drawn: filled, an opening that wide read as a blob
+sitting on the Spleen rather than as a channel leaving it, and the client asked
+twice for it to go. Dropping it takes its outline with it, since the ink is
+derived from these maps. Nothing narrower sits behind it, so **34-57 stops 75
+units short of gate 57** and the corridor check names that as its one known
+break.
 
 Leaving a real fragment OUT is the same problem from the other side, and needs a
 different measure, because a missing piece leaves a hole rather than a wrong
 shape. Two checks cover it. Every channel's regions must **reach both of its
-gates** — 34-57's merged mouth is 75 units out from gate 57's junction, so
-dropping it left the channel starting in mid-air — and no fragment may sit more
-than 30 from the rest of its own channel. 26-44 crosses the three tracks running
+gates** — bar the one break above — and no fragment may sit more than 30 from
+the rest of its own channel. 26-44 crosses the three tracks running
 from the G to the Sacral and the drawing shows it between them as two small
 squares (13.8 × 12.9 and 16.8 × 13); without them the channel drew with two
 holes punched in it. Both checks are in the e2e suite, along with the widths.

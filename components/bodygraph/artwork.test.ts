@@ -10,8 +10,8 @@ describe("the reference artwork", () => {
   /**
    * The line work outlines what can be painted, and nothing else.
    *
-   * The file has 74 subpaths — an outer contour and 73 regions — and only 45 of
-   * those regions are a centre or a channel. Outlining the other 28 drew the
+   * The file has 74 subpaths — an outer contour and 73 regions — and only 44 of
+   * those regions are a centre or a channel. Outlining the other 29 drew the
    * gaps the artwork leaves between neighbouring channels, and a gap is the
    * same width as a track (Head to Ajna: tracks of 14.9, 15.7 and 15.1, gaps of
    * 17.3 and 14.3), so three channels drew as five identical bars. Deriving the
@@ -23,7 +23,7 @@ describe("the reference artwork", () => {
       ...Object.values(CHANNEL_REGION).flat(),
     ];
     expect(ARTWORK_INK.match(/M/g) ?? []).toHaveLength(fillable.length);
-    expect(fillable).toHaveLength(45);
+    expect(fillable).toHaveLength(44);
     for (const d of fillable) expect(ARTWORK_INK).toContain(d);
     expect(ARTWORK_INK.startsWith("M337.6,155.4")).toBe(true);
   });

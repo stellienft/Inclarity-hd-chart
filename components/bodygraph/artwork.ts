@@ -82,16 +82,23 @@ export const CHANNEL_REGION: Readonly<Record<string, readonly string[]>> = {
   "6-59": ["M494.3,1099.9c51.5-9.6,99.7-25.6,145.8-49.7-2.5-3.4-4.1-6.7-5.4-11.6-44.8,23.2-91.8,39-141.1,47.8,0,5-1,8.8.7,13.5Z"],
   "27-50": ["M317,1099.4v-13.6s-52.2-12.1-52.2-12.1c-30.6-9.3-59.4-20.9-88-35.8-1.3,4.7-2.9,8.4-5.8,12.3,31.5,16.3,63,28.7,96.5,38.2l49.5,10.9Z"],
   /*
-   * The second region is the quadrilateral on the Spleen's upper edge, where
-   * this channel and 20-57 leave the centre through ONE merged mouth. It is
-   * 20.8 units across where a plain track is 12.6 to 16, which is why it was
-   * taken for a gap and dropped; walking the corridor out of gate 57's junction
-   * finds it 75 units along, before anything else belonging to 34-57, so it is
-   * this channel's and the extra width is the junction it shares.
+   * ONE region, and this channel therefore stops 75 units short of gate 57.
+   *
+   * The drawing has a second piece here — the quadrilateral on the Spleen's
+   * upper edge where this channel and 20-57 leave the centre through one merged
+   * mouth. Walking the corridor out of gate 57's junction reaches it before
+   * anything else belonging to 34-57, so by the drawing it is this channel's,
+   * and its 20.8 units of width (against 12.6 to 16 for a plain track) is the
+   * junction the two share.
+   *
+   * The client has asked twice for it to go: filled, a mouth that wide reads as
+   * a blob sitting on the Spleen rather than as a channel leaving it. Dropping
+   * it takes its outline with it, since the ink is derived from these maps, and
+   * leaves the gap named as a known break in the corridor test. Nothing else in
+   * the file can carry that stretch — there is no narrower piece behind it.
    */
   "34-57": [
     "M316.7,1015.7l-68.9-16.8c-31-9.6-60.3-21.3-88.6-36.9l-10,9.3c53.1,30.8,108.3,46.2,167.7,58.5.4-5.1.7-9.1-.2-14Z",
-    "M107.3,980.2l16.7-19.1c-15.9-11.2-29-23.6-39.7-40.7l-2.9,44.9,25.9,14.9Z",
   ],
   /*
    * Four regions, in a row at y 877: the arc in from the Spleen, then two small
@@ -116,7 +123,7 @@ export const CHANNEL_REGION: Readonly<Record<string, readonly string[]>> = {
  * and nothing else.
  *
  * The file's own path has 74 subpaths — an outer contour and 73 regions — and
- * only 45 of those regions are a centre or a channel. The other 28 are the GAPS
+ * only 44 of those regions are a centre or a channel. The other 29 are the GAPS
  * the drawing leaves between neighbouring channels, plus the one large region
  * of negative space in the middle of the graph. Stroking all 73 outlined the
  * gaps too, and a gap here is the same width as a track (between the Head and
@@ -139,8 +146,6 @@ export const INTEGRATION_GROUP: readonly string[] = ["10-20", "10-34", "10-57", 
 
 /** 20-57's band, which the whole integration web runs along. */
 const CORRIDOR = "M100.6,815.1c4.3-9.4,13.4-16.1,21.2-21.8,42.9-31.5,119.9-35.2,173.3-34l.3-13.4c-39.5-1.5-77.4.4-115.3,8.3-25.2,5.3-47.8,14.3-70,29.2,12-31,26-60.2,44-87.8,15-23.1,30.8-44.4,49.9-64.1,21.4-22.1,44.3-41.3,70.5-57.4,14.1-8.7,27.6-16.8,42.7-23.4l-.5-13.8c-19,7.7-36,17.2-53.3,28-31.2,19.5-58.9,43.1-83,71-23.8,27.5-43.9,57.1-60.4,89.7-21,41.5-36.6,84.9-46.5,130.4-7.1,32.6-10.3,64.8-12,97.8l14.1,8c.9-20.8,1.8-40,5-60.2,10.7,23.5,26.3,41.4,47.1,55.5l10-9.2c-26.9-18.6-55.4-52.3-50.1-85.6,2.5-16,6.1-32,13-47.2Z";
-/** The mouth on the Spleen's upper edge that 34-57 shares with 20-57. */
-const SPLEEN_MOUTH = "M107.3,980.2l16.7-19.1c-15.9-11.2-29-23.6-39.7-40.7l-2.9,44.9,25.9,14.9Z";
 /** 34-57's track, in from the Sacral. */
 const SACRAL_REACH = "M316.7,1015.7l-68.9-16.8c-31-9.6-60.3-21.3-88.6-36.9l-10,9.3c53.1,30.8,108.3,46.2,167.7,58.5.4-5.1.7-9.1-.2-14Z";
 
@@ -186,19 +191,19 @@ export const MERGED_ROUTE: Readonly<Record<string, readonly RouteSpan[]>> = {
     { region: CORRIDOR, gate: 10, from: 760.1, to: 860.9 },
     { region: CORRIDOR, gate: 57, from: 860.9, to: 961.8 },
   ],
-  // Down the corridor, through the shared mouth, out along 34-57's track. The
-  // seam sits at y 869, halfway along the run measured end to end.
+  // Down the corridor, then out along 34-57's track. The seam sits at y 869,
+  // halfway along the run measured end to end. The mouth the two share on the
+  // Spleen's upper edge is not drawn — see 34-57 above — so this route has the
+  // same 75-unit break in it that 34-57 does.
   "20-34": [
     { region: CORRIDOR, gate: 20, from: 536.9, to: 869 },
     { region: CORRIDOR, gate: 34, from: 869, to: 961.8 },
-    { region: SPLEEN_MOUTH, gate: 34, from: 918, to: 982 },
     { region: SACRAL_REACH, gate: 34, from: 958, to: 1032 },
   ],
-  // Half of this one falls inside the shared mouth, so the corridor is all
-  // gate 10's and everything past the Spleen is gate 34's.
+  // The corridor is all gate 10's and everything past the Spleen gate 34's,
+  // which is where the seam would have fallen anyway.
   "10-34": [
     { region: CORRIDOR, gate: 10, from: 760.1, to: 961.8 },
-    { region: SPLEEN_MOUTH, gate: 34, from: 918, to: 982 },
     { region: SACRAL_REACH, gate: 34, from: 958, to: 1032 },
   ],
 };
