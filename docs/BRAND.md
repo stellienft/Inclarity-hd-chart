@@ -124,10 +124,22 @@ Canva states tracking in thousandths of an em, so the guide's -10 and +50 are
    UI rows stay tight, but paragraphs are set at 1.6, which is what WCAG 1.4.12
    expects body copy to survive.
 
-A third, narrower exception: gate numerals inside the chart are 10px reversed
-out of a 19px disc, where Extra Light strokes disappear. They are set at 500 —
-the legibility floor for reversed micro-type — and nowhere else in the product
-uses that weight.
+A third, narrower exception: gate numerals inside the chart are 19 units
+reversed out of a 30-unit disc, where Extra Light strokes disappear. They are
+set at 500 — the legibility floor for reversed micro-type — and nowhere else in
+the product uses that weight. The graph is scaled to 0.68 inside its frame, so
+those units land at about 13px on a full-width chart, making these the smallest
+type in the product and the first thing to become hard to read.
+
+**Where the numerals sit.** Each is slid ALONG its centre's edge until it is
+over the mouth of its own channel, then relaxed until it clears the drawn shape
+by a marker radius and no two rings in a centre run together. The e2e suite
+asserts the result the way a reader checks it: for all 64, the nearest drawn
+track in the whole graph must belong to one of that gate's own channels. Gates
+10, 20, 34 and 57 are the exception the drawing forces — it merges their six
+channels into one web whose only band is 20-57's. The widest any numeral sits
+from its track is gate 11 at 31 units, which the Ajna's apex forces: the track
+leaves from further out than a marker can sit and still be inside the triangle.
 
 ### Not implemented
 

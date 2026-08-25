@@ -128,8 +128,8 @@ export const GATE_MARKER_TEXT = PALETTE.white;
 /**
  * Weights for the numerals drawn inside the chart.
  *
- * The brand sets body copy in Extra Light, but these are 17px numerals
- * reversed out of a 28px disc: at 200 the strokes disappear. 500 is the
+ * The brand sets body copy in Extra Light, but these are 19px numerals
+ * reversed out of a 30px disc: at 200 the strokes disappear. 500 is the
  * legibility floor for reversed type and is used only here, never in running
  * text.
  */
@@ -141,22 +141,31 @@ export const STROKE_WIDTH = {
   channelTrack: 14,
 } as const;
 
-/** Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS. */
-export const GATE_NUMERAL_SIZE = 17;
+/**
+ * Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS.
+ *
+ * Two digits of Bricolage Grotesque run about 1.1x the point size wide, so 19
+ * fills roughly 21 of the 30-unit disc — the same proportion 17 held in 28, one
+ * step larger. The graph is scaled to 0.68 inside the frame, so every unit here
+ * is worth 0.68 on screen and the numerals are the smallest type in the
+ * product; they were the first thing to become hard to read at chart size.
+ */
+export const GATE_NUMERAL_SIZE = 19;
 
 /**
  * Marker radius, and the reason it is not larger.
  *
- * The binding constraint is the Root's left edge, where 54, 38 and 58 sit 39
- * apart: two markers of radius 14 leave 11 units of daylight between them, and
- * at 16 they touch. It is also just wider than the 14-unit channel tracks the
- * reference artwork draws, so a marker reads as a stop on the line rather than
- * a bulge in it.
+ * The binding constraint is how close two markers end up in the tightest
+ * centres once each is slid along its edge to sit over its own channel: the
+ * Root, the Spleen and the Solar Plexus all settle with only a unit or two of
+ * daylight between neighbours. Each marker carries a 2-unit white ring centred
+ * on its edge, so two of them need 2 units of gap for the rings not to run
+ * together; at 16 several centres cannot give it.
  */
-export const GATE_MARKER_RADIUS = 14;
+export const GATE_MARKER_RADIUS = 15;
 
 /**
- * Per-centre marker radius, where 14 does not fit.
+ * Per-centre marker radius, where 15 does not fit.
  *
  * The drawing is the client's artwork now, so a centre cannot be resized to
  * suit its numbers — the numbers give way instead. The Heart is 104 x 90 and
@@ -164,9 +173,9 @@ export const GATE_MARKER_RADIUS = 14;
  * need this.
  */
 export const GATE_MARKER_RADIUS_BY_CENTRE: Readonly<Partial<Record<string, number>>> = {
-  heart: 11,
-  spleen: 12,
-  solarPlexus: 12,
+  heart: 12,
+  spleen: 13,
+  solarPlexus: 13,
 };
 
 export const markerRadius = (centre: string): number =>

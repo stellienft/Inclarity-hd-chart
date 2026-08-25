@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { VIEWBOX } from "../components/bodygraph/geometry";
+import { CHANNEL_DEFINITIONS } from "../lib/human-design/constants/channels";
 import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
 
 /**
@@ -318,6 +319,73 @@ test.describe("gate markers against the drawn centres", () => {
       .filter(({ width }) => !(width >= 12 && width <= 17))
       .map(({ id, index, width }) => `${id}[${index}] is ${width.toFixed(1)} across`);
     expect(wrong, "a gap between tracks has been mapped as a channel").toEqual([]);
+  });
+
+  /**
+   * Every numeral sits nearer its OWN channel's track than any other.
+   *
+   * This is the alignment the client keeps checking by eye, made a
+   * measurement. For each of the 64 gates, the nearest drawn region in the
+   * whole graph has to belong to one of that gate's own channels — so a numeral
+   * that has drifted along its centre's edge and ended up over its neighbour's
+   * track fails, which is what had happened to 7 and 13 under the G's apex and
+   * to 15 and 46 below it.
+   *
+   * Gates 10, 20, 34 and 57 are the exception the drawing forces: it merges
+   * their six channels into one web whose only drawn band is 20-57's, so that
+   * band is the right answer for all four.
+   */
+  test("puts every gate numeral over its own channel", async ({ page }) => {
+    await generateChart(page);
+    const rows = await page.evaluate(() => {
+      const svg = document.querySelector("svg[role='img']")!;
+      const regions: Array<{ id: string; pts: DOMPoint[] }> = [];
+      for (const group of svg.querySelectorAll("[data-channel]")) {
+        const id = group.getAttribute("data-channel")!;
+        const seen = new Set<string>();
+        for (const path of group.querySelectorAll("path")) {
+          const d = path.getAttribute("d");
+          if (!d || path.getAttribute("fill") === null || seen.has(d)) continue;
+          seen.add(d);
+          const geometry = path as unknown as SVGGeometryElement;
+          const L = geometry.getTotalLength();
+          const pts: DOMPoint[] = [];
+          for (let k = 0; k < 300; k += 1) pts.push(geometry.getPointAtLength((k * L) / 300));
+          regions.push({ id, pts });
+        }
+      }
+      return [...svg.querySelectorAll("[data-gate]")].map((el) => {
+        const label = el.querySelector("text")!;
+        const x = Number(label.getAttribute("x"));
+        const y = Number(label.getAttribute("y"));
+        let nearest = "", best = Infinity;
+        for (const r of regions) {
+          for (const q of r.pts) {
+            const d = (q.x - x) ** 2 + (q.y - y) ** 2;
+            if (d < best) { best = d; nearest = r.id; }
+          }
+        }
+        return { gate: Number(el.getAttribute("data-gate")), nearest, distance: Math.sqrt(best) };
+      });
+    });
+
+    expect(rows).toHaveLength(64);
+    const MERGED_WEB = new Set([10, 20, 34, 57]);
+    const wrong = rows
+      .filter(({ gate, nearest }) => {
+        const own = CHANNEL_DEFINITIONS.filter((d) => d.gates.includes(gate)).map((d) => d.id);
+        return !own.includes(nearest) && !(MERGED_WEB.has(gate) && nearest === "20-57");
+      })
+      .map(({ gate, nearest, distance }) => `${gate} sits on ${nearest} (${distance.toFixed(1)})`);
+    expect(wrong, "a gate numeral is closer to another channel than to its own").toEqual([]);
+
+    // And none of them has wandered far from the drawing: the widest is gate 11
+    // at 31, which the Ajna's apex forces — its track leaves from further out
+    // than a 15-unit marker can sit.
+    const adrift = rows
+      .filter(({ distance }) => distance > 34)
+      .map(({ gate, distance }) => `${gate} is ${distance.toFixed(1)} from its track`);
+    expect(adrift, "a gate numeral is a long way off its channel").toEqual([]);
   });
 
   /**
