@@ -121,6 +121,20 @@ table {
   font-weight: 300;
 }
 
+/*
+  The two planetary column headings — DESIGN and PERSONALITY — and the one
+  place display type is not the guide's Light.
+
+  At 11px in caps with 0.18em of tracking, Light is thinner than the chips it
+  labels and reads as a caption rather than as the column's name. Client-
+  directed; recorded in docs/BRAND.md. It has to live here rather than as a
+  Tailwind utility because the h3 rule above is unlayered and would otherwise
+  win the cascade against `font-bold`.
+*/
+.brand-column-heading {
+  font-weight: 700;
+}
+
 /* Navigation and buttons: upper case, Light, +50 tracking. */
 .brand-nav {
   font-family: var(--font-display);

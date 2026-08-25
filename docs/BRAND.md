@@ -141,6 +141,19 @@ channels into one web whose only band is 20-57's. The widest any numeral sits
 from its track is gate 11 at 31 units, which the Ajna's apex forces: the track
 leaves from further out than a marker can sit and still be inside the triangle.
 
+**One place display type is not Light.** The two planetary column headings —
+DESIGN and PERSONALITY — are set BOLD (700) and centred over their columns. At
+11px in caps with 0.18em of tracking, Light is thinner than the chips it labels
+and reads as a caption rather than as the column's name. Client-directed. It
+lives as `.brand-column-heading` in `globals.css` rather than a Tailwind
+utility, because the `h1..h4, .font-display` rule there is unlayered and would
+otherwise win the cascade against `font-bold`.
+
+The planetary glyphs in those chips run LARGER than the values beside them —
+17 against 14 — rather than matching. They come from a fallback face, since
+Bricolage Grotesque has no astrological block, and at a matched size they render
+optically smaller than the digits and lose their internal detail.
+
 ### Not implemented
 
 **Avanti Script Bold**, the guide's Quote / Highlight face. It is a commercial
