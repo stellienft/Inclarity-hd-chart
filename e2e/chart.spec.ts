@@ -143,11 +143,48 @@ test.describe("validation and accessibility", () => {
 
   test("every form control has an associated label", async ({ page }) => {
     await page.goto("/");
-    for (const id of ["#name", "#date", "#time"]) {
+    for (const id of ["#name", "#date", "#time", "#email"]) {
       const input = page.locator(id);
       const inputId = await input.getAttribute("id");
       await expect(page.locator(`label[for="${inputId}"]`)).toHaveCount(1);
     }
+  });
+
+  /**
+   * The email field is optional, and validated only once something is typed.
+   *
+   * It is also the one field that goes nowhere: it is held in the form and is
+   * not part of the request, so this asserts that too. Give it a destination
+   * and this test should fail, as a reminder that the privacy note promises
+   * nothing is stored.
+   */
+  test("accepts a blank email, rejects a malformed one, and sends neither", async ({ page }) => {
+    await page.goto("/");
+    const bodies: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/api/chart") && request.method() === "POST") {
+        bodies.push(request.postData() ?? "");
+      }
+    });
+
+    await page.fill("#date", "1990-03-01");
+    await page.fill("#time", "14:32");
+    await page.getByRole("combobox").fill("Brisbane");
+    await page.getByRole("option").first().click();
+
+    await page.fill("#email", "not-an-address");
+    await page.getByRole("button", { name: /generate my chart/i }).click();
+    await expect(page.getByRole("alert").filter({ hasText: /valid email/i })).toBeVisible();
+    await expect(page.getByTestId("birth-form")).toBeVisible();
+    expect(bodies, "a malformed email still submitted the form").toEqual([]);
+
+    await page.fill("#email", "reader@example.com");
+    await page.getByRole("button", { name: /generate my chart/i }).click();
+    await expect(page.getByTestId("design-column")).toBeVisible({ timeout: 30_000 });
+
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0], "the email reached the server").not.toContain("reader@example.com");
+    expect(bodies[0], "the email reached the server").not.toContain("email");
   });
 
   test("the BodyGraph exposes an accessible name and description", async ({ page }) => {

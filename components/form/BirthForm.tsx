@@ -16,14 +16,26 @@ interface FieldErrors {
   date?: string;
   time?: string;
   location?: string;
+  email?: string;
   form?: string;
 }
+
+/**
+ * Deliberately permissive: one @, something either side, a dot in the domain.
+ *
+ * The only address this can reject with confidence is one that is obviously
+ * mistyped. Anything stricter starts refusing addresses that are perfectly
+ * valid — plus-tags, new TLDs, unicode domains — and the cost of a false
+ * rejection here is a visitor who cannot submit at all.
+ */
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function BirthForm({ onChart }: BirthFormProps) {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState<LocationResult | null>(null);
+  const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,6 +44,11 @@ export function BirthForm({ onChart }: BirthFormProps) {
     if (!date) next.date = "Please enter your birth date.";
     if (!time) next.time = "Please enter your birth time.";
     if (!location) next.location = "Please search for and select your birth place.";
+    // Optional, like the name — but if something has been typed, it has to look
+    // like an address, or the visitor never finds out it was wrong.
+    if (email.trim() && !EMAIL.test(email.trim())) {
+      next.email = "Please enter a valid email address, or leave it blank.";
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -77,7 +94,7 @@ export function BirthForm({ onChart }: BirthFormProps) {
     <form onSubmit={onSubmit} noValidate className="space-y-6" data-testid="birth-form">
       <div>
         <label htmlFor="name" className="block text-sm font-light text-espresso">
-          Name <span className="font-extralight text-dusk/60">(optional)</span>
+          Name
         </label>
         <input
           id="name"
@@ -150,6 +167,39 @@ export function BirthForm({ onChart }: BirthFormProps) {
         onChange={setLocation}
         {...(errors.location ? { error: errors.location } : {})}
       />
+
+      {/*
+        The address is held in the form and goes NOWHERE — it is not added to
+        the request, so nothing about a visitor leaves the browser that did not
+        before. Give it a destination and the privacy note in lib/config/site.ts
+        has to be rewritten to match, since it currently promises that nothing
+        is saved.
+      */}
+      <div>
+        <label htmlFor="email" className="block text-sm font-light text-espresso">
+          Email address
+        </label>
+        <input
+          id="email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          maxLength={254}
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          className={`mt-1.5 w-full rounded-md border bg-white px-3 py-2.5 text-espresso placeholder:text-dusk/40 ${
+            errors.email ? "border-ochre-deep" : "border-pebble"
+          }`}
+          placeholder="you@example.com"
+        />
+        {errors.email ? (
+          <p id="email-error" role="alert" className="mt-1 text-sm text-dusk">
+            {errors.email}
+          </p>
+        ) : null}
+      </div>
 
       {errors.form ? (
         <p role="alert" className="rounded-md border border-ochre-deep/30 bg-ochre-deep/5 px-4 py-3 text-sm text-dusk">
