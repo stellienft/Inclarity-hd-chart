@@ -128,8 +128,8 @@ export const GATE_MARKER_TEXT = PALETTE.white;
 /**
  * Weights for the numerals drawn inside the chart.
  *
- * The brand sets body copy in Extra Light, but these are 19px numerals
- * reversed out of a 30px disc: at 200 the strokes disappear. 500 is the
+ * The brand sets body copy in Extra Light, but these are 21px numerals
+ * reversed out of a 32px disc: at 200 the strokes disappear. 500 is the
  * legibility floor for reversed type and is used only here, never in running
  * text.
  */
@@ -144,13 +144,13 @@ export const STROKE_WIDTH = {
 /**
  * Gate numerals. Sized to sit legibly inside a marker of GATE_MARKER_RADIUS.
  *
- * Two digits of Bricolage Grotesque run about 1.1x the point size wide, so 19
- * fills roughly 21 of the 30-unit disc — the same proportion 17 held in 28, one
- * step larger. The graph is scaled to 0.68 inside the frame, so every unit here
+ * Two digits of Bricolage Grotesque run about 1.1x the point size wide, so 21
+ * fills roughly 23 of the 32-unit disc — the proportion 17 held in 28, two steps
+ * larger. The graph is scaled to 0.68 inside the frame, so every unit here
  * is worth 0.68 on screen and the numerals are the smallest type in the
  * product; they were the first thing to become hard to read at chart size.
  */
-export const GATE_NUMERAL_SIZE = 19;
+export const GATE_NUMERAL_SIZE = 21;
 
 /**
  * Marker radius, and the reason it is not larger.
@@ -162,20 +162,26 @@ export const GATE_NUMERAL_SIZE = 19;
  * on its edge, so two of them need 2 units of gap for the rings not to run
  * together; at 16 several centres cannot give it.
  */
-export const GATE_MARKER_RADIUS = 15;
+export const GATE_MARKER_RADIUS = 16;
 
 /**
- * Per-centre marker radius, where 15 does not fit.
+ * Per-centre marker radius, where 16 does not fit.
  *
  * The drawing is the client's artwork now, so a centre cannot be resized to
- * suit its numbers — the numbers give way instead. The Heart is 104 x 90 and
- * carries four gates; the three triangles are the only shapes tight enough to
- * need this.
+ * suit its numbers — the numbers give way instead.
  */
 export const GATE_MARKER_RADIUS_BY_CENTRE: Readonly<Partial<Record<string, number>>> = {
-  heart: 12,
-  spleen: 13,
-  solarPlexus: 13,
+  heart: 13,
+  spleen: 14,
+  solarPlexus: 14,
+  /*
+   * The Throat carries eleven gates, more than any other centre, and 45's is
+   * the tightest: its junction sits in the bottom-right corner with 12's 49
+   * units above and 33's coming across the bottom. At 16 there is no position
+   * left where 45's numeral is nearer its own channel than 12-22 by more than a
+   * unit, and the alignment check is a coin toss. At 15 it clears by six.
+   */
+  throat: 15,
 };
 
 export const markerRadius = (centre: string): number =>

@@ -17,7 +17,13 @@ import {
   graphTransformAttr,
   variableArrowPath,
 } from "./geometry";
-import { ARTWORK_INK, CENTRE_REGION, CHANNEL_REGION, MERGED_ROUTE } from "./artwork";
+import {
+  ARTWORK_INK,
+  CENTRE_REGION,
+  CHANNEL_BRIDGE,
+  CHANNEL_REGION,
+  MERGED_ROUTE,
+} from "./artwork";
 import { FIGURE_ARTWORK_PATH, figureTransformAttr } from "./figure";
 import {
   CENTER_DEFINED_FILL,
@@ -461,6 +467,73 @@ export function BodyGraph({ chart, title, className }: BodyGraphProps) {
                   </g>
                 );
               })}
+            </g>
+          );
+        })}
+      </g>
+
+      {/*
+        ---- Bridges, over the ink ----
+
+        A bridge is the one kind of region here the client did not draw: a piece
+        of track added so a channel reads as one continuous line where the
+        drawing cuts it. It is outlined with everything else, but it is painted
+        AGAIN here, after the ink, so an activated channel covers the outline of
+        whatever it crosses instead of being ruled through by it — which is what
+        makes the crossing read as over rather than under. See CHANNEL_BRIDGE.
+      */}
+      <g fill="none">
+        {CHANNEL_DEFINITIONS.filter((d) => CHANNEL_BRIDGE[d.id]).map((definition) => {
+          const [gateA, gateB] = definition.gates;
+          const styleA = gateStyle(gateA);
+          const styleB = gateStyle(gateB);
+          if (styleA === "none" && styleB === "none") return null;
+
+          const a = getGatePoint(gateA);
+          const b = getGatePoint(gateB);
+          const mid = channelMidpoint(a, b, definition.id);
+          const spans = CHANNEL_BRIDGE[definition.id]!;
+
+          const end = (from: typeof a, to: typeof b, style: ActivationStyle, gate: number) => {
+            if (style === "none") return null;
+            const planeId = `bridge-${definition.id}-${gate}`;
+            const fill = (colour: string, key: string) =>
+              spans.map((d, index) => <path key={`${key}-${index}`} d={d} fill={colour} />);
+            const quarter = { x: (from.x + mid.x) / 2, y: (from.y + mid.y) / 2 };
+            const outerId = `bridge-outer-${definition.id}-${gate}`;
+            const innerId = `bridge-inner-${definition.id}-${gate}`;
+            return (
+              <g key={gate} data-half={gate}>
+                <clipPath id={planeId}>
+                  <rect {...channelHalfPlane(from, to, mid)} />
+                </clipPath>
+                <g clipPath={`url(#${planeId})`}>
+                  {style === "both" ? (
+                    <>
+                      <clipPath id={outerId}>
+                        <rect {...channelHalfPlane(from, mid, quarter)} />
+                      </clipPath>
+                      <clipPath id={innerId}>
+                        <rect {...channelHalfPlane(mid, from, quarter)} />
+                      </clipPath>
+                      <g clipPath={`url(#${outerId})`}>{fill(PERSONALITY_COLOR, "p")}</g>
+                      <g clipPath={`url(#${innerId})`}>{fill(DESIGN_COLOR, "d")}</g>
+                    </>
+                  ) : (
+                    fill(activationColor(style), "s")
+                  )}
+                </g>
+              </g>
+            );
+          };
+
+          return (
+            <g key={definition.id} data-bridge={definition.id}>
+              {styleA === styleB && styleA !== "both"
+                ? spans.map((d, index) => (
+                    <path key={index} d={d} fill={activationColor(styleA)} />
+                  ))
+                : [end(a, b, styleA, gateA), end(b, a, styleB, gateB)]}
             </g>
           );
         })}

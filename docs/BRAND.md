@@ -124,22 +124,36 @@ Canva states tracking in thousandths of an em, so the guide's -10 and +50 are
    UI rows stay tight, but paragraphs are set at 1.6, which is what WCAG 1.4.12
    expects body copy to survive.
 
-A third, narrower exception: gate numerals inside the chart are 19 units
-reversed out of a 30-unit disc, where Extra Light strokes disappear. They are
+A third, narrower exception: gate numerals inside the chart are 21 units
+reversed out of a 32-unit disc, where Extra Light strokes disappear. They are
 set at 500 — the legibility floor for reversed micro-type — and nowhere else in
 the product uses that weight. The graph is scaled to 0.68 inside its frame, so
-those units land at about 13px on a full-width chart, making these the smallest
+those units land at about 14px on a full-width chart, making these the smallest
 type in the product and the first thing to become hard to read.
 
-**Where the numerals sit.** Each is slid ALONG its centre's edge until it is
-over the mouth of its own channel, then relaxed until it clears the drawn shape
-by a marker radius and no two rings in a centre run together. The e2e suite
-asserts the result the way a reader checks it: for all 64, the nearest drawn
-track in the whole graph must belong to one of that gate's own channels. Gates
+The Throat takes a 15-unit marker where every other centre takes 16. It carries
+eleven gates, more than any other, and 45's junction sits in its bottom-right
+corner with 12's 49 units above and 33's coming across the bottom; at 16 there
+is no position left where 45's numeral is nearer its own channel than 12-22 by
+more than a unit. The Heart takes 13 and the two triangles 14, for room.
+
+**Where the numerals sit: on their channel's own axis.** Each numeral is placed
+by walking IN FROM THE MOUTH of its own channel along that channel's local
+direction, until the marker clears the drawn centre by its radius. Two earlier
+rules both failed the same way — insetting perpendicular to the centre's edge,
+and sliding along that edge — because wherever the edge slopes, both leave the
+numeral off to one side of the line running into it. That is what 7 and 13 under
+the G's apex, 47 and 4 in the Ajna, and 15 and 46 below the G were all showing.
+
+The e2e suite asserts the result the way a reader checks it: for all 64, the
+nearest drawn track in the whole graph must belong to one of that gate's own
+channels, AND win by at least 3 units so the next re-solve cannot flip it. Gates
 10, 20, 34 and 57 are the exception the drawing forces — it merges their six
-channels into one web whose only band is 20-57's. The widest any numeral sits
-from its track is gate 11 at 31 units, which the Ajna's apex forces: the track
-leaves from further out than a marker can sit and still be inside the triangle.
+channels into one web whose only band is 20-57's.
+
+How far ALONG the axis a numeral ends up is not a defect; it depends on how fast
+the centre narrows. The Ajna sets the bound, closing to a point, so 11 and 17 go
+43 and 35 units up their tracks before a 16-unit marker clears both edges.
 
 **One place display type is not Light.** The two planetary column headings —
 DESIGN and PERSONALITY — are set BOLD (700) and centred over their columns. At

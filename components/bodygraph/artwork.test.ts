@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { CHANNEL_DEFINITIONS } from "@/lib/human-design/constants/channels";
 import { CENTER_IDS } from "@/lib/human-design/types/center";
 
-import { ARTWORK_INK, ARTWORK_VIEWBOX, CENTRE_REGION, CHANNEL_REGION, INTEGRATION_GROUP } from "./artwork";
+import {
+  ARTWORK_INK,
+  ARTWORK_VIEWBOX,
+  CENTRE_REGION,
+  CHANNEL_BRIDGE,
+  CHANNEL_REGION,
+  INTEGRATION_GROUP,
+} from "./artwork";
 import { GRAPH_BOX } from "./geometry";
 
 describe("the reference artwork", () => {
@@ -16,6 +23,11 @@ describe("the reference artwork", () => {
    * same width as a track (Head to Ajna: tracks of 14.9, 15.7 and 15.1, gaps of
    * 17.3 and 14.3), so three channels drew as five identical bars. Deriving the
    * ink from the two maps is what keeps the two in step.
+   *
+   * The 45th fillable region is the one bridge, which is not in the file — see
+   * CHANNEL_BRIDGE. It is outlined with the rest so the channel it completes
+   * reads as one line, and every bridge has to be one of its own channel's
+   * regions or the two would drift apart.
    */
   it("outlines exactly the regions the chart can fill", () => {
     const fillable = [
@@ -23,7 +35,13 @@ describe("the reference artwork", () => {
       ...Object.values(CHANNEL_REGION).flat(),
     ];
     expect(ARTWORK_INK.match(/M/g) ?? []).toHaveLength(fillable.length);
-    expect(fillable).toHaveLength(44);
+    expect(fillable).toHaveLength(44 + Object.values(CHANNEL_BRIDGE).flat().length);
+
+    for (const [id, spans] of Object.entries(CHANNEL_BRIDGE)) {
+      for (const d of spans) {
+        expect(CHANNEL_REGION[id], `${id}'s bridge is not one of its regions`).toContain(d);
+      }
+    }
     for (const d of fillable) expect(ARTWORK_INK).toContain(d);
     expect(ARTWORK_INK.startsWith("M337.6,155.4")).toBe(true);
   });

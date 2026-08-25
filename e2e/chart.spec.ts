@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { VIEWBOX } from "../components/bodygraph/geometry";
+import { getGatePoint, VIEWBOX } from "../components/bodygraph/geometry";
 import { CHANNEL_DEFINITIONS } from "../lib/human-design/constants/channels";
 import { GATE_DEFINITIONS } from "../lib/human-design/constants/gates";
 
@@ -358,38 +358,65 @@ test.describe("gate markers against the drawn centres", () => {
         const label = el.querySelector("text")!;
         const x = Number(label.getAttribute("x"));
         const y = Number(label.getAttribute("y"));
-        let nearest = "", best = Infinity;
+        const byChannel = new Map<string, number>();
         for (const r of regions) {
+          let best = byChannel.get(r.id) ?? Infinity;
           for (const q of r.pts) {
             const d = (q.x - x) ** 2 + (q.y - y) ** 2;
-            if (d < best) { best = d; nearest = r.id; }
+            if (d < best) best = d;
           }
+          byChannel.set(r.id, best);
         }
-        return { gate: Number(el.getAttribute("data-gate")), nearest, distance: Math.sqrt(best) };
+        const ranked = [...byChannel].map(([id, d]) => ({ id, d: Math.sqrt(d) }))
+          .sort((a, b) => a.d - b.d);
+        return {
+          gate: Number(el.getAttribute("data-gate")),
+          nearest: ranked[0]!.id,
+          distance: ranked[0]!.d,
+          runnerUp: ranked[1]!.d,
+        };
       });
     });
 
     expect(rows).toHaveLength(64);
     const MERGED_WEB = new Set([10, 20, 34, 57]);
+    const own = (gate: number, id: string) =>
+      CHANNEL_DEFINITIONS.some((d) => d.id === id && d.gates.includes(gate)) ||
+      (MERGED_WEB.has(gate) && id === "20-57");
+
     const wrong = rows
-      .filter(({ gate, nearest }) => {
-        const own = CHANNEL_DEFINITIONS.filter((d) => d.gates.includes(gate)).map((d) => d.id);
-        return !own.includes(nearest) && !(MERGED_WEB.has(gate) && nearest === "20-57");
-      })
+      .filter(({ gate, nearest }) => !own(gate, nearest))
       .map(({ gate, nearest, distance }) => `${gate} sits on ${nearest} (${distance.toFixed(1)})`);
     expect(wrong, "a gate numeral is closer to another channel than to its own").toEqual([]);
 
-    // And none of them has wandered far from the drawing: the widest is gate 11
-    // at 31, which the Ajna's apex forces — its track leaves from further out
-    // than a 15-unit marker can sit.
+    // And not by a whisker: its own track has to win by a clear margin, or the
+    // next re-solve flips it. 45 in the Throat's bottom-right corner was the
+    // one that could not manage it at a 16-unit radius, which is why the Throat
+    // carries 15.
+    const marginal = rows
+      .filter(({ runnerUp, distance }) => runnerUp - distance < 3)
+      .map(({ gate, runnerUp, distance }) => `${gate} by only ${(runnerUp - distance).toFixed(1)}`);
+    expect(marginal, "a gate numeral only just belongs to its own channel").toEqual([]);
+
+    /*
+     * Distance is a weak second check, because a numeral sits ALONG its
+     * channel's axis and how far along depends on how fast the centre narrows.
+     * The Ajna sets the bound: it closes to a point, so 11 and 17 have to go 43
+     * and 35 up their tracks before a 16-unit marker clears both edges.
+     */
     const adrift = rows
-      .filter(({ distance }) => distance > 34)
+      .filter(({ distance }) => distance > 46)
       .map(({ gate, distance }) => `${gate} is ${distance.toFixed(1)} from its track`);
     expect(adrift, "a gate numeral is a long way off its channel").toEqual([]);
   });
 
   /**
    * Every channel runs unbroken from one of its gates to the other.
+   *
+   * Measured from each gate's ANCHOR — the junction where the drawing's track
+   * meets the centre — not from where the numeral is drawn. The numeral is
+   * placed for legibility and sits some way inside the shape; the anchor is
+   * the thing the track is supposed to arrive at.
    *
    * The width check above catches a gap wrongly taken for a track. This is the
    * other half of the same problem — a real fragment of a track left OUT — and
@@ -414,7 +441,10 @@ test.describe("gate markers against the drawn centres", () => {
    */
   test("runs every channel unbroken from one gate to the other", async ({ page }) => {
     await generateChart(page);
-    const breaks = await page.evaluate(() => {
+    const anchors = Object.fromEntries(
+      GATE_DEFINITIONS.map(({ gate }) => [gate, getGatePoint(gate)]),
+    );
+    const breaks = await page.evaluate((anchors: Record<number, { x: number; y: number }>) => {
       const svg = document.querySelector("svg[role='img']")!;
       const dist = (a: DOMPoint, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
       const out: Array<{ id: string; what: string; value: number }> = [];
@@ -440,17 +470,12 @@ test.describe("gate markers against the drawn centres", () => {
         if (!outlines.length) continue; // stroked over the artwork, no track of its own
 
         for (const gate of id.split("-").map(Number)) {
-          const marker = svg.querySelector(`[data-gate="${gate}"] text`)!;
-          const at = {
-            x: Number(marker.getAttribute("x")),
-            y: Number(marker.getAttribute("y")),
-          };
-          // Measure to the CENTRE, not the junction: the marker is inset, so
-          // this is a generous bound that still catches a channel that never
-          // arrives. A track that reaches its gate lands within ~35.
+          const at = anchors[gate]!;
+          // An ink line is about 5.5 wide, so a track that reaches its junction
+          // stops within about 8 of it; every one measures 4.5 to 8.2.
           const near = Math.min(...outlines.flat().map((q) => dist(q, at)));
           const KNOWN_BREAK = id === "34-57" && gate === 57;
-          if (near > 40 && !KNOWN_BREAK) {
+          if (near > 20 && !KNOWN_BREAK) {
             out.push({ id, what: `never reaches gate ${gate}`, value: near });
           }
         }
@@ -469,7 +494,7 @@ test.describe("gate markers against the drawn centres", () => {
         }
       }
       return out;
-    });
+    }, anchors);
 
     expect(
       breaks.map((b) => `${b.id}: ${b.what} (${b.value.toFixed(1)})`),

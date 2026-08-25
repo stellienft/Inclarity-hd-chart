@@ -111,10 +111,39 @@ export const CHANNEL_REGION: Readonly<Record<string, readonly string[]>> = {
   "26-44": [
     "M514.2,882.7c-.3-5.7.2-7.8.8-12.3h-55.3s0,13,0,13l54.5-.7Z",
     "M419.5,884.7l13.8-.5-.2-12.9-13.9.5c0,4.5-.7,8.2.4,12.9Z",
+    // The one piece of geometry in this file that is NOT the client's — see
+    // CHANNEL_BRIDGE below. It joins the two squares across 2-14's track.
+    "M392.3,885.3L419.5,884.7L419.2,871.8L392.3,872.3Z",
     "M375.5,886l16.8-.7v-13c-.1,0-17,.8-17,.8-.3,4.6-.5,8.7.3,13Z",
     "M348.8,888v-13.2c-90.7,8.5-178.3,34.8-236.5,108l11.9,7.1c57.2-69.2,137.5-92.5,224.6-101.9Z",
   ],
   "37-40": ["M699.3,983.8l11.6-6.7c-11.8-24.3-25.6-46.5-44.5-66.3-2.8,3-5.5,6.1-9.8,8.5l21.3,25.7c8.5,12.4,15,25.5,21.5,38.7Z"],
+};
+
+/**
+ * The only geometry here the client did not draw, and why it exists.
+ *
+ * 26-44 crosses the three tracks running from the G down to the Sacral, and the
+ * drawing shows all three passing OVER it: 5-15, 2-14 and 29-46 are unbroken and
+ * 26-44 is the one cut into pieces. The client asked for 26-44 to read as one
+ * continuous line, going under 5-15, OVER 2-14, and under 29-46 — so the middle
+ * crossing is flipped.
+ *
+ * Flipping it takes a piece of track that is not in the file: a 27 x 13
+ * quadrilateral joining the two squares either side of 2-14, matched to their
+ * corners so the run is straight. Interrupting 2-14 instead — the other way to
+ * draw an over-crossing — is not possible here: its track starts at y 860 and
+ * the crossing is at 872, so breaking it would leave a six-unit stub at the G's
+ * bottom tip and strand gate 2 from its own channel.
+ *
+ * The bridge is outlined with everything else, so the line reads continuous
+ * whether or not the channel is defined. It is ALSO listed here, and painted
+ * again after the artwork's ink, so that an activated 26-44 covers 2-14's
+ * outline at the crossing rather than being ruled through by it. Each entry
+ * must be one of that channel's own regions above.
+ */
+export const CHANNEL_BRIDGE: Readonly<Record<string, readonly string[]>> = {
+  "26-44": ["M392.3,885.3L419.5,884.7L419.2,871.8L392.3,872.3Z"],
 };
 
 /** The four the drawing merges, which cannot have a track of their own. */
